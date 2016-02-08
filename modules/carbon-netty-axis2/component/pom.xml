@@ -102,7 +102,11 @@
             javax.xml.parsers.*;version="0.0.0",
             org.wso2.carbon.messaging.*;version="[1.0.0.SNAPSHOT,1.1.0)",
         </import.package>
-
+        <provide.capability>
+            osgi.service;effective:=active;
+            objectClass="org.wso2.carbon.axis2.runtime.internal.Axis2Runtime";
+            dependent-component-key="carbon-runtime-mgt",
+        </provide.capability>
         <carbon.axis2.package.export.version>1.0.0</carbon.axis2.package.export.version>
 
     </properties>

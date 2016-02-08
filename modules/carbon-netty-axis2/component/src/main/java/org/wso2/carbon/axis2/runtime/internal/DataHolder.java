@@ -19,6 +19,9 @@ import org.apache.axis2.context.ConfigurationContext;
 import org.osgi.framework.BundleContext;
 import org.wso2.carbon.kernel.transports.CarbonTransport;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Netty Axis2 Runtime DataHolder.
  *
@@ -28,7 +31,7 @@ public class DataHolder {
     private static DataHolder instance = new DataHolder();
     private BundleContext bundleContext = null;
     private ConfigurationContext configurationContext = null;
-    private CarbonTransport carbonTransport = null;
+    List<CarbonTransport> carbonTransportList = new ArrayList<>();
 
     public static DataHolder getInstance() {
         return instance;
@@ -50,11 +53,11 @@ public class DataHolder {
         this.configurationContext = configurationContext;
     }
 
-    public CarbonTransport getCarbonTransport() {
-        return carbonTransport;
+    public void addCarbonTransport(CarbonTransport carbonTransport) {
+        carbonTransportList.add(carbonTransport);
     }
 
-    public void setCarbonTransport(CarbonTransport carbonTransport) {
-        this.carbonTransport = carbonTransport;
+    public List<CarbonTransport> getCarbonTransportList() {
+        return carbonTransportList;
     }
 }

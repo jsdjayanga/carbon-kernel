@@ -15,17 +15,12 @@
  */
 package org.wso2.carbon.axis2.runtime.internal;
 
-import org.apache.axis2.AxisFault;
-import org.apache.axis2.context.ConfigurationContext;
-import org.apache.axis2.context.ConfigurationContextFactory;
-import org.apache.axis2.engine.ListenerManager;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.nio.file.Paths;
+import org.wso2.carbon.kernel.runtime.Runtime;
 
 
 
@@ -36,6 +31,8 @@ import java.nio.file.Paths;
  */
 public class Activator implements BundleActivator {
     private static final Logger logger = LoggerFactory.getLogger(Activator.class);
+    private Axis2Runtime axis2Runtime;
+    private ServiceRegistration serviceRegistration;
 
     /**
      * This is called when the bundle is started.
@@ -43,29 +40,11 @@ public class Activator implements BundleActivator {
      * @param bundleContext BundleContext of this bundle
      */
     public void start(BundleContext bundleContext) {
-        String axis2FilePath = Paths.get(System.getProperty("carbon.home"), "conf", "axis2", "axis2.xml").toString();
-        File file = new File(axis2FilePath);
-        if (!file.exists()) {
-            logger.info("Axis2.xml file should be available in [PRODUCT_HOME]/conf/axis2/axis2.xml");
-        }
-
-        try {
-            ConfigurationContext configurationContext =
-                    ConfigurationContextFactory.createConfigurationContextFromFileSystem(null, axis2FilePath);
-            ListenerManager listenerManager = configurationContext.getListenerManager();
-            if (listenerManager == null) {
-                listenerManager = new ListenerManager();
-                listenerManager.init(configurationContext);
-                listenerManager.start();
-            }
-
-            DataHolder.getInstance().setConfigurationContext(configurationContext);
-        } catch (AxisFault axisFault) {
-            logger.error("Failed to initialize Axis2 engine with the given axis2.xml", axisFault);
-        }
-
         DataHolder.getInstance().setBundleContext(bundleContext);
-        logger.info("Axis2 engine is initialized successfully.");
+
+        axis2Runtime = new Axis2Runtime();
+        serviceRegistration = bundleContext.registerService(Runtime.class, axis2Runtime, null);
+        logger.info("Registering Axis2Runtime service");
     }
 
     /**
@@ -76,9 +55,7 @@ public class Activator implements BundleActivator {
      */
 
     public void stop(BundleContext bundleContext) throws Exception {
-        if (DataHolder.getInstance().getConfigurationContext() != null) {
-            //TODO : unregister all the service groups + services
-            logger.info("Stopping activator");
-        }
+        serviceRegistration.unregister();
+        axis2Runtime = null;
     }
 }

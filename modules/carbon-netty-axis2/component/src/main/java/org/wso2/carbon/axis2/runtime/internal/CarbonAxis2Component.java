@@ -18,7 +18,6 @@ package org.wso2.carbon.axis2.runtime.internal;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.description.AxisService;
-import org.apache.axis2.description.TransportInDescription;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -28,7 +27,7 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.axis2.runtime.transport.DummyTransportListener;
+import org.wso2.carbon.kernel.startupresolver.RequiredCapabilityListener;
 import org.wso2.carbon.kernel.transports.CarbonTransport;
 import org.wso2.carbon.messaging.CarbonMessageProcessor;
 
@@ -40,9 +39,13 @@ import org.wso2.carbon.messaging.CarbonMessageProcessor;
  */
 @Component(
         name = "org.wso2.carbon.axis2.runtime.internal.CarbonAxis2Component",
-        immediate = true
+        immediate = true,
+        property = {
+                "capability-name=org.wso2.carbon.kernel.transports.CarbonTransport",
+                "component-key=carbon-transport-mgt-for-axis2"
+        }
 )
-public class CarbonAxis2Component {
+public class CarbonAxis2Component implements RequiredCapabilityListener {
     private static final Logger logger = LoggerFactory.getLogger(CarbonAxis2Component.class);
 
     /**
@@ -55,10 +58,6 @@ public class CarbonAxis2Component {
     @Activate
     protected void start(BundleContext bundleContext) throws Exception {
         logger.info("CarbonAxis2Component is activated");
-
-        bundleContext.registerService(ConfigurationContext.class,
-                DataHolder.getInstance().getConfigurationContext(), null);
-        bundleContext.registerService(CarbonMessageProcessor.class, new Axis2CarbonMessageProcessor(), null);
     }
 
     /**
@@ -102,19 +101,7 @@ public class CarbonAxis2Component {
             unbind = "removeCarbonTransport"
     )
     protected void addCarbonTransport(CarbonTransport carbonTransport) {
-        ConfigurationContext configurationContext = DataHolder.getInstance().getConfigurationContext();
-        if (configurationContext != null) {
-            String transportId = carbonTransport.getId();
-            TransportInDescription transportInDescription =
-                    new TransportInDescription(transportId.substring(transportId.indexOf("-") + 1));
-            transportInDescription.setReceiver(new DummyTransportListener());
-            try {
-                configurationContext.getAxisConfiguration().addTransportIn(transportInDescription);
-                configurationContext.getListenerManager().addListener(transportInDescription, false);
-            } catch (AxisFault axisFault) {
-                logger.error("Error while configuring transport", axisFault);
-            }
-        }
+        DataHolder.getInstance().addCarbonTransport(carbonTransport);
     }
 
     protected void removeCarbonTransport(CarbonTransport carbonTransport) {
@@ -123,5 +110,15 @@ public class CarbonAxis2Component {
         } catch (AxisFault axisFault) {
             logger.error("Error while stopping transports", axisFault);
         }
+    }
+
+    @Override
+    public void onAllRequiredCapabilitiesAvailable() {
+        logger.info("All the capabilities are ready");
+
+        DataHolder.getInstance().getBundleContext().registerService(ConfigurationContext.class,
+                DataHolder.getInstance().getConfigurationContext(), null);
+        DataHolder.getInstance().getBundleContext().registerService(CarbonMessageProcessor.class,
+                new Axis2CarbonMessageProcessor(), null);
     }
 }
