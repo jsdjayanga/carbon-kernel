@@ -39,11 +39,6 @@
                 <version>${osgi.core.api.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.testng</groupId>
-                <artifactId>testng</artifactId>
-                <version>${testng.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
                 <version>${slf4j.api.version}</version>
@@ -160,6 +155,41 @@
                 <version>${carbon.kernel.version}</version>
                 <type>zip</type>
             </dependency>
+            <dependency>
+                <groupId>org.testng</groupId>
+                <artifactId>testng</artifactId>
+                <version>${testng.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.ops4j.pax.exam</groupId>
+                <artifactId>pax-exam</artifactId>
+                <version>${pax.exam.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.ops4j.pax.exam</groupId>
+                <artifactId>pax-exam-container-native</artifactId>
+                <version>${pax.exam.container.native.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.ops4j.pax.exam</groupId>
+                <artifactId>pax-exam-testng</artifactId>
+                <version>${pax.exam.testng.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.ops4j.pax.exam</groupId>
+                <artifactId>pax-exam-link-mvn</artifactId>
+                <version>${pax.exam.link.mvn.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.ops4j.pax.url</groupId>
+                <artifactId>pax-url-aether</artifactId>
+                <version>${pax.url.aether.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jacoco</groupId>
+                <artifactId>org.jacoco.ant</artifactId>
+                <version>${org.jacoco.ant.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -176,7 +206,6 @@
 
         <carbon.kernel.version>5.0.0</carbon.kernel.version>
         <osgi.core.api.version>6.0.0</osgi.core.api.version>
-        <testng.version>6.9.4</testng.version>
         <slf4j.api.version>1.7.12</slf4j.api.version>
         <axis2.version>1.7.0.wso2v1</axis2.version>
         <axiom.version>1.2.17.wso2v1</axiom.version>
@@ -194,6 +223,15 @@
         <xmlschema.core.version>2.2.1</xmlschema.core.version>
         <org.wso2.carbon.transport.http.netty.version>2.0.0-alpha2</org.wso2.carbon.transport.http.netty.version>
         <org.wso2.carbon.messaging.version>1.0.0-alpha2</org.wso2.carbon.messaging.version>
+
+        <testng.version>6.9.4</testng.version>
+        <pax.exam.version>4.6.0</pax.exam.version>
+        <pax.exam.container.native.version>4.6.0</pax.exam.container.native.version>
+        <pax.exam.testng.version>4.6.0</pax.exam.testng.version>
+        <pax.exam.link.mvn.version>4.6.0</pax.exam.link.mvn.version>
+        <pax.url.aether.version>1.6.0</pax.url.aether.version>
+        <org.jacoco.ant.version>0.7.5.201505241946</org.jacoco.ant.version>
+        <maven.paxexam.plugin.version>1.2.4</maven.paxexam.plugin.version>
     </properties>
 
 </project>
