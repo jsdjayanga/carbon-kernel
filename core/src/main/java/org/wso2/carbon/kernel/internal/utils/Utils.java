@@ -37,4 +37,13 @@ public class Utils {
                 .toString();
     }
 
+    /**
+     * Returns the secure_vault.yml location.
+     *
+     * @return String secure_vault.yml location
+     */
+    public static String getSecureVaultYAMLLocation() {
+        return org.wso2.carbon.kernel.utils.Utils.getCarbonConfigHome().resolve(Constants.SECURE_VAULT_CONFIG_YAML)
+                .toString();
+    }
 }

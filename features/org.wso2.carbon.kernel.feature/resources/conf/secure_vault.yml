@@ -1,0 +1,11 @@
+secretRepository: 
+  type: file
+  secretProvider: 
+    name: hardCoded
+    params: 
+      - masterPassword
+      - privateKeyPassword
+  keystore: 
+    alias: wso2carbon
+    location: /home/jayanga/WSO2/secvault/wso2carbon-kernel-5.2.0-SNAPSHOT/resources/security/wso2carbon.jks
+    type: JKS

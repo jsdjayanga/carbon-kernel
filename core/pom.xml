@@ -136,9 +136,12 @@
             javax.security.auth.*;version="${javax.security.auth.import.version.range}",
         </import.package>
         <carbon.component>
-            startup.listener;componentName="carbon-transport-mgt";requiredService="org.wso2.carbon.kernel.transports.CarbonTransport",
+            startup.listener;componentName="carbon-transport-mgt";requiredService="org.wso2.carbon.kernel.transport;s.CarbonTransport",
             startup.listener;componentName="carbon-runtime-mgt";requiredService="org.wso2.carbon.kernel.runtime.Runtime",
-            osgi.service;objectClass="org.wso2.carbon.kernel.runtime.RuntimeService";requiredByComponentName="carbon-transport-mgt"
+            startup.listener;componentName="carbon-secure-vault-mgt";requiredService="org.wso2.carbon.kernel.securevault.SecretRepository,org.wso2.carbon.kernel.securevault.SecretProvider",
+            osgi.service;objectClass="org.wso2.carbon.kernel.runtime.RuntimeService";requiredByComponentName="carbon-transport-mgt",
+            osgi.service;objectClass="org.wso2.carbon.kernel.securevault.SecretRepository";requiredByComponentName="carbon-secure-vault-mgt",
+            osgi.service;objectClass="org.wso2.carbon.kernel.securevault.SecretProvider";requiredByComponentName="carbon-secure-vault-mgt"
         </carbon.component>
     </properties>
 
