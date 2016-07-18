@@ -8,6 +8,8 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.kernel.securevault.Secret;
 import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
 
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,5 +46,19 @@ public class SecureVaultUtils {
             secrets.add(new Secret(paramater));
         }
         return secrets;
+    }
+
+    public static Secret getSecret(List<Secret> secrets, String secretName) throws SecureVaultException {
+        for (Secret secret : secrets) {
+            if (secret.getSecretName().equals(secretName)) {
+                return secret;
+            }
+        }
+        throw new SecureVaultException("No secret found with given secret name '" + secretName + "'");
+    }
+
+    public static char[] toChars(byte[] bytes) {
+        Charset charset = Charset.forName("UTF-8");
+        return charset.decode(ByteBuffer.wrap(bytes)).array();
     }
 }

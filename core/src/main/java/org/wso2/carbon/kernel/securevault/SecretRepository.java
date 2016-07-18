@@ -10,5 +10,5 @@ import java.util.List;
  */
 public interface SecretRepository {
     void init(SecureVaultConfiguration secretRepositoryConfig, List<Secret> secrets) throws SecureVaultException;
-    String getSecret(String alias);
+    char[] getSecret(String alias);
 }

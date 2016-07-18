@@ -12,6 +12,7 @@ import org.wso2.carbon.kernel.internal.securevault.config.SecureVaultConfigurati
 import org.wso2.carbon.kernel.securevault.Secret;
 import org.wso2.carbon.kernel.securevault.SecretProvider;
 import org.wso2.carbon.kernel.securevault.SecretRepository;
+import org.wso2.carbon.kernel.securevault.SecureVault;
 import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
 import org.wso2.carbon.kernel.startupresolver.RequiredCapabilityListener;
 
@@ -75,30 +76,12 @@ public class SecureVaultComponent implements RequiredCapabilityListener {
                 SecureVaultConstants.SECRET_PROVIDER_PROPERTY_NAME, SecretProvider.class.getName(), secretProviderName);
         SecretProvider secretProvider = (SecretProvider) bundleContext.getService(serviceReference1);
         List<String> params = SecureVaultConfiguration.getInstance()
-                .getList(SecureVaultConstants.SECRET_PROVIDER, "params");
+                .getList(SecureVaultConstants.SECRET_PROVIDER, "secrets");
         List<Secret> secrets = SecureVaultUtils.createSecrets(params);
         secretProvider.provide(secrets);
 
         secretRepository.init(secureVaultConfiguration, secrets);
 
-//        if (bundleContext != null) {
-//            ServiceReference[] serviceReferences;
-//            try {
-//                serviceReferences = bundleContext.getServiceReferences(SecretRepository.class.getName(), null);
-//            } catch (InvalidSyntaxException e) {
-//                throw new SecureVaultException("Error while retrieving OSGi service reference");
-//            }
-//
-//            for (ServiceReference serviceReference : serviceReferences) {
-//                if (name.equals(serviceReference.getProperty(SecureVaultConstants.SECRET_REPOSITORY))) {
-//                    secretRepository = (SecretRepository) bundleContext.getService(serviceReference);
-//                    secretRepository.init(secureVaultConfiguration);
-//                    logger.info("SecureVault initialized with secret repository : " + name);
-//                    return;
-//                }
-//            }
-//
-//            throw new SecureVaultException("Failed to initialize secret repository : " + name);
-//        }
+        bundleContext.registerService(SecureVault.class, new SecureVaultImpl(secretRepository), null);
     }
 }
