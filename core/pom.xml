@@ -141,7 +141,7 @@
             startup.listener;componentName="carbon-secure-vault-mgt";requiredService="org.wso2.carbon.kernel.securevault.SecretRepository,org.wso2.carbon.kernel.securevault.SecretProvider",
             osgi.service;objectClass="org.wso2.carbon.kernel.runtime.RuntimeService";requiredByComponentName="carbon-transport-mgt",
             osgi.service;objectClass="org.wso2.carbon.kernel.securevault.SecretRepository";requiredByComponentName="carbon-secure-vault-mgt",
-            osgi.service;objectClass="org.wso2.carbon.kernel.securevault.SecretProvider";requiredByComponentName="carbon-secure-vault-mgt"
+            osgi.service;objectClass="org.wso2.carbon.kernel.securevault.SecretProvider";requiredByComponentName="carbon-secure-vault-mgt";serviceCount="2"
         </carbon.component>
     </properties>
 

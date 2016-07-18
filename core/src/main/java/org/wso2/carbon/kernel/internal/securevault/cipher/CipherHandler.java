@@ -22,13 +22,7 @@ public abstract class CipherHandler {
 
     public CipherHandler(KeyStore keyStore, String alias, char[] privateKeyPassword, String algorithm,
                          int cipherMode) throws SecureVaultException {
-        try {
-            cipher = Cipher.getInstance(algorithm);
-        } catch (NoSuchAlgorithmException | NoSuchPaddingException  e) {
-            throw new SecureVaultException("Failed to get Cipher for algorithm '" + algorithm + "'", e);
-        }
-
-        PrivateKey privateKey = null;
+        PrivateKey privateKey;
         try {
             privateKey = (PrivateKey) keyStore.getKey(alias, privateKeyPassword);
         } catch (KeyStoreException | NoSuchAlgorithmException | UnrecoverableKeyException e) {
@@ -36,8 +30,10 @@ public abstract class CipherHandler {
         }
 
         try {
+            Cipher cipher = Cipher.getInstance(algorithm);
             cipher.init(cipherMode, privateKey);
-        } catch (InvalidKeyException e) {
+            this.cipher = cipher;
+        } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException e) {
             throw new SecureVaultException("Failed to initialize Cipher for mode '" + cipherMode + "'", e);
         }
     }

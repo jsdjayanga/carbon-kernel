@@ -5,8 +5,10 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.kernel.internal.securevault.SecureVaultUtils;
 import org.wso2.carbon.kernel.securevault.Secret;
 import org.wso2.carbon.kernel.securevault.SecretProvider;
+import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
 
 import java.util.List;
 
@@ -26,23 +28,27 @@ public class HardCodedSecretProvider implements SecretProvider {
 
     @Activate
     public void activate() {
-        logger.info("===================HardCodedSecretProvider activate");
+        if (logger.isDebugEnabled()) {
+            logger.debug("Activating {}", this.getClass().getName());
+        }
     }
 
     @Deactivate
     public void deactivate() {
-        logger.info("===================HardCodedSecretProvider deactivate");
+        if (logger.isDebugEnabled()) {
+            logger.debug("Deactivating {}", this.getClass().getName());
+        }
     }
 
     @Override
-    public void provide(List<Secret> secrets) {
-        logger.info("Providing hard coded secrets");
-        for (Secret secret : secrets) {
-            if (secret.getSecretName().equals("masterPassword")) {
-                secret.setSecretValue("wso2carbon");
-            } else if (secret.getSecretName().equals("privateKeyPassword")) {
-                secret.setSecretValue("wso2carbon");
-            }
-        }
+    public void provide(List<Secret> secrets) throws SecureVaultException {
+        logger.debug("Providing hard coded secrets for 'masterPassword' and 'privateKeyPassword'");
+
+        Secret masterPassword = SecureVaultUtils.getSecret(secrets, "masterPassword");
+        masterPassword.setSecretValue("wso2carbon");
+
+        Secret privateKeyPassword = SecureVaultUtils.getSecret(secrets, "privateKeyPassword");
+        privateKeyPassword.setSecretValue("wso2carbon");
+
     }
 }
