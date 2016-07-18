@@ -10,7 +10,6 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.UnrecoverableKeyException;
-import java.util.Base64;
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
 
@@ -41,10 +40,5 @@ public abstract class CipherHandler {
         } catch (InvalidKeyException e) {
             throw new SecureVaultException("Failed to initialize Cipher for mode '" + cipherMode + "'", e);
         }
-    }
-
-    protected static byte[] base64Decode(String base64Encoded) {
-        byte[] decodedValue = Base64.getDecoder().decode(base64Encoded);
-        return decodedValue;
     }
 }

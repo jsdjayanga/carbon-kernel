@@ -1,5 +1,6 @@
 package org.wso2.carbon.kernel.internal.securevault.cipher;
 
+import org.wso2.carbon.kernel.internal.securevault.SecureVaultUtils;
 import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
 
 import java.io.ByteArrayInputStream;
@@ -16,35 +17,27 @@ import javax.crypto.CipherOutputStream;
 public class EncryptionHandler extends CipherHandler {
     public EncryptionHandler(KeyStore keyStore, String alias, char[] privateKeyPassword,
                              String algorithm) throws SecureVaultException {
-        super(keyStore, alias, privateKeyPassword, algorithm,  Cipher.DECRYPT_MODE);
+        super(keyStore, alias, privateKeyPassword, algorithm, Cipher.DECRYPT_MODE);
     }
 
     public byte[] decrypt(String encryptedPassword) throws SecureVaultException {
-        byte[] base64DecodedPassword = base64Decode(encryptedPassword);
+        byte[] base64DecodedPassword = SecureVaultUtils.base64Decode(encryptedPassword);
 
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        CipherOutputStream out = new CipherOutputStream(baos, cipher);
+        try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+             CipherOutputStream cipherOutputStream = new CipherOutputStream(byteArrayOutputStream, cipher);
+             InputStream inputStream = new ByteArrayInputStream(base64DecodedPassword)
+        ) {
+            byte[] buffer = new byte[1024];
+            int length;
 
-        InputStream inputStream = new ByteArrayInputStream(base64DecodedPassword);
-        byte[] buffer = new byte[64];
-        int length;
-        try {
             while ((length = inputStream.read(buffer)) != -1) {
-                out.write(buffer, 0, length);
+                cipherOutputStream.write(buffer, 0, length);
             }
+            cipherOutputStream.flush();
+            cipherOutputStream.close();
+            return byteArrayOutputStream.toByteArray();
         } catch (IOException e) {
-            throw new SecureVaultException("IOError when reading the input" +
-                    " stream for cipher ", e);
-        } finally {
-            try {
-                inputStream.close();
-                out.flush();
-                out.close();
-            } catch (IOException ignored) {
-                // ignore exception
-            }
+            throw new SecureVaultException("Failed to decrypt the password", e);
         }
-
-        return baos.toByteArray();
     }
 }

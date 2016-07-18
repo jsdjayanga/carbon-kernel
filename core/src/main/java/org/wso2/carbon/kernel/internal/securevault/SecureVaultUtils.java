@@ -11,6 +11,7 @@ import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
 /**
@@ -55,6 +56,11 @@ public class SecureVaultUtils {
             }
         }
         throw new SecureVaultException("No secret found with given secret name '" + secretName + "'");
+    }
+
+    public static byte[] base64Decode(String base64Encoded) {
+        byte[] decodedValue = Base64.getDecoder().decode(base64Encoded);
+        return decodedValue;
     }
 
     public static char[] toChars(byte[] bytes) {
