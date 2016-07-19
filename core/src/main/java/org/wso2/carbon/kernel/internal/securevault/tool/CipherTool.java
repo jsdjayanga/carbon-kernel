@@ -1,5 +1,6 @@
 package org.wso2.carbon.kernel.internal.securevault.tool;
 
+import org.wso2.carbon.kernel.internal.securevault.SecureVaultConstants;
 import org.wso2.carbon.kernel.internal.securevault.SecureVaultUtils;
 import org.wso2.carbon.kernel.internal.securevault.cipher.EncryptionHandler;
 import org.wso2.carbon.kernel.internal.securevault.config.SecureVaultConfiguration;
@@ -26,13 +27,18 @@ public class CipherTool {
     private static final Logger logger = Logger.getLogger(CipherTool.class.getName());
     private SecureVaultConfiguration secureVaultConfiguration;
     private List<Secret> secrets;
+    EncryptionHandler encryptionHandler;
 
     public static void main(String[] args) {
         logger.info("####### WSO2 CipherTool #######");
         CipherTool cipherTool;
         try {
             cipherTool = new CipherTool();
-            cipherTool.execute(args);
+            if (args.length == 0) {
+                cipherTool.encryptSecretsProperties();
+            } else {
+                cipherTool.processArgs(args);
+            }
         } catch (SecureVaultException e) {
             logger.log(Level.SEVERE, "CipherTool exits with error", e);
         }
@@ -43,25 +49,30 @@ public class CipherTool {
 
         SecretProvider secretProvider = new DefaultSecretProvider();
         secrets = new ArrayList<>();
-        secrets.add(new Secret("masterPassword"));
+        secrets.add(new Secret(SecureVaultConstants.MASTER_PASSWORD));
         secretProvider.provide(secrets);
 
-        String keystoreType = secureVaultConfiguration.getString("keystore", "type");
-        String keystoreLocation = secureVaultConfiguration.getString("keystore", "location");
-        KeyStoreProvider keyStoreProvider = new KeyStoreProvider(KeyStoreType.valueOf(keystoreType),
-                keystoreLocation, SecureVaultUtils.getSecret(secrets, "masterPassword").getSecretValue());
-        KeyStore keyStore = keyStoreProvider.getKeyStore();
-
-        String algorithm = secureVaultConfiguration.getString("keystore", "algorithm");
-        String privateKeyAlias = secureVaultConfiguration.getString("keystore", "alias");
-
+        String keystoreType = secureVaultConfiguration.getString(
+                SecureVaultConstants.KEYSTORE, SecureVaultConstants.TYPE);
+        String keystoreLocation = secureVaultConfiguration.getString(
+                SecureVaultConstants.KEYSTORE, SecureVaultConstants.LOCATION);
+        String privateKeyAlias = secureVaultConfiguration.getString(
+                SecureVaultConstants.KEYSTORE, SecureVaultConstants.ALIAS);
+        String algorithm = secureVaultConfiguration.getString(
+                SecureVaultConstants.KEYSTORE, SecureVaultConstants.ALGORITHM);
         if (algorithm == null || algorithm.isEmpty()) {
-            algorithm = "RSA";
+            algorithm = SecureVaultConstants.RSA;
         }
 
-        EncryptionHandler encryptionHandler = new EncryptionHandler(keyStore, privateKeyAlias, algorithm);
+        KeyStoreProvider keyStoreProvider = new KeyStoreProvider(KeyStoreType.valueOf(keystoreType),
+                keystoreLocation, SecureVaultUtils.getSecret(secrets,
+                SecureVaultConstants.MASTER_PASSWORD).getSecretValue());
+        KeyStore keyStore = keyStoreProvider.getKeyStore();
+        encryptionHandler = new EncryptionHandler(keyStore, privateKeyAlias, algorithm);
+    }
 
-        String secretPropertiesFileLocation = secureVaultConfiguration.getString("location");
+    private void encryptSecretsProperties() throws SecureVaultException {
+        String secretPropertiesFileLocation = secureVaultConfiguration.getString(SecureVaultConstants.LOCATION);
         if (secretPropertiesFileLocation == null || secretPropertiesFileLocation.isEmpty()) {
             secretPropertiesFileLocation = Utils.getSecretsPropertiesLocation();
         }
@@ -72,18 +83,32 @@ public class CipherTool {
             String encryptedText = secretsProperties.getProperty(key);
 
             String[] tokens = encryptedText.split(" ");
-            if ("plainText".equals(tokens[0])) {
+            if (SecureVaultConstants.PLAIN_TEXT.equals(tokens[0])) {
                 byte[] encryptedPassword = encryptionHandler.encrypt(tokens[1].trim().toCharArray());
-                secretsProperties.setProperty(key,
-                        "cipherText " + new String(SecureVaultUtils.toChars(encryptedPassword)));
+                secretsProperties.setProperty(key, SecureVaultConstants.CIPHER_TEXT + " "
+                        + new String(SecureVaultUtils.toChars(encryptedPassword)));
             }
         }
 
         SecureVaultUtils.updateSecretFile(Paths.get(secretPropertiesFileLocation), secretsProperties);
     }
 
-    private void execute(String[] args) {
-        logger.info("Executing...");
+    private void processArgs(String[] args) throws SecureVaultException {
+        if ("-help".equals(args[0])) {
+            printHelp();
+        } else if ((args[0].startsWith("-D" + SecureVaultConstants.ENCRYPT_TEXT + "="))) {
+            encryptText(args[0].substring(14));
+        } else {
+            throw new SecureVaultException("Unknown option '" + args[0] + "'");
+        }
+    }
 
+    private void printHelp() {
+        logger.info("==========help===========");
+    }
+
+    private void encryptText(String plainText) throws SecureVaultException {
+        byte[] encryptedPassword = encryptionHandler.encrypt(plainText.trim().toCharArray());
+        logger.info(new String(SecureVaultUtils.toChars(encryptedPassword)));
     }
 }

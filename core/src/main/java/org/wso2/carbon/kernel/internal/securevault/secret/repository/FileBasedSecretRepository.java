@@ -5,6 +5,7 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.kernel.internal.securevault.SecureVaultConstants;
 import org.wso2.carbon.kernel.internal.securevault.SecureVaultUtils;
 import org.wso2.carbon.kernel.internal.securevault.cipher.DecryptionHandler;
 import org.wso2.carbon.kernel.internal.securevault.config.SecureVaultConfiguration;
@@ -39,36 +40,43 @@ public class FileBasedSecretRepository implements SecretRepository {
 
     @Activate
     public void activate() {
-        logger.info("===================FileBasedSecretRepository activate");
+        if (logger.isDebugEnabled()) {
+            logger.debug("Activating {}", this.getClass().getName());
+        }
     }
 
     @Deactivate
     public void deactivate() {
-        logger.info("===================FileBasedSecretRepository deactivate");
+        if (logger.isDebugEnabled()) {
+            logger.debug("Deactivating {}", this.getClass().getName());
+        }
     }
 
     @Override
     public void init(SecureVaultConfiguration secureVaultConfiguration, List<Secret> secrets)
             throws SecureVaultException {
-        logger.info("===================initializing FileBasedSecretRepository");
+        logger.info("Initializing FileBasedSecretRepository");
 
-        String secretPropertiesFileLocation = secureVaultConfiguration.getString("location");
+        String secretPropertiesFileLocation = secureVaultConfiguration.getString(SecureVaultConstants.LOCATION);
         if (secretPropertiesFileLocation == null || secretPropertiesFileLocation.isEmpty()) {
             secretPropertiesFileLocation = Utils.getSecretsPropertiesLocation();
         }
         Properties secretsProperties = SecureVaultUtils.loadSecretFile(Paths.get(secretPropertiesFileLocation));
 
 
-        String keystoreType = secureVaultConfiguration.getString("keystore", "type");
-        String keystoreLocation = secureVaultConfiguration.getString("keystore", "location");
-        String privateKeyAlias = secureVaultConfiguration.getString("keystore", "alias");
-        Secret masterPassword = SecureVaultUtils.getSecret(secrets, "masterPassword");
-        Secret privateKeyPassword = SecureVaultUtils.getSecret(secrets, "privateKeyPassword");
-
-        String algorithm = secureVaultConfiguration.getString("keystore", "algorithm");
+        String keystoreType = secureVaultConfiguration.getString(
+                SecureVaultConstants.KEYSTORE, SecureVaultConstants.TYPE);
+        String keystoreLocation = secureVaultConfiguration.getString(
+                SecureVaultConstants.KEYSTORE, SecureVaultConstants.LOCATION);
+        String privateKeyAlias = secureVaultConfiguration.getString(
+                SecureVaultConstants.KEYSTORE, SecureVaultConstants.ALIAS);
+        String algorithm = secureVaultConfiguration.getString(
+                SecureVaultConstants.KEYSTORE, SecureVaultConstants.ALGORITHM);
         if (algorithm == null || algorithm.isEmpty()) {
-            algorithm = "RSA";
+            algorithm = SecureVaultConstants.RSA;
         }
+        Secret masterPassword = SecureVaultUtils.getSecret(secrets, SecureVaultConstants.MASTER_PASSWORD);
+        Secret privateKeyPassword = SecureVaultUtils.getSecret(secrets, SecureVaultConstants.PRIVATE_KEY_PASSWORD);
 
         KeyStoreProvider keyStoreProvider = new KeyStoreProvider(KeyStoreType.valueOf(keystoreType),
                 keystoreLocation, masterPassword.getSecretValue());
@@ -81,17 +89,15 @@ public class FileBasedSecretRepository implements SecretRepository {
         for (Object alias : secretsProperties.keySet()) {
             String key = String.valueOf(alias);
             String secret = secretsProperties.getProperty(key);
-            char[] decryptedPassword = new char[0];
-
+            char[] decryptedPassword;
             String[] tokens = secret.split(" ");
-            if ("cipherText".equals(tokens[0])) {
+            if (SecureVaultConstants.CIPHER_TEXT.equals(tokens[0])) {
                 decryptedPassword = SecureVaultUtils.toChars(decryptionHandler.decrypt(tokens[1].trim()));
-            } else if ("plainText".equals(tokens[0])) {
+            } else if (SecureVaultConstants.PLAIN_TEXT.equals(tokens[0])) {
                 decryptedPassword = tokens[1].toCharArray();
             } else {
-                // TODO: log error
+                throw new SecureVaultException("Unknown prefix in secrets file");
             }
-
             this.secrets.put(key, decryptedPassword);
         }
     }
