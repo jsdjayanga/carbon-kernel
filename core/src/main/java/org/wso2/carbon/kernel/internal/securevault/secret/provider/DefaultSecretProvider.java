@@ -5,7 +5,6 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.kernel.internal.securevault.SecureVaultUtils;
 import org.wso2.carbon.kernel.securevault.Secret;
 import org.wso2.carbon.kernel.securevault.SecretProvider;
 import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
@@ -34,8 +33,6 @@ import java.util.Properties;
 )
 public class DefaultSecretProvider implements SecretProvider {
     private static Logger logger = LoggerFactory.getLogger(DefaultSecretProvider.class);
-    private char[] masterPassword;
-    private char[] privateKeyPassword;
     private boolean isPermanentFile = false;
 
     @Activate
@@ -56,19 +53,13 @@ public class DefaultSecretProvider implements SecretProvider {
     public void provide(List<Secret> secrets) throws SecureVaultException {
         Path passwordFilePath = Paths.get(Utils.getCarbonHome().toString(), "password");
         if (Files.exists(passwordFilePath)) {
-            readSecretsFile(passwordFilePath);
+            readSecretsFile(passwordFilePath, secrets);
         } else {
-            readSecretsFromConsole();
+            readSecretsFromConsole(secrets);
         }
-
-        Secret masterPassword = SecureVaultUtils.getSecret(secrets, "masterPassword");
-        masterPassword.setSecretValue(String.valueOf(this.masterPassword));
-
-        Secret privateKeyPassword = SecureVaultUtils.getSecret(secrets, "privateKeyPassword");
-        privateKeyPassword.setSecretValue(String.valueOf(this.privateKeyPassword));
     }
 
-    private void readSecretsFile(Path passwordFilePath) throws SecureVaultException {
+    private void readSecretsFile(Path passwordFilePath, List<Secret> secrets) throws SecureVaultException {
         Properties properties = new Properties();
         try (InputStream inputStream = new FileInputStream(passwordFilePath.toFile())) {
             properties.load(inputStream);
@@ -81,8 +72,9 @@ public class DefaultSecretProvider implements SecretProvider {
                 isPermanentFile = Boolean.parseBoolean(permanentFile);
             }
 
-            masterPassword = properties.getProperty("masterPassword", "").toCharArray();
-            privateKeyPassword = properties.getProperty("privateKeyPassword", "").toCharArray();
+            for (Secret secret : secrets) {
+                secret.setSecretValue(properties.getProperty(secret.getSecretName(), ""));
+            }
 
             inputStream.close();
 
@@ -96,11 +88,13 @@ public class DefaultSecretProvider implements SecretProvider {
         }
     }
 
-    private void readSecretsFromConsole() throws SecureVaultException {
+    private void readSecretsFromConsole(List<Secret> secrets) throws SecureVaultException {
         Console console = System.console();
         if (console != null) {
-            masterPassword = console.readPassword("[%s]", "Enter KeyStore Password :");
-            privateKeyPassword = console.readPassword("[%s]", "Enter Private Key Password : ");
+            for (Secret secret : secrets) {
+                secret.setSecretValue(new String(console.readPassword("[%s]",
+                        "Enter " + secret.getSecretName() + " Password :")));
+            }
         }
     }
 }

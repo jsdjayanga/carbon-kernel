@@ -8,11 +8,20 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.kernel.securevault.Secret;
 import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
 import java.nio.charset.Charset;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import java.util.Properties;
 
 /**
  * Created by jayanga on 7/13/16.
@@ -63,8 +72,47 @@ public class SecureVaultUtils {
         return decodedValue;
     }
 
+    public static byte[] base64Encode(byte[] original) {
+        byte[] encodedValue = Base64.getEncoder().encode(original);
+        return encodedValue;
+    }
+
     public static char[] toChars(byte[] bytes) {
         Charset charset = Charset.forName("UTF-8");
         return charset.decode(ByteBuffer.wrap(bytes)).array();
+    }
+
+    public static byte[] toBytes(char[] chars) {
+        Charset charset = Charset.forName("UTF-8");
+        return charset.encode(CharBuffer.wrap(chars)).array();
+    }
+
+    public static Properties loadSecretFile(Path secretsFilePath) throws SecureVaultException {
+        Properties properties = new Properties();
+        try (InputStream inputStream = new FileInputStream(secretsFilePath.toFile())) {
+
+            // TODO : Use ConfigUtil to update with environment variables
+
+            properties.load(inputStream);
+        } catch (FileNotFoundException e) {
+            throw new SecureVaultException("Cannot find secrets file in given location. (location: "
+                    + secretsFilePath + ")", e);
+        } catch (IOException e) {
+            throw new SecureVaultException("Cannot access secrets file in given location. (location: "
+                    + secretsFilePath + ")", e);
+        }
+        return properties;
+    }
+
+    public static void updateSecretFile(Path secretsFilePath, Properties properties) throws SecureVaultException {
+        try (OutputStream outputStream = new FileOutputStream(secretsFilePath.toFile())) {
+            properties.store(outputStream, null);
+        } catch (FileNotFoundException e) {
+            throw new SecureVaultException("Cannot find secrets file in given location. (location: "
+                    + secretsFilePath + ")", e);
+        } catch (IOException e) {
+            throw new SecureVaultException("Cannot access secrets file in given location. (location: "
+                    + secretsFilePath + ")", e);
+        }
     }
 }

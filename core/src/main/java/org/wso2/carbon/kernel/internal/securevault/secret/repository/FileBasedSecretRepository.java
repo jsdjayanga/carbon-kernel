@@ -15,11 +15,6 @@ import org.wso2.carbon.kernel.securevault.Secret;
 import org.wso2.carbon.kernel.securevault.SecretRepository;
 import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.KeyStore;
 import java.util.HashMap;
@@ -61,7 +56,7 @@ public class FileBasedSecretRepository implements SecretRepository {
         if (secretPropertiesFileLocation == null || secretPropertiesFileLocation.isEmpty()) {
             secretPropertiesFileLocation = Utils.getSecretsPropertiesLocation();
         }
-        Properties encryptedSecrets = loadSecretFile(Paths.get(secretPropertiesFileLocation));
+        Properties secretsProperties = SecureVaultUtils.loadSecretFile(Paths.get(secretPropertiesFileLocation));
 
 
         String keystoreType = secureVaultConfiguration.getString("keystore", "type");
@@ -83,12 +78,12 @@ public class FileBasedSecretRepository implements SecretRepository {
         DecryptionHandler decryptionHandler = new DecryptionHandler(keyStore, privateKeyAlias,
                 privateKeyPassword.getSecretValue().toCharArray(), algorithm);
 
-        for (Object alias : encryptedSecrets.keySet()) {
+        for (Object alias : secretsProperties.keySet()) {
             String key = String.valueOf(alias);
-            String encryptedText = encryptedSecrets.getProperty(key);
+            String secret = secretsProperties.getProperty(key);
             char[] decryptedPassword = new char[0];
 
-            String[] tokens = encryptedText.split(" ");
+            String[] tokens = secret.split(" ");
             if ("cipherText".equals(tokens[0])) {
                 decryptedPassword = SecureVaultUtils.toChars(decryptionHandler.decrypt(tokens[1].trim()));
             } else if ("plainText".equals(tokens[0])) {
@@ -108,22 +103,5 @@ public class FileBasedSecretRepository implements SecretRepository {
             return secret;
         }
         return new char[0];
-    }
-
-    private Properties loadSecretFile(Path secretsFilePath) throws SecureVaultException {
-        Properties properties = new Properties();
-        try (InputStream inputStream = new FileInputStream(secretsFilePath.toFile())) {
-
-            // TODO : Use ConfigUtil to update with environment variables
-
-            properties.load(inputStream);
-        } catch (FileNotFoundException e) {
-            throw new SecureVaultException("Cannot find secrets file in given location. (location: "
-                    + secretsFilePath + ")", e);
-        } catch (IOException e) {
-            throw new SecureVaultException("Cannot access secrets file in given location. (location: "
-                    + secretsFilePath + ")", e);
-        }
-        return properties;
     }
 }
