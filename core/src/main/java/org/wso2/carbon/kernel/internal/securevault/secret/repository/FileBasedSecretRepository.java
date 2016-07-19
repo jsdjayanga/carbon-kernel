@@ -6,7 +6,7 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.kernel.internal.securevault.SecureVaultUtils;
-import org.wso2.carbon.kernel.internal.securevault.cipher.EncryptionHandler;
+import org.wso2.carbon.kernel.internal.securevault.cipher.DecryptionHandler;
 import org.wso2.carbon.kernel.internal.securevault.config.SecureVaultConfiguration;
 import org.wso2.carbon.kernel.internal.securevault.keystore.KeyStoreProvider;
 import org.wso2.carbon.kernel.internal.securevault.keystore.KeyStoreType;
@@ -80,7 +80,7 @@ public class FileBasedSecretRepository implements SecretRepository {
         KeyStore keyStore = keyStoreProvider.getKeyStore();
 
 
-        EncryptionHandler encryptionHandler = new EncryptionHandler(keyStore, privateKeyAlias,
+        DecryptionHandler decryptionHandler = new DecryptionHandler(keyStore, privateKeyAlias,
                 privateKeyPassword.getSecretValue().toCharArray(), algorithm);
 
         for (Object alias : encryptedSecrets.keySet()) {
@@ -90,7 +90,7 @@ public class FileBasedSecretRepository implements SecretRepository {
 
             String[] tokens = encryptedText.split(" ");
             if ("cipherText".equals(tokens[0])) {
-                decryptedPassword = SecureVaultUtils.toChars(encryptionHandler.decrypt(tokens[1].trim()));
+                decryptedPassword = SecureVaultUtils.toChars(decryptionHandler.decrypt(tokens[1].trim()));
             } else if ("plainText".equals(tokens[0])) {
                 decryptedPassword = tokens[1].toCharArray();
             } else {

@@ -14,8 +14,8 @@ import javax.crypto.CipherOutputStream;
 /**
  * Created by jayanga on 7/18/16.
  */
-public class EncryptionHandler extends CipherHandler {
-    public EncryptionHandler(KeyStore keyStore, String alias, char[] privateKeyPassword,
+public class DecryptionHandler extends CipherHandler {
+    public DecryptionHandler(KeyStore keyStore, String alias, char[] privateKeyPassword,
                              String algorithm) throws SecureVaultException {
         super(keyStore, alias, privateKeyPassword, algorithm, Cipher.DECRYPT_MODE);
     }

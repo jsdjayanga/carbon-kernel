@@ -75,9 +75,9 @@ public class SecureVaultComponent implements RequiredCapabilityListener {
         ServiceReference serviceReference1 = SecureVaultUtils.getServiceReference(bundleContext,
                 SecureVaultConstants.SECRET_PROVIDER_PROPERTY_NAME, SecretProvider.class.getName(), secretProviderName);
         SecretProvider secretProvider = (SecretProvider) bundleContext.getService(serviceReference1);
-        List<String> params = SecureVaultConfiguration.getInstance()
+        List<String> secretsList = SecureVaultConfiguration.getInstance()
                 .getList(SecureVaultConstants.SECRET_PROVIDER, "secrets");
-        List<Secret> secrets = SecureVaultUtils.createSecrets(params);
+        List<Secret> secrets = SecureVaultUtils.createSecrets(secretsList);
         secretProvider.provide(secrets);
 
         secretRepository.init(secureVaultConfiguration, secrets);
