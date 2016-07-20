@@ -37,7 +37,15 @@ import java.util.List;
 import java.util.Properties;
 
 /**
- * Created by jayanga on 7/13/16.
+ * This service component is responsible for providing secrets to initialize the secret repositories. This provider
+ * has two behaviours
+ * 1. Reads the secrets from file
+ *    It looks for a property file with name "password" in server home directory, read the passwords and delete the file.
+ *    If the file has a property "permanent=true", the file will not be deleted.
+ * 2. Reads the secrets from command line.
+ * And this component registers a SecretProvider as an OSGi service.
+ *
+ * @since 5.2.0
  */
 @Component(
         name = "org.wso2.carbon.kernel.internal.securevault.secret.provider.DefaultSecretProvider",

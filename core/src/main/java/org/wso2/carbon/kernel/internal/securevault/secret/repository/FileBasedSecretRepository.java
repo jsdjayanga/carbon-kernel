@@ -40,7 +40,12 @@ import java.util.Map;
 import java.util.Properties;
 
 /**
- * Created by jayanga on 7/12/16.
+ * This service component is responsible for exposing the secrets given in the secrets.properties file. By default
+ * this will read the secrets from default secrets.properties file. This can be altered by specifying "location"
+ * of the secrets file in the secure_vault.yml file.
+ * And this component registers a SecretRepository as an OSGi service.
+ *
+ * @since 5.2.0
  */
 @Component(
         name = "org.wso2.carbon.kernel.internal.securevault.secret.repository.FileBasedSecretRepository",

@@ -29,7 +29,11 @@ import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
 import java.util.List;
 
 /**
- * Created by jayanga on 7/13/16.
+ * This service component is responsible for providing secrets to initialize the secret repositories. It has
+ * hard coded passwords for 'masterPassword' and 'privateKeyPassword'
+ * And this component registers a SecretProvider as an OSGi service.
+ *
+ * @since 5.2.0
  */
 @Component(
         name = "org.wso2.carbon.kernel.internal.securevault.secret.provider.HardCodedSecretProvider",
