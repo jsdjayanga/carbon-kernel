@@ -40,8 +40,8 @@ import java.util.Properties;
  * This service component is responsible for providing secrets to initialize the secret repositories. This provider
  * has two behaviours
  * 1. Reads the secrets from file
- *    It looks for a property file with name "password" in server home directory, read the passwords and delete the file.
- *    If the file has a property "permanent=true", the file will not be deleted.
+ *    It looks for a property file with name "password" in server home directory, read the passwords and delete the
+ *    file. If the file has a property "permanent=true", the file will not be deleted.
  * 2. Reads the secrets from command line.
  * And this component registers a SecretProvider as an OSGi service.
  *
