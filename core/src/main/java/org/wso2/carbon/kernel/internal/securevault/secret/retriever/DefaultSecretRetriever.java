@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-package org.wso2.carbon.kernel.internal.securevault.secret.provider;
+package org.wso2.carbon.kernel.internal.securevault.secret.retriever;
 
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.kernel.internal.securevault.config.SecureVaultConfiguration;
 import org.wso2.carbon.kernel.securevault.Secret;
-import org.wso2.carbon.kernel.securevault.SecretProvider;
+import org.wso2.carbon.kernel.securevault.SecretRetriever;
 import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
 import org.wso2.carbon.kernel.utils.Utils;
 
@@ -52,11 +53,11 @@ import java.util.Properties;
         immediate = true,
         property = {
                 "capabilityName=SecretProvider",
-                "secretProviderName=default"
+                "secretRetrieverType=default"
         }
 )
-public class DefaultSecretProvider implements SecretProvider {
-    private static Logger logger = LoggerFactory.getLogger(DefaultSecretProvider.class);
+public class DefaultSecretRetriever implements SecretRetriever {
+    private static Logger logger = LoggerFactory.getLogger(DefaultSecretRetriever.class);
     private boolean isPermanentFile = false;
 
     @Activate
@@ -74,7 +75,12 @@ public class DefaultSecretProvider implements SecretProvider {
     }
 
     @Override
-    public void provide(List<Secret> secrets) throws SecureVaultException {
+    public void init(SecureVaultConfiguration secretRepositoryConfig) throws SecureVaultException {
+        // Nothing to initialize in DefaultSecretInitializer
+    }
+
+    @Override
+    public void readSecrets(List<Secret> secrets) throws SecureVaultException {
         Path passwordFilePath = Paths.get(Utils.getCarbonHome().toString(), "password");
         if (Files.exists(passwordFilePath)) {
             readSecretsFile(passwordFilePath, secrets);

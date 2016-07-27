@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.kernel.securevault.Secret;
 import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
 
+import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -66,10 +67,10 @@ public class SecureVaultUtils {
                 + "' with property '" + propertyName + "'");
     }
 
-    public static List<Secret> createSecrets(List<String> paramaters) {
+    public static List<Secret> createSecrets(List<String> parameters) {
         List<Secret> secrets = new ArrayList<>();
-        for (String paramater : paramaters) {
-            secrets.add(new Secret(paramater));
+        for (String parameter : parameters) {
+            secrets.add(new Secret(parameter));
         }
         return secrets;
     }
@@ -83,7 +84,7 @@ public class SecureVaultUtils {
         throw new SecureVaultException("No secret found with given secret name '" + secretName + "'");
     }
 
-    public static byte[] base64Decode(String base64Encoded) {
+    public static byte[] base64Decode(byte[] base64Encoded) {
         byte[] decodedValue = Base64.getDecoder().decode(base64Encoded);
         return decodedValue;
     }
@@ -100,7 +101,11 @@ public class SecureVaultUtils {
 
     public static byte[] toBytes(char[] chars) {
         Charset charset = Charset.forName("UTF-8");
-        return charset.encode(CharBuffer.wrap(chars)).array();
+        ByteBuffer encoded = charset.encode(CharBuffer.wrap(chars));
+
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        byteArrayOutputStream.write(encoded.array(), 0, encoded.limit());
+        return byteArrayOutputStream.toByteArray();
     }
 
     public static Properties loadSecretFile(Path secretsFilePath) throws SecureVaultException {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.wso2.carbon.kernel.internal.securevault.keystore;
+package org.wso2.carbon.kernel.internal.securevault.cipher.jks;
 
 import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
 

@@ -35,7 +35,7 @@ public class SecureVaultConfiguration {
     private static final Logger logger = LoggerFactory.getLogger(SecureVaultConfiguration.class);
     private static final SecureVaultConfiguration INSTANCE = new SecureVaultConfiguration();
     private boolean initialized = false;
-    private Map<String, Object> secretRepositoryConfig;
+    private Map<String, Object> secureVaultConfiguration;
 
     private SecureVaultConfiguration() {
     }
@@ -61,17 +61,17 @@ public class SecureVaultConfiguration {
             // ConfigUtil.parse(inputStream);
 
             Yaml yaml = new Yaml();
-            secretRepositoryConfig = (Map<String, Object>) yaml.load(inputStream);
-            if (secretRepositoryConfig == null || secretRepositoryConfig.isEmpty()) {
+            secureVaultConfiguration = (Map<String, Object>) yaml.load(inputStream);
+            if (secureVaultConfiguration == null || secureVaultConfiguration.isEmpty()) {
                 throw new SecureVaultException("Failed to load secure vault configuration yaml : "
                         + configFileLocation);
             }
             logger.debug("Secure vault configurations parsed successfully.");
 
-            secretRepositoryConfig = (Map<String, Object>) secretRepositoryConfig.get("secretRepository");
-            if (secretRepositoryConfig == null || secretRepositoryConfig.isEmpty()) {
-                throw new SecureVaultException("Secret repository configurations not found : " + configFileLocation);
-            }
+//            secretRepositoryConfig = (Map<String, Object>) secretRepositoryConfig.get("secretRepository");
+//            if (secretRepositoryConfig == null || secretRepositoryConfig.isEmpty()) {
+//                throw new SecureVaultException("Secret repository configurations not found : " + configFileLocation);
+//            }
             initialized = true;
             logger.debug("Secret repository configurations loaded successfully.");
         } catch (IOException e) {
@@ -80,7 +80,7 @@ public class SecureVaultConfiguration {
     }
 
     public String getString(String key) {
-        Object object = secretRepositoryConfig.get(key);
+        Object object = secureVaultConfiguration.get(key);
         if (object instanceof String) {
             return (String) object;
         }
@@ -88,7 +88,7 @@ public class SecureVaultConfiguration {
     }
 
     public String getString(String... keys) {
-        Map<String, Object> config = secretRepositoryConfig;
+        Map<String, Object> config = secureVaultConfiguration;
         Object object;
         for (int i = 0; i < keys.length; i++) {
             object = config.get(keys[i]);
@@ -105,7 +105,7 @@ public class SecureVaultConfiguration {
     }
 
     public List<String> getList(String... keys) {
-        Map<String, Object> config = secretRepositoryConfig;
+        Map<String, Object> config = secureVaultConfiguration;
         Object object;
         for (int i = 0; i < keys.length; i++) {
             object = config.get(keys[i]);
@@ -122,7 +122,7 @@ public class SecureVaultConfiguration {
     }
 
     public boolean exist(String key) {
-        Object object = secretRepositoryConfig.get(key);
+        Object object = secureVaultConfiguration.get(key);
         if (object != null) {
             return true;
         }

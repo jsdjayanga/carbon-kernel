@@ -14,14 +14,18 @@
  * limitations under the License.
  */
 
-package org.wso2.carbon.kernel.internal.securevault.keystore;
+package org.wso2.carbon.kernel.securevault;
+
+
+import org.wso2.carbon.kernel.internal.securevault.config.SecureVaultConfiguration;
+import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
+
+import java.util.List;
 
 /**
- * Created by jayanga on 7/17/16.
+ * Created by jayanga on 7/13/16.
  */
-public enum KeyStoreType {
-    JKS,
-    PKCS8,
-    PKCS12,
-    CA_CERTIFICATES_PATH
+public interface SecretRetriever {
+    void init(SecureVaultConfiguration secureVaultConfiguration) throws SecureVaultException;
+    void readSecrets(List<Secret> secrets) throws SecureVaultException;
 }

@@ -1,6 +1,6 @@
 secretRepository:
   type: file
-secretInitializer:
+secretRetriever:
   type: default
 cipherProvider:
   type: jks

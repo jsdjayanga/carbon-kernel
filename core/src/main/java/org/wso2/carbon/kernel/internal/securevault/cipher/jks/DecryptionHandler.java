@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.wso2.carbon.kernel.internal.securevault.cipher;
+package org.wso2.carbon.kernel.internal.securevault.cipher.jks;
 
 import org.wso2.carbon.kernel.internal.securevault.SecureVaultUtils;
 import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
@@ -49,7 +49,7 @@ public class DecryptionHandler extends CipherHandler {
         }
     }
 
-    public byte[] decrypt(String encryptedPassword) throws SecureVaultException {
+    public byte[] decrypt(byte[] encryptedPassword) throws SecureVaultException {
         byte[] base64DecodedPassword = SecureVaultUtils.base64Decode(encryptedPassword);
         return doCipher(base64DecodedPassword);
     }

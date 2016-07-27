@@ -14,16 +14,14 @@
  * limitations under the License.
  */
 
-package org.wso2.carbon.kernel.securevault;
-
-
-import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
-
-import java.util.List;
+package org.wso2.carbon.kernel.internal.securevault.cipher.jks;
 
 /**
- * Created by jayanga on 7/13/16.
+ * Created by jayanga on 7/17/16.
  */
-public interface SecretProvider {
-    void provide(List<Secret> secrets) throws SecureVaultException;
+public enum KeyStoreType {
+    JKS,
+    PKCS8,
+    PKCS12,
+    CA_CERTIFICATES_PATH
 }

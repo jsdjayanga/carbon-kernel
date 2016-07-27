@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.wso2.carbon.kernel.internal.securevault.secret.provider;
+package org.wso2.carbon.kernel.internal.securevault.secret.retriever;
 
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -22,8 +22,9 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.kernel.internal.securevault.SecureVaultUtils;
+import org.wso2.carbon.kernel.internal.securevault.config.SecureVaultConfiguration;
 import org.wso2.carbon.kernel.securevault.Secret;
-import org.wso2.carbon.kernel.securevault.SecretProvider;
+import org.wso2.carbon.kernel.securevault.SecretRetriever;
 import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
 
 import java.util.List;
@@ -40,11 +41,11 @@ import java.util.List;
         immediate = true,
         property = {
                 "capabilityName=SecretProvider",
-                "secretProviderName=hardCoded"
+                "secretRetrieverType=hardCoded"
         }
 )
-public class HardCodedSecretProvider implements SecretProvider {
-    private static Logger logger = LoggerFactory.getLogger(HardCodedSecretProvider.class);
+public class HardCodedSecretRetriever implements SecretRetriever {
+    private static Logger logger = LoggerFactory.getLogger(HardCodedSecretRetriever.class);
 
     @Activate
     public void activate() {
@@ -61,7 +62,12 @@ public class HardCodedSecretProvider implements SecretProvider {
     }
 
     @Override
-    public void provide(List<Secret> secrets) throws SecureVaultException {
+    public void init(SecureVaultConfiguration secretRepositoryConfig) throws SecureVaultException {
+        // Nothing to initialize
+    }
+
+    @Override
+    public void readSecrets(List<Secret> secrets) throws SecureVaultException {
         logger.debug("Providing hard coded secrets for 'masterPassword' and 'privateKeyPassword'");
 
         Secret masterPassword = SecureVaultUtils.getSecret(secrets, "masterPassword");
@@ -69,6 +75,5 @@ public class HardCodedSecretProvider implements SecretProvider {
 
         Secret privateKeyPassword = SecureVaultUtils.getSecret(secrets, "privateKeyPassword");
         privateKeyPassword.setSecretValue("wso2carbon");
-
     }
 }

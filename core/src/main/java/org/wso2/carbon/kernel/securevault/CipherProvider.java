@@ -20,10 +20,11 @@ import org.wso2.carbon.kernel.internal.securevault.config.SecureVaultConfigurati
 import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
 
 /**
- * Created by jayanga on 7/12/16.
+ * Created by jayanga on 7/22/16.
  */
-public interface SecretRepository {
-    void init(SecureVaultConfiguration secureVaultConfiguration, CipherProvider cipherProvider)
+public interface CipherProvider {
+    void init(SecureVaultConfiguration secureVaultConfiguration, SecretRetriever secretRetriever)
             throws SecureVaultException;
-    char[] getSecret(String alias);
+    byte[] encrypt(byte[] plainText) throws SecureVaultException;
+    byte[] decrypt(byte[] cipherText) throws SecureVaultException;
 }

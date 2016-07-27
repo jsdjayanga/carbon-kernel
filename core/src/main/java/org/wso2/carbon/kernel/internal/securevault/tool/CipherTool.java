@@ -18,14 +18,14 @@ package org.wso2.carbon.kernel.internal.securevault.tool;
 
 import org.wso2.carbon.kernel.internal.securevault.SecureVaultConstants;
 import org.wso2.carbon.kernel.internal.securevault.SecureVaultUtils;
-import org.wso2.carbon.kernel.internal.securevault.cipher.EncryptionHandler;
+import org.wso2.carbon.kernel.internal.securevault.cipher.jks.EncryptionHandler;
+import org.wso2.carbon.kernel.internal.securevault.cipher.jks.KeyStoreProvider;
+import org.wso2.carbon.kernel.internal.securevault.cipher.jks.KeyStoreType;
 import org.wso2.carbon.kernel.internal.securevault.config.SecureVaultConfiguration;
-import org.wso2.carbon.kernel.internal.securevault.keystore.KeyStoreProvider;
-import org.wso2.carbon.kernel.internal.securevault.keystore.KeyStoreType;
-import org.wso2.carbon.kernel.internal.securevault.secret.provider.DefaultSecretProvider;
+import org.wso2.carbon.kernel.internal.securevault.secret.retriever.DefaultSecretRetriever;
 import org.wso2.carbon.kernel.internal.utils.Utils;
 import org.wso2.carbon.kernel.securevault.Secret;
-import org.wso2.carbon.kernel.securevault.SecretProvider;
+import org.wso2.carbon.kernel.securevault.SecretRetriever;
 import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
 
 import java.nio.file.Paths;
@@ -63,10 +63,10 @@ public class CipherTool {
     public CipherTool() throws SecureVaultException {
         secureVaultConfiguration = SecureVaultConfiguration.getInstance();
 
-        SecretProvider secretProvider = new DefaultSecretProvider();
+        SecretRetriever secretRetriever = new DefaultSecretRetriever();
         secrets = new ArrayList<>();
         secrets.add(new Secret(SecureVaultConstants.MASTER_PASSWORD));
-        secretProvider.provide(secrets);
+        secretRetriever.readSecrets(secrets);
 
         String keystoreType = secureVaultConfiguration.getString(
                 SecureVaultConstants.KEYSTORE, SecureVaultConstants.TYPE);
@@ -100,7 +100,8 @@ public class CipherTool {
 
             String[] tokens = encryptedText.split(" ");
             if (SecureVaultConstants.PLAIN_TEXT.equals(tokens[0])) {
-                byte[] encryptedPassword = encryptionHandler.encrypt(tokens[1].trim().toCharArray());
+                byte[] encryptedPassword = encryptionHandler
+                        .encrypt(SecureVaultUtils.toBytes(tokens[1].trim().toCharArray()));
                 secretsProperties.setProperty(key, SecureVaultConstants.CIPHER_TEXT + " "
                         + new String(SecureVaultUtils.toChars(encryptedPassword)));
             }
@@ -124,7 +125,7 @@ public class CipherTool {
     }
 
     private void encryptText(String plainText) throws SecureVaultException {
-        byte[] encryptedPassword = encryptionHandler.encrypt(plainText.trim().toCharArray());
+        byte[] encryptedPassword = encryptionHandler.encrypt(SecureVaultUtils.toBytes(plainText.trim().toCharArray()));
         logger.info(new String(SecureVaultUtils.toChars(encryptedPassword)));
     }
 }

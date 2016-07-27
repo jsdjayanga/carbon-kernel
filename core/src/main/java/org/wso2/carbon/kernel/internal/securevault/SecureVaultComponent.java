@@ -25,14 +25,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.kernel.internal.DataHolder;
 import org.wso2.carbon.kernel.internal.securevault.config.SecureVaultConfiguration;
-import org.wso2.carbon.kernel.securevault.Secret;
-import org.wso2.carbon.kernel.securevault.SecretProvider;
+import org.wso2.carbon.kernel.securevault.CipherProvider;
 import org.wso2.carbon.kernel.securevault.SecretRepository;
+import org.wso2.carbon.kernel.securevault.SecretRetriever;
 import org.wso2.carbon.kernel.securevault.SecureVault;
 import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
 import org.wso2.carbon.kernel.startupresolver.RequiredCapabilityListener;
-
-import java.util.List;
 
 /**
  * Created by jayanga on 7/12/16.
@@ -62,42 +60,44 @@ public class SecureVaultComponent implements RequiredCapabilityListener {
     @Override
     public void onAllRequiredCapabilitiesAvailable() {
         logger.debug("All dependencies for SecureVaultComponent are ready.");
-
-        SecureVaultConfiguration secureVaultConfiguration;
-        try {
-            secureVaultConfiguration = SecureVaultConfiguration.getInstance();
-            String secretRepositoryType = secureVaultConfiguration
-                    .getString(SecureVaultConstants.SECRET_REPOSITORY_TYPE);
-            initializeSecretRepository(secretRepositoryType, secureVaultConfiguration);
-            logger.info("Successfully initialized secure vault with secret repository : " + secretRepositoryType);
-        } catch (SecureVaultException e) {
-            logger.error("Failed to read secure vault configuration", e);
-        }
-
-
+        initializeSecureVault();
     }
 
-    private void initializeSecretRepository(String secretRepositoryType,
-                                            SecureVaultConfiguration secureVaultConfiguration)
-            throws SecureVaultException {
-        BundleContext bundleContext = DataHolder.getInstance().getBundleContext();
-        ServiceReference serviceReference = SecureVaultUtils.getServiceReference(bundleContext,
-                SecureVaultConstants.SECRET_REPOSITORY_PROPERTY_NAME, SecretRepository.class.getName(),
-                secretRepositoryType);
-        secretRepository = (SecretRepository) bundleContext.getService(serviceReference);
+    private void initializeSecureVault() {
+        try {
+            SecureVaultConfiguration secureVaultConfiguration = SecureVaultConfiguration.getInstance();
+            String secretRepositoryType = secureVaultConfiguration.getString("secretRepository", "type");
+            String secretRetrieverType = secureVaultConfiguration.getString("secretRetriever", "type");
+            String cipherProviderType = secureVaultConfiguration.getString("cipherProvider", "type");
 
-        String secretProviderName = secureVaultConfiguration.getString(SecureVaultConstants.SECRET_PROVIDER, "name");
-        //BundleContext bundleContext = DataHolder.getInstance().getBundleContext();
-        ServiceReference serviceReference1 = SecureVaultUtils.getServiceReference(bundleContext,
-                SecureVaultConstants.SECRET_PROVIDER_PROPERTY_NAME, SecretProvider.class.getName(), secretProviderName);
-        SecretProvider secretProvider = (SecretProvider) bundleContext.getService(serviceReference1);
-        List<String> secretsList = SecureVaultConfiguration.getInstance()
-                .getList(SecureVaultConstants.SECRET_PROVIDER, "secrets");
-        List<Secret> secrets = SecureVaultUtils.createSecrets(secretsList);
-        secretProvider.provide(secrets);
+            if (logger.isDebugEnabled()) {
+                logger.debug("Initializing secure vault with, SecretRepository={}, SecretRetriever={}, " +
+                        "CipherProvider={}", secretRepositoryType, secretRetrieverType, cipherProviderType);
+            }
 
-        secretRepository.init(secureVaultConfiguration, secrets);
+            BundleContext bundleContext = DataHolder.getInstance().getBundleContext();
 
-        bundleContext.registerService(SecureVault.class, new SecureVaultImpl(secretRepository), null);
+            ServiceReference secretRetrieverSR = SecureVaultUtils.getServiceReference(bundleContext,
+                    SecureVaultConstants.SECRET_RETRIEVER_PROPERTY_NAME, SecretRetriever.class.getName(),
+                    secretRetrieverType);
+            SecretRetriever secretRetriever = (SecretRetriever) bundleContext.getService(secretRetrieverSR);
+            secretRetriever.init(secureVaultConfiguration);
+
+            ServiceReference cipherProviderSR = SecureVaultUtils.getServiceReference(bundleContext,
+                    SecureVaultConstants.CIPHER_PROVIDER_PROPERTY_NAME, CipherProvider.class.getName(),
+                    cipherProviderType);
+            CipherProvider cipherProvider = (CipherProvider) bundleContext.getService(cipherProviderSR);
+            cipherProvider.init(secureVaultConfiguration, secretRetriever);
+
+            ServiceReference secretRepositorySR = SecureVaultUtils.getServiceReference(bundleContext,
+                    SecureVaultConstants.SECRET_REPOSITORY_PROPERTY_NAME, SecretRepository.class.getName(),
+                    secretRepositoryType);
+            secretRepository = (SecretRepository) bundleContext.getService(secretRepositorySR);
+            secretRepository.init(secureVaultConfiguration, cipherProvider);
+
+            bundleContext.registerService(SecureVault.class, new SecureVaultImpl(secretRepository), null);
+        } catch (SecureVaultException e) {
+            logger.error("Failed to initialize Secure Vault.", e);
+        }
     }
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.wso2.carbon.kernel.internal.securevault.cipher;
+package org.wso2.carbon.kernel.internal.securevault.cipher.jks;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.wso2.carbon.kernel.internal.securevault.cipher;
+package org.wso2.carbon.kernel.internal.securevault.cipher.jks;
 
 import org.wso2.carbon.kernel.internal.securevault.SecureVaultUtils;
 import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
@@ -50,8 +50,8 @@ public class EncryptionHandler extends CipherHandler {
         }
     }
 
-    public byte[] encrypt(char[] plainTextPassword) throws SecureVaultException {
-        byte[] encryptedPassword = doCipher(SecureVaultUtils.toBytes(plainTextPassword));
+    public byte[] encrypt(byte[] plainTextPassword) throws SecureVaultException {
+        byte[] encryptedPassword = doCipher(plainTextPassword);
         return SecureVaultUtils.base64Encode(encryptedPassword);
     }
 }
