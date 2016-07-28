@@ -34,10 +34,12 @@ import org.wso2.carbon.kernel.securevault.SecretRepository;
 import org.wso2.carbon.kernel.securevault.SecretRetriever;
 import org.wso2.carbon.kernel.securevault.SecureVault;
 import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
+import org.wso2.carbon.kernel.securevault.exception.SecureVaultRuntimeException;
 import org.wso2.carbon.kernel.startupresolver.RequiredCapabilityListener;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * This service component acts as a RequiredCapabilityListener for all the SecretRepositories, SecretRetrievers
@@ -68,17 +70,17 @@ public class SecureVaultComponent implements RequiredCapabilityListener {
 
     @Activate
     public void activate() {
-        logger.debug("Activating SecureVault component");
+        logger.debug("Activating SecureVaultComponent");
     }
 
     @Deactivate
     public void deactivate() {
-        logger.debug("Deactivating SecureVault component");
+        logger.debug("Deactivating SecureVaultComponent");
     }
 
     @Override
     public void onAllRequiredCapabilitiesAvailable() {
-        logger.debug("All dependencies for SecureVaultComponent are ready.");
+        logger.debug("All required capabilities are available for SecureVaultComponent");
         initializeSecureVault();
     }
 
@@ -148,16 +150,20 @@ public class SecureVaultComponent implements RequiredCapabilityListener {
     private void initializeSecureVault() {
         try {
             SecureVaultConfiguration secureVaultConfiguration = SecureVaultConfiguration.getInstance();
-            String secretRepositoryType = secureVaultConfiguration.getString("secretRepository", "type");
-            String secretRetrieverType = secureVaultConfiguration.getString("secretRetriever", "type");
-            String cipherProviderType = secureVaultConfiguration.getString("cipherProvider", "type");
+            String secretRepositoryType = secureVaultConfiguration.getString(SecureVaultConstants.SECRET_REPOSITORY,
+                    SecureVaultConstants.TYPE);
+            String secretRetrieverType = secureVaultConfiguration.getString(SecureVaultConstants.SECRET_RETRIEVER,
+                    SecureVaultConstants.TYPE);
+            String cipherProviderType = secureVaultConfiguration.getString(SecureVaultConstants.CIPHER_PROVIDER,
+                    SecureVaultConstants.TYPE);
 
-            if (logger.isDebugEnabled()) {
-                logger.debug("Initializing secure vault with, SecretRepository={}, SecretRetriever={}, " +
-                        "CipherProvider={}", secretRepositoryType, secretRetrieverType, cipherProviderType);
-            }
+            logger.debug("Initializing the secure vault with, SecretRepositoryType={}, SecretRetrieverType={}, " +
+                    "CipherProviderType={}", secretRepositoryType, secretRetrieverType, cipherProviderType);
 
-            BundleContext bundleContext = DataHolder.getInstance().getBundleContext();
+            Optional<BundleContext> optBundleContext = Optional.ofNullable(
+                    DataHolder.getInstance().getBundleContext());
+            BundleContext bundleContext = optBundleContext.orElseThrow(() -> new SecureVaultRuntimeException(
+                    "Unable to initialize secure vault as bundle context is null"));
 
             ServiceReference secretRetrieverSR = SecureVaultUtils.getServiceReference(bundleContext,
                     SecureVaultConstants.SECRET_RETRIEVER_PROPERTY_NAME, SecretRetriever.class.getName(),

@@ -83,7 +83,7 @@ public class FileBasedSecretRepository implements SecretRepository {
             String key = String.valueOf(alias);
             String secret = secretsProperties.getProperty(key);
             char[] decryptedPassword;
-            String[] tokens = secret.split(" ");
+            String[] tokens = secret.split(SecureVaultConstants.SPACE);
             if (SecureVaultConstants.CIPHER_TEXT.equals(tokens[0])) {
                 decryptedPassword = SecureVaultUtils.toChars(cipherProvider
                         .decrypt(SecureVaultUtils.toBytes(tokens[1].trim().toCharArray())));

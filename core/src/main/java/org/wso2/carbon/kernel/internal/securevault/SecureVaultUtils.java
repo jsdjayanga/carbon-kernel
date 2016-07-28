@@ -51,7 +51,8 @@ public class SecureVaultUtils {
             throws SecureVaultException {
         ServiceReference[] serviceReferences;
         try {
-            serviceReferences = bundleContext.getServiceReferences(serviceClassName, null);
+            serviceReferences = bundleContext.getServiceReferences(serviceClassName,
+                    "(" + propertyName + "=" + serviceName + ")");
         } catch (InvalidSyntaxException e) {
             throw new SecureVaultException("Error while retrieving OSGi service reference");
         }
