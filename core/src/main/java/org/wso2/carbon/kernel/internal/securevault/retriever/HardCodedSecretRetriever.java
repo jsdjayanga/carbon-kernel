@@ -59,11 +59,6 @@ public class HardCodedSecretRetriever implements SecretRetriever {
     }
 
     @Override
-    public void init(SecureVaultConfiguration secretRepositoryConfig) throws SecureVaultException {
-        // Nothing to initialize
-    }
-
-    @Override
     public void readSecrets(List<Secret> secrets) throws SecureVaultException {
         logger.debug("Providing hard coded secrets for 'keyStorePassword' and 'privateKeyPassword'");
 

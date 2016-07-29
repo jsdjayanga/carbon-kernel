@@ -71,11 +71,6 @@ public class DefaultSecretRetriever implements SecretRetriever {
     }
 
     @Override
-    public void init(SecureVaultConfiguration secretRepositoryConfig) throws SecureVaultException {
-        // Nothing to initialize in DefaultSecretInitializer
-    }
-
-    @Override
     public void readSecrets(List<Secret> secrets) throws SecureVaultException {
         Path passwordFilePath = Paths.get(Utils.getCarbonHome().toString(), "password");
         if (Files.exists(passwordFilePath)) {

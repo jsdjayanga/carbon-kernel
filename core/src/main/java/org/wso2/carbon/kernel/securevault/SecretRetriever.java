@@ -26,6 +26,6 @@ import java.util.List;
  * Created by jayanga on 7/13/16.
  */
 public interface SecretRetriever {
-    void init(SecureVaultConfiguration secureVaultConfiguration) throws SecureVaultException;
+    default void init(SecureVaultConfiguration secureVaultConfiguration) throws SecureVaultException {}
     void readSecrets(List<Secret> secrets) throws SecureVaultException;
 }

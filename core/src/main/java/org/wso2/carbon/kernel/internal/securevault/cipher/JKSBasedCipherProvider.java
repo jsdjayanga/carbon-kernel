@@ -97,7 +97,6 @@ public class JKSBasedCipherProvider implements CipherProvider {
         KeyStore keyStore = loadKeyStore(keystoreLocation, keyStorePassword.getSecretValue().toCharArray());
 
         encryptionCipher = getEncryptionCipher(keyStore, privateKeyAlias, algorithm);
-
         decryptionCipher = getDecryptionCipher(keyStore, privateKeyAlias, algorithm,
                 privateKeyPassword.getSecretValue().toCharArray());
     }
