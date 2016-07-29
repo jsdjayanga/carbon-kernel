@@ -19,11 +19,14 @@ package org.wso2.carbon.kernel.securevault;
 import org.wso2.carbon.kernel.internal.securevault.config.SecureVaultConfiguration;
 import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
 
+import java.util.List;
+
 /**
  * Created by jayanga on 7/12/16.
  */
 public interface SecretRepository {
-    void init(SecureVaultConfiguration secureVaultConfiguration, CipherProvider cipherProvider)
+    void init(SecureVaultConfiguration secureVaultConfiguration, CipherProvider cipherProvider, List<Secret> secrets)
             throws SecureVaultException;
+    default void loadSecrets(List<Secret> secrets) {}
     char[] getSecret(String alias);
 }

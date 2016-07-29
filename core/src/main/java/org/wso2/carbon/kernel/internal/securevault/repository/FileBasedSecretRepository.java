@@ -26,11 +26,13 @@ import org.wso2.carbon.kernel.internal.securevault.SecureVaultUtils;
 import org.wso2.carbon.kernel.internal.securevault.config.SecureVaultConfiguration;
 import org.wso2.carbon.kernel.internal.utils.Utils;
 import org.wso2.carbon.kernel.securevault.CipherProvider;
+import org.wso2.carbon.kernel.securevault.Secret;
 import org.wso2.carbon.kernel.securevault.SecretRepository;
 import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
 
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -69,7 +71,8 @@ public class FileBasedSecretRepository implements SecretRepository {
     }
 
     @Override
-    public void init(SecureVaultConfiguration secureVaultConfiguration, CipherProvider cipherProvider)
+    public void init(SecureVaultConfiguration secureVaultConfiguration, CipherProvider cipherProvider,
+                     List<Secret> secrets)
             throws SecureVaultException {
         logger.info("Initializing FileBasedSecretRepository");
 

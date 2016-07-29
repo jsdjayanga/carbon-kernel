@@ -26,7 +26,6 @@ import org.wso2.carbon.kernel.internal.securevault.SecureVaultUtils;
 import org.wso2.carbon.kernel.internal.securevault.config.SecureVaultConfiguration;
 import org.wso2.carbon.kernel.securevault.CipherProvider;
 import org.wso2.carbon.kernel.securevault.Secret;
-import org.wso2.carbon.kernel.securevault.SecretRetriever;
 import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
 
 import java.io.BufferedInputStream;
@@ -36,7 +35,6 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -65,7 +63,7 @@ public class JKSBasedCipherProvider implements CipherProvider {
     }
 
     @Override
-    public void init(SecureVaultConfiguration secureVaultConfiguration, SecretRetriever secretRetriever)
+    public void init(SecureVaultConfiguration secureVaultConfiguration, List<Secret> secrets)
             throws SecureVaultException {
         String keystoreLocation = secureVaultConfiguration.getString(
                 SecureVaultConstants.CIPHER_PROVIDER, SecureVaultConstants.KEYSTORE, SecureVaultConstants.LOCATION);
@@ -77,12 +75,6 @@ public class JKSBasedCipherProvider implements CipherProvider {
             algorithm = SecureVaultConstants.RSA;
         }
 
-        List<Secret> secrets = new ArrayList<>();
-        secrets.add(new Secret(SecureVaultConstants.MASTER_PASSWORD));
-        secrets.add(new Secret(SecureVaultConstants.PRIVATE_KEY_PASSWORD));
-
-        secretRetriever.readSecrets(secrets);
-
         Secret masterPassword = SecureVaultUtils.getSecret(secrets, SecureVaultConstants.MASTER_PASSWORD);
         Secret privateKeyPassword = SecureVaultUtils.getSecret(secrets, SecureVaultConstants.PRIVATE_KEY_PASSWORD);
 
@@ -92,6 +84,12 @@ public class JKSBasedCipherProvider implements CipherProvider {
                 privateKeyPassword.getSecretValue().toCharArray(), algorithm);
 
         encryptionHandler = new EncryptionHandler(keyStore, privateKeyAlias, algorithm);
+    }
+
+    @Override
+    public void loadSecrets(List<Secret> secrets) {
+        secrets.add(new Secret(SecureVaultConstants.MASTER_PASSWORD));
+        secrets.add(new Secret(SecureVaultConstants.PRIVATE_KEY_PASSWORD));
     }
 
     @Override

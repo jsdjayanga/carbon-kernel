@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.kernel.internal.DataHolder;
 import org.wso2.carbon.kernel.internal.securevault.config.SecureVaultConfiguration;
 import org.wso2.carbon.kernel.securevault.CipherProvider;
+import org.wso2.carbon.kernel.securevault.Secret;
 import org.wso2.carbon.kernel.securevault.SecretRepository;
 import org.wso2.carbon.kernel.securevault.SecretRetriever;
 import org.wso2.carbon.kernel.securevault.SecureVault;
@@ -169,19 +170,25 @@ public class SecureVaultComponent implements RequiredCapabilityListener {
                     SecureVaultConstants.SECRET_RETRIEVER_PROPERTY_NAME, SecretRetriever.class.getName(),
                     secretRetrieverType);
             activeSecretRetriever = (SecretRetriever) bundleContext.getService(secretRetrieverSR);
-            activeSecretRetriever.init(secureVaultConfiguration);
 
             ServiceReference cipherProviderSR = SecureVaultUtils.getServiceReference(bundleContext,
                     SecureVaultConstants.CIPHER_PROVIDER_PROPERTY_NAME, CipherProvider.class.getName(),
                     cipherProviderType);
             activeCipherProvider = (CipherProvider) bundleContext.getService(cipherProviderSR);
-            activeCipherProvider.init(secureVaultConfiguration, activeSecretRetriever);
 
             ServiceReference secretRepositorySR = SecureVaultUtils.getServiceReference(bundleContext,
                     SecureVaultConstants.SECRET_REPOSITORY_PROPERTY_NAME, SecretRepository.class.getName(),
                     secretRepositoryType);
             activeSecretRepository = (SecretRepository) bundleContext.getService(secretRepositorySR);
-            activeSecretRepository.init(secureVaultConfiguration, activeCipherProvider);
+
+            List<Secret> secrets = new ArrayList<>();
+            activeSecretRetriever.init(secureVaultConfiguration);
+            activeCipherProvider.loadSecrets(secrets);
+            activeSecretRepository.loadSecrets(secrets);
+            activeSecretRetriever.readSecrets(secrets);
+
+            activeCipherProvider.init(secureVaultConfiguration, secrets);
+            activeSecretRepository.init(secureVaultConfiguration, activeCipherProvider, secrets);
 
             secureVaultSReg = bundleContext.registerService(SecureVault.class,
                     new SecureVaultImpl(activeSecretRepository), null);
