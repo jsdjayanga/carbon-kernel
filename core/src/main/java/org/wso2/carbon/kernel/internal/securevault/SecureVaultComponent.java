@@ -195,7 +195,7 @@ public class SecureVaultComponent implements RequiredCapabilityListener {
 
             firstInitializationDone = true;
             initialized = true;
-        } catch (SecureVaultException e) {
+        } catch (SecureVaultException | SecureVaultRuntimeException e) {
             logger.error("Failed to initialize Secure Vault.", e);
         }
     }

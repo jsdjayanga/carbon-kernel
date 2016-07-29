@@ -62,16 +62,12 @@ public class DefaultSecretRetriever implements SecretRetriever {
 
     @Activate
     public void activate() {
-        if (logger.isDebugEnabled()) {
-            logger.debug("Activating {}", this.getClass().getName());
-        }
+            logger.debug("Activating DefaultSecretRetriever");
     }
 
     @Deactivate
     public void deactivate() {
-        if (logger.isDebugEnabled()) {
-            logger.debug("Deactivating {}", this.getClass().getName());
-        }
+            logger.debug("Deactivating DefaultSecretRetriever");
     }
 
     @Override

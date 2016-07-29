@@ -65,12 +65,12 @@ public class JKSBasedCipherProvider implements CipherProvider {
 
     @Activate
     public void activate() {
-        logger.info("Activating {}", this.getClass().getName());
+        logger.debug("Activating JKSBasedCipherProvider");
     }
 
     @Deactivate
     public void deactivate() {
-        logger.info("Deactivating {}", this.getClass().getName());
+        logger.debug("Deactivating JKSBasedCipherProvider");
     }
 
     @Override

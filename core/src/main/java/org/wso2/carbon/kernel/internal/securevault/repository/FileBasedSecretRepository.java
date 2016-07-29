@@ -58,23 +58,19 @@ public class FileBasedSecretRepository implements SecretRepository {
 
     @Activate
     public void activate() {
-        if (logger.isDebugEnabled()) {
-            logger.debug("Activating {}", this.getClass().getName());
-        }
+        logger.debug("Activating FileBasedSecretRepository");
     }
 
     @Deactivate
     public void deactivate() {
-        if (logger.isDebugEnabled()) {
-            logger.debug("Deactivating {}", this.getClass().getName());
-        }
+        logger.debug("Deactivating FileBasedSecretRepository");
     }
 
     @Override
     public void init(SecureVaultConfiguration secureVaultConfiguration, CipherProvider cipherProvider,
                      List<Secret> secrets)
             throws SecureVaultException {
-        logger.info("Initializing FileBasedSecretRepository");
+        logger.debug("Initializing FileBasedSecretRepository");
 
         Properties secretsProperties = getSecretProperties(secureVaultConfiguration);
 
@@ -117,7 +113,7 @@ public class FileBasedSecretRepository implements SecretRepository {
             }
 
             secretsProperties.setProperty(key, SecureVaultConstants.CIPHER_TEXT + " "
-                        + new String(SecureVaultUtils.toChars(encryptedPassword)));
+                    + new String(SecureVaultUtils.toChars(encryptedPassword)));
         }
 
         String secretPropertiesFileLocation = getSecretPropertiesFileLocation(secureVaultConfiguration);

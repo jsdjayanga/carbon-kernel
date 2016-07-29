@@ -35,7 +35,6 @@ import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.Properties;
@@ -59,7 +58,7 @@ public class SecureVaultUtils {
 
         for (ServiceReference serviceReference : serviceReferences) {
             if (serviceName.equals(serviceReference.getProperty(propertyName))) {
-                logger.info("Service provider '{}' found with given property '{}'", serviceName, propertyName);
+                logger.debug("Service provider '{}' found with given property '{}'", serviceName, propertyName);
                 return serviceReference;
             }
         }
@@ -68,21 +67,12 @@ public class SecureVaultUtils {
                 + "' with property '" + propertyName + "'");
     }
 
-    public static List<Secret> createSecrets(List<String> parameters) {
-        List<Secret> secrets = new ArrayList<>();
-        for (String parameter : parameters) {
-            secrets.add(new Secret(parameter));
-        }
-        return secrets;
-    }
-
     public static Secret getSecret(List<Secret> secrets, String secretName) throws SecureVaultException {
-        for (Secret secret : secrets) {
-            if (secret.getSecretName().equals(secretName)) {
-                return secret;
-            }
-        }
-        throw new SecureVaultException("No secret found with given secret name '" + secretName + "'");
+        return secrets.stream()
+                .filter(secret -> secret.getSecretName().equals(secretName))
+                .findFirst()
+                .orElseThrow(() -> new SecureVaultException(
+                        "No secret found with given secret name '" + secretName + "'"));
     }
 
     public static byte[] base64Decode(byte[] base64Encoded) {
