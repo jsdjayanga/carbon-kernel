@@ -88,7 +88,7 @@ public class JKSBasedCipherProvider implements CipherProvider {
                 .orElseThrow(() -> new SecureVaultException("Private key alias is mandatory"));
 
         String algorithm = secureVaultConfiguration.getString(
-                SecureVaultConstants.CIPHER_PROVIDER, SecureVaultConstants.KEYSTORE, SecureVaultConstants.ALGORITHM)
+                SecureVaultConstants.CIPHER_PROVIDER, SecureVaultConstants.ALGORITHM)
                 .orElse(SecureVaultConstants.RSA);
 
         Secret keyStorePassword = SecureVaultUtils.getSecret(secrets, SecureVaultConstants.KEY_STORE_PASSWORD);
