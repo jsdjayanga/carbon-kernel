@@ -45,11 +45,11 @@ import java.util.Properties;
  * @since 5.2.0
  */
 @Component(
-        name = "org.wso2.carbon.kernel.internal.securevault.secret.repository.FileBasedSecretRepository",
+        name = "org.wso2.carbon.kernel.internal.securevault.repository.FileBasedSecretRepository",
         immediate = true,
         property = {
                 "capabilityName=SecretRepository",
-                "secretRepositoryType=file"
+                "secretRepositoryType=org.wso2.carbon.kernel.internal.securevault.repository.FileBasedSecretRepository"
         }
 )
 public class FileBasedSecretRepository implements SecretRepository {

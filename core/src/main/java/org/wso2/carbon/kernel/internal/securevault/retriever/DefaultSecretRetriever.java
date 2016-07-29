@@ -49,11 +49,11 @@ import java.util.Properties;
  * @since 5.2.0
  */
 @Component(
-        name = "org.wso2.carbon.kernel.internal.securevault.secret.provider.DefaultSecretProvider",
+        name = "org.wso2.carbon.kernel.internal.securevault.retriever.DefaultSecretRetriever",
         immediate = true,
         property = {
                 "capabilityName=SecretProvider",
-                "secretRetrieverType=default"
+                "secretRetrieverType=org.wso2.carbon.kernel.internal.securevault.retriever.DefaultSecretRetriever"
         }
 )
 public class DefaultSecretRetriever implements SecretRetriever {

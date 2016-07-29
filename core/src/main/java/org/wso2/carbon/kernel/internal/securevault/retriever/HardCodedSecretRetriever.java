@@ -37,11 +37,11 @@ import java.util.List;
  * @since 5.2.0
  */
 @Component(
-        name = "org.wso2.carbon.kernel.internal.securevault.secret.provider.HardCodedSecretProvider",
+        name = "org.wso2.carbon.kernel.internal.securevault.retriever.HardCodedSecretRetriever",
         immediate = true,
         property = {
                 "capabilityName=SecretProvider",
-                "secretRetrieverType=hardCoded"
+                "secretRetrieverType=org.wso2.carbon.kernel.internal.securevault.retriever.HardCodedSecretRetriever"
         }
 )
 public class HardCodedSecretRetriever implements SecretRetriever {

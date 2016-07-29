@@ -1,9 +1,9 @@
 secretRepository:
-  type: file
+  type: org.wso2.carbon.kernel.internal.securevault.repository.FileBasedSecretRepository
 secretRetriever:
-  type: default
+  type: org.wso2.carbon.kernel.internal.securevault.retriever.HardCodedSecretRetriever
 cipherProvider:
-  type: jks
+  type: org.wso2.carbon.kernel.internal.securevault.cipher.JKSBasedCipherProvider
   keystore:
     alias: wso2carbon
     location: /home/jayanga/WSO2/Development/secure_vault/wso2carbon.jks

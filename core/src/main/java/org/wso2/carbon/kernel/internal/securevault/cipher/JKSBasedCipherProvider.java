@@ -55,7 +55,7 @@ import javax.crypto.NoSuchPaddingException;
         immediate = true,
         property = {
                 "capabilityName=CipherProvider",
-                "cipherProviderType=jks"
+                "cipherProviderType=org.wso2.carbon.kernel.internal.securevault.cipher.JKSBasedCipherProvider"
         }
 )
 public class JKSBasedCipherProvider implements CipherProvider {
