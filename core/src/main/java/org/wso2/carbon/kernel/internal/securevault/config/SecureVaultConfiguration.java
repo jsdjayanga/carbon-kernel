@@ -25,7 +25,6 @@ import org.yaml.snakeyaml.Yaml;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -68,23 +67,11 @@ public class SecureVaultConfiguration {
             }
             logger.debug("Secure vault configurations parsed successfully.");
 
-//            secretRepositoryConfig = (Map<String, Object>) secretRepositoryConfig.get("secretRepository");
-//            if (secretRepositoryConfig == null || secretRepositoryConfig.isEmpty()) {
-//                throw new SecureVaultException("Secret repository configurations not found : " + configFileLocation);
-//            }
             initialized = true;
             logger.debug("Secret repository configurations loaded successfully.");
         } catch (IOException e) {
             throw new SecureVaultException("Failed to read secure vault configuration file : " + configFileLocation, e);
         }
-    }
-
-    public String getString(String key) {
-        Object object = secureVaultConfiguration.get(key);
-        if (object instanceof String) {
-            return (String) object;
-        }
-        return null;
     }
 
     public String getString(String... keys) {
@@ -102,30 +89,5 @@ public class SecureVaultConfiguration {
             }
         }
         return null;
-    }
-
-    public List<String> getList(String... keys) {
-        Map<String, Object> config = secureVaultConfiguration;
-        Object object;
-        for (int i = 0; i < keys.length; i++) {
-            object = config.get(keys[i]);
-            if (object instanceof Map) {
-                config = (Map<String, Object>) object;
-                continue;
-            }
-
-            if (object instanceof List && i == keys.length - 1) {
-                return (List<String>) object;
-            }
-        }
-        return null;
-    }
-
-    public boolean exist(String key) {
-        Object object = secureVaultConfiguration.get(key);
-        if (object != null) {
-            return true;
-        }
-        return false;
     }
 }

@@ -48,7 +48,10 @@ import javax.crypto.CipherOutputStream;
 import javax.crypto.NoSuchPaddingException;
 
 /**
- * Created by jayanga on 7/22/16.
+ * This service component is responsible for providing encryption and decryption capabilities based on the JKS.
+ * And this component registers a CipherProvider as an OSGi service.
+ *
+ * @since 5.2.0
  */
 @Component(
         name = "org.wso2.carbon.kernel.internal.securevault.cipher.JKSBasedCipherProvider",
