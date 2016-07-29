@@ -18,9 +18,7 @@ package org.wso2.carbon.kernel.internal.securevault.tool;
 
 import org.wso2.carbon.kernel.internal.securevault.SecureVaultConstants;
 import org.wso2.carbon.kernel.internal.securevault.SecureVaultUtils;
-import org.wso2.carbon.kernel.internal.securevault.cipher.jks.EncryptionHandler;
-import org.wso2.carbon.kernel.internal.securevault.cipher.jks.KeyStoreProvider;
-import org.wso2.carbon.kernel.internal.securevault.cipher.jks.KeyStoreType;
+import org.wso2.carbon.kernel.internal.securevault.cipher.EncryptionHandler;
 import org.wso2.carbon.kernel.internal.securevault.config.SecureVaultConfiguration;
 import org.wso2.carbon.kernel.internal.securevault.secret.retriever.DefaultSecretRetriever;
 import org.wso2.carbon.kernel.internal.utils.Utils;
@@ -29,7 +27,6 @@ import org.wso2.carbon.kernel.securevault.SecretRetriever;
 import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
 
 import java.nio.file.Paths;
-import java.security.KeyStore;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -80,11 +77,11 @@ public class CipherTool {
             algorithm = SecureVaultConstants.RSA;
         }
 
-        KeyStoreProvider keyStoreProvider = new KeyStoreProvider(KeyStoreType.valueOf(keystoreType),
-                keystoreLocation, SecureVaultUtils.getSecret(secrets,
-                SecureVaultConstants.MASTER_PASSWORD).getSecretValue());
-        KeyStore keyStore = keyStoreProvider.getKeyStore();
-        encryptionHandler = new EncryptionHandler(keyStore, privateKeyAlias, algorithm);
+//        KeyStoreProvider keyStoreProvider = new KeyStoreProvider(KeyStoreType.valueOf(keystoreType),
+//                keystoreLocation, SecureVaultUtils.getSecret(secrets,
+//                SecureVaultConstants.MASTER_PASSWORD).getSecretValue());
+//        KeyStore keyStore = keyStoreProvider.getKeyStore();
+//        encryptionHandler = new EncryptionHandler(keyStore, privateKeyAlias, algorithm);
     }
 
     private void encryptSecretsProperties() throws SecureVaultException {

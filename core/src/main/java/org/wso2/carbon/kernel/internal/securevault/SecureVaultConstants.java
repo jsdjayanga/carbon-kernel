@@ -39,5 +39,6 @@ public class SecureVaultConstants {
     public static final String PLAIN_TEXT = "plainText";
     public static final String ENCRYPT_TEXT = "encryptText";
     public static final String SPACE = " ";
+    public static final String JKS = "JKS";
 
 }

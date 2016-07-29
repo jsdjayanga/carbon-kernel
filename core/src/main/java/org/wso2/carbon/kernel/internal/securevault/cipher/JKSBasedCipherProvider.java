@@ -23,17 +23,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.kernel.internal.securevault.SecureVaultConstants;
 import org.wso2.carbon.kernel.internal.securevault.SecureVaultUtils;
-import org.wso2.carbon.kernel.internal.securevault.cipher.jks.DecryptionHandler;
-import org.wso2.carbon.kernel.internal.securevault.cipher.jks.EncryptionHandler;
-import org.wso2.carbon.kernel.internal.securevault.cipher.jks.KeyStoreProvider;
-import org.wso2.carbon.kernel.internal.securevault.cipher.jks.KeyStoreType;
 import org.wso2.carbon.kernel.internal.securevault.config.SecureVaultConfiguration;
 import org.wso2.carbon.kernel.securevault.CipherProvider;
 import org.wso2.carbon.kernel.securevault.Secret;
 import org.wso2.carbon.kernel.securevault.SecretRetriever;
 import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
 
+import java.io.BufferedInputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -65,8 +67,6 @@ public class JKSBasedCipherProvider implements CipherProvider {
     @Override
     public void init(SecureVaultConfiguration secureVaultConfiguration, SecretRetriever secretRetriever)
             throws SecureVaultException {
-        String keystoreType = secureVaultConfiguration.getString(
-                SecureVaultConstants.CIPHER_PROVIDER, SecureVaultConstants.KEYSTORE, SecureVaultConstants.TYPE);
         String keystoreLocation = secureVaultConfiguration.getString(
                 SecureVaultConstants.CIPHER_PROVIDER, SecureVaultConstants.KEYSTORE, SecureVaultConstants.LOCATION);
         String privateKeyAlias = secureVaultConfiguration.getString(
@@ -86,9 +86,7 @@ public class JKSBasedCipherProvider implements CipherProvider {
         Secret masterPassword = SecureVaultUtils.getSecret(secrets, SecureVaultConstants.MASTER_PASSWORD);
         Secret privateKeyPassword = SecureVaultUtils.getSecret(secrets, SecureVaultConstants.PRIVATE_KEY_PASSWORD);
 
-        KeyStoreProvider keyStoreProvider = new KeyStoreProvider(KeyStoreType.valueOf(keystoreType),
-                keystoreLocation, masterPassword.getSecretValue());
-        KeyStore keyStore = keyStoreProvider.getKeyStore();
+        KeyStore keyStore = loadKeyStore(keystoreLocation, masterPassword.getSecretValue().toCharArray());
 
         decryptionHandler = new DecryptionHandler(keyStore, privateKeyAlias,
                 privateKeyPassword.getSecretValue().toCharArray(), algorithm);
@@ -104,5 +102,24 @@ public class JKSBasedCipherProvider implements CipherProvider {
     @Override
     public byte[] decrypt(byte[] cipherText) throws SecureVaultException {
         return decryptionHandler.decrypt(cipherText);
+    }
+
+    private KeyStore loadKeyStore(String keyStorePath, char[] keyStorePassword) throws SecureVaultException {
+        try (BufferedInputStream bufferedInputStream = new BufferedInputStream(new FileInputStream(keyStorePath))) {
+            KeyStore keyStore;
+            try {
+                keyStore = KeyStore.getInstance(SecureVaultConstants.JKS);
+                keyStore.load(bufferedInputStream, keyStorePassword);
+                return keyStore;
+            } catch (CertificateException e) {
+                throw new SecureVaultException("Failed to load certificates from keystore : '" + keyStorePath + "'", e);
+            } catch (NoSuchAlgorithmException e) {
+                throw new SecureVaultException("Failed to load keystore algorithm at : '" + keyStorePath + "'", e);
+            } catch (KeyStoreException e) {
+                throw new SecureVaultException("Failed to initialize keystore at : '" + keyStorePath + "'", e);
+            }
+        } catch (IOException e) {
+            throw new SecureVaultException("Unable to find keystore at '" + keyStorePath + "'", e);
+        }
     }
 }
