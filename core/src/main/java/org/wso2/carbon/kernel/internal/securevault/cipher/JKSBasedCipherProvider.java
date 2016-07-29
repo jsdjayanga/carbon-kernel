@@ -29,13 +29,23 @@ import org.wso2.carbon.kernel.securevault.Secret;
 import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.security.InvalidKeyException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.util.List;
+import javax.crypto.Cipher;
+import javax.crypto.CipherOutputStream;
+import javax.crypto.NoSuchPaddingException;
 
 /**
  * Created by jayanga on 7/22/16.
@@ -50,8 +60,9 @@ import java.util.List;
 )
 public class JKSBasedCipherProvider implements CipherProvider {
     private static Logger logger = LoggerFactory.getLogger(JKSBasedCipherProvider.class);
-    DecryptionHandler decryptionHandler;
-    EncryptionHandler encryptionHandler;
+    Cipher encryptionCipher;
+    Cipher decryptionCipher;
+
     @Activate
     public void activate() {
         logger.info("Activating {}", this.getClass().getName());
@@ -80,10 +91,10 @@ public class JKSBasedCipherProvider implements CipherProvider {
 
         KeyStore keyStore = loadKeyStore(keystoreLocation, masterPassword.getSecretValue().toCharArray());
 
-        decryptionHandler = new DecryptionHandler(keyStore, privateKeyAlias,
-                privateKeyPassword.getSecretValue().toCharArray(), algorithm);
+        encryptionCipher = getEncryptionCipher(keyStore, privateKeyAlias, algorithm);
 
-        encryptionHandler = new EncryptionHandler(keyStore, privateKeyAlias, algorithm);
+        decryptionCipher = getDecryptionCipher(keyStore, privateKeyAlias, algorithm,
+                privateKeyPassword.getSecretValue().toCharArray());
     }
 
     @Override
@@ -94,12 +105,12 @@ public class JKSBasedCipherProvider implements CipherProvider {
 
     @Override
     public byte[] encrypt(byte[] plainText) throws SecureVaultException {
-        return encryptionHandler.encrypt(plainText);
+        return doEncrypt(plainText);
     }
 
     @Override
     public byte[] decrypt(byte[] cipherText) throws SecureVaultException {
-        return decryptionHandler.decrypt(cipherText);
+        return doDecrypt(cipherText);
     }
 
     private KeyStore loadKeyStore(String keyStorePath, char[] keyStorePassword) throws SecureVaultException {
@@ -118,6 +129,71 @@ public class JKSBasedCipherProvider implements CipherProvider {
             }
         } catch (IOException e) {
             throw new SecureVaultException("Unable to find keystore at '" + keyStorePath + "'", e);
+        }
+    }
+
+    private Cipher getEncryptionCipher(KeyStore keyStore, String alias, String algorithm)
+            throws SecureVaultException {
+        Certificate certificate;
+        try {
+            certificate = keyStore.getCertificate(alias);
+        } catch (KeyStoreException e) {
+            throw new SecureVaultException("Failed to get certificate for alias '" + alias + "'", e);
+        }
+
+        try {
+            Cipher cipher = Cipher.getInstance(algorithm);
+            cipher.init(Cipher.ENCRYPT_MODE, certificate);
+            return cipher;
+        } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException e) {
+            throw new SecureVaultException("Failed to initialize Cipher for mode '" + Cipher.ENCRYPT_MODE + "'", e);
+        }
+    }
+
+    private Cipher getDecryptionCipher(KeyStore keyStore, String alias, String algorithm, char[] privateKeyPassword)
+            throws SecureVaultException {
+        PrivateKey privateKey;
+        try {
+            privateKey = (PrivateKey) keyStore.getKey(alias, privateKeyPassword);
+        } catch (KeyStoreException | NoSuchAlgorithmException | UnrecoverableKeyException e) {
+            throw new SecureVaultException("Failed to get private key for alias '" + alias + "'", e);
+        }
+
+        try {
+            Cipher cipher = Cipher.getInstance(algorithm);
+            cipher.init(Cipher.DECRYPT_MODE, privateKey);
+            return cipher;
+        } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException e) {
+            throw new SecureVaultException("Failed to initialize Cipher for mode '" + Cipher.DECRYPT_MODE + "'", e);
+        }
+    }
+
+    private byte[] doEncrypt(byte[] plainTextPassword) throws SecureVaultException {
+        byte[] encryptedPassword = doCipher(encryptionCipher, plainTextPassword);
+        return SecureVaultUtils.base64Encode(encryptedPassword);
+    }
+
+    private byte[] doDecrypt(byte[] encryptedPassword) throws SecureVaultException {
+        byte[] base64DecodedPassword = SecureVaultUtils.base64Decode(encryptedPassword);
+        return doCipher(decryptionCipher, base64DecodedPassword);
+    }
+
+    private byte[] doCipher(Cipher cipher, byte[] original) throws SecureVaultException {
+        try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+             CipherOutputStream cipherOutputStream = new CipherOutputStream(byteArrayOutputStream, cipher);
+             InputStream inputStream = new ByteArrayInputStream(original)
+        ) {
+            byte[] buffer = new byte[1024];
+            int length;
+
+            while ((length = inputStream.read(buffer)) != -1) {
+                cipherOutputStream.write(buffer, 0, length);
+            }
+            cipherOutputStream.flush();
+            cipherOutputStream.close();
+            return byteArrayOutputStream.toByteArray();
+        } catch (IOException e) {
+            throw new SecureVaultException("Failed to decrypt the password", e);
         }
     }
 }
