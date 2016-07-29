@@ -27,6 +27,8 @@ import java.util.List;
 public interface SecretRepository {
     void init(SecureVaultConfiguration secureVaultConfiguration, CipherProvider cipherProvider, List<Secret> secrets)
             throws SecureVaultException;
+    void secureSecrets(SecureVaultConfiguration secureVaultConfiguration, CipherProvider cipherProvider,
+                       List<Secret> secrets) throws SecureVaultException;
     default void loadSecrets(List<Secret> secrets) {}
     char[] getSecret(String alias);
 }

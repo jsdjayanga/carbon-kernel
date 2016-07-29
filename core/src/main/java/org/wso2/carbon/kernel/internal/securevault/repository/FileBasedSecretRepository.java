@@ -76,11 +76,7 @@ public class FileBasedSecretRepository implements SecretRepository {
             throws SecureVaultException {
         logger.info("Initializing FileBasedSecretRepository");
 
-        String secretPropertiesFileLocation = secureVaultConfiguration.getString(SecureVaultConstants.LOCATION);
-        if (secretPropertiesFileLocation == null || secretPropertiesFileLocation.isEmpty()) {
-            secretPropertiesFileLocation = Utils.getSecretsPropertiesLocation();
-        }
-        Properties secretsProperties = SecureVaultUtils.loadSecretFile(Paths.get(secretPropertiesFileLocation));
+        Properties secretsProperties = getSecretProperties(secureVaultConfiguration);
 
         for (Object alias : secretsProperties.keySet()) {
             String key = String.valueOf(alias);
@@ -100,11 +96,56 @@ public class FileBasedSecretRepository implements SecretRepository {
     }
 
     @Override
+    public void secureSecrets(SecureVaultConfiguration secureVaultConfiguration, CipherProvider cipherProvider,
+                              List<Secret> secrets) throws SecureVaultException {
+        logger.info("Securing FileBasedSecretRepository");
+
+        Properties secretsProperties = getSecretProperties(secureVaultConfiguration);
+
+        for (Object alias : secretsProperties.keySet()) {
+            String key = String.valueOf(alias);
+            String secret = secretsProperties.getProperty(key);
+
+            byte[] encryptedPassword;
+            String[] tokens = secret.split(SecureVaultConstants.SPACE);
+            if (SecureVaultConstants.PLAIN_TEXT.equals(tokens[0])) {
+                encryptedPassword = cipherProvider.encrypt(SecureVaultUtils.toBytes(tokens[1].trim().toCharArray()));
+            } else if (SecureVaultConstants.CIPHER_TEXT.equals(tokens[0])) {
+                encryptedPassword = SecureVaultUtils.toBytes(tokens[1].toCharArray());
+            } else {
+                throw new SecureVaultException("Unknown prefix in secrets file");
+            }
+
+            secretsProperties.setProperty(key, SecureVaultConstants.CIPHER_TEXT + " "
+                        + new String(SecureVaultUtils.toChars(encryptedPassword)));
+        }
+
+        String secretPropertiesFileLocation = getSecretPropertiesFileLocation(secureVaultConfiguration);
+        SecureVaultUtils.updateSecretFile(Paths.get(secretPropertiesFileLocation), secretsProperties);
+    }
+
+    @Override
     public char[] getSecret(String alias) {
         char[] secret = secrets.get(alias);
         if (secret != null && secret.length != 0) {
             return secret;
         }
         return new char[0];
+    }
+
+    private Properties getSecretProperties(SecureVaultConfiguration secureVaultConfiguration)
+            throws SecureVaultException {
+        String secretPropertiesFileLocation = getSecretPropertiesFileLocation(secureVaultConfiguration);
+        Properties secretsProperties = SecureVaultUtils.loadSecretFile(Paths.get(secretPropertiesFileLocation));
+        return secretsProperties;
+    }
+
+    private String getSecretPropertiesFileLocation(SecureVaultConfiguration secureVaultConfiguration) {
+        String secretPropertiesFileLocation = secureVaultConfiguration.getString(
+                SecureVaultConstants.SECRET_REPOSITORY, SecureVaultConstants.LOCATION);
+        if (secretPropertiesFileLocation == null || secretPropertiesFileLocation.isEmpty()) {
+            secretPropertiesFileLocation = Utils.getSecretsPropertiesLocation();
+        }
+        return secretPropertiesFileLocation;
     }
 }
