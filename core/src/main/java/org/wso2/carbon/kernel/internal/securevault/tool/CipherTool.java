@@ -24,6 +24,7 @@ import org.wso2.carbon.kernel.securevault.Secret;
 import org.wso2.carbon.kernel.securevault.SecretRepository;
 import org.wso2.carbon.kernel.securevault.SecretRetriever;
 import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
+import org.wso2.carbon.kernel.securevault.exception.SecureVaultRuntimeException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,15 +53,28 @@ public class CipherTool {
         }
     }
 
+    // TODO: remove this if Carbon Tool is not used
+    public void execute(String[] args) {
+        try {
+            init();
+            processArgs(args);
+        } catch (SecureVaultException e) {
+            logger.log(Level.SEVERE, "CipherTool exits with error", e);
+        }
+    }
+
     private void init() throws SecureVaultException {
         secureVaultConfiguration = SecureVaultConfiguration.getInstance();
 
         String secretRepositoryType = secureVaultConfiguration.getString(SecureVaultConstants.SECRET_REPOSITORY,
-                SecureVaultConstants.TYPE);
+                SecureVaultConstants.TYPE).orElseThrow(() ->
+                new SecureVaultRuntimeException("Secret repository type is mandatory"));
         String secretRetrieverType = secureVaultConfiguration.getString(SecureVaultConstants.SECRET_RETRIEVER,
-                SecureVaultConstants.TYPE);
+                SecureVaultConstants.TYPE).orElseThrow(() ->
+                new SecureVaultRuntimeException("Secret retriever type is mandatory"));
         String cipherProviderType = secureVaultConfiguration.getString(SecureVaultConstants.CIPHER_PROVIDER,
-                SecureVaultConstants.TYPE);
+                SecureVaultConstants.TYPE).orElseThrow(() ->
+                new SecureVaultRuntimeException("Cipher provider type is mandatory"));
 
         try {
             secretRetriever = (SecretRetriever) Class.forName(secretRetrieverType).newInstance();
@@ -83,7 +97,6 @@ public class CipherTool {
     }
 
     private void processArgs(String[] args) throws SecureVaultException {
-
         if (args.length == 0) {
             process();
         } else if ("-help".equals(args[0]) || "--help".equals(args[0])) {

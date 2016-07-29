@@ -137,11 +137,7 @@ public class FileBasedSecretRepository implements SecretRepository {
     }
 
     private String getSecretPropertiesFileLocation(SecureVaultConfiguration secureVaultConfiguration) {
-        String secretPropertiesFileLocation = secureVaultConfiguration.getString(
-                SecureVaultConstants.SECRET_REPOSITORY, SecureVaultConstants.LOCATION);
-        if (secretPropertiesFileLocation == null || secretPropertiesFileLocation.isEmpty()) {
-            secretPropertiesFileLocation = Utils.getSecretsPropertiesLocation();
-        }
-        return secretPropertiesFileLocation;
+        return secureVaultConfiguration.getString(SecureVaultConstants.SECRET_REPOSITORY, SecureVaultConstants.LOCATION)
+                .orElse(Utils.getSecretsPropertiesLocation());
     }
 }
