@@ -32,7 +32,7 @@ import java.util.List;
 
 /**
  * This service component is responsible for providing secrets to initialize the secret repositories. It has
- * hard coded passwords for 'masterPassword' and 'privateKeyPassword'
+ * hard coded passwords for 'keyStorePassword' and 'privateKeyPassword'
  * And this component registers a SecretProvider as an OSGi service.
  *
  * @since 5.2.0
@@ -65,10 +65,10 @@ public class HardCodedSecretRetriever implements SecretRetriever {
 
     @Override
     public void readSecrets(List<Secret> secrets) throws SecureVaultException {
-        logger.debug("Providing hard coded secrets for 'masterPassword' and 'privateKeyPassword'");
+        logger.debug("Providing hard coded secrets for 'keyStorePassword' and 'privateKeyPassword'");
 
-        Secret masterPassword = SecureVaultUtils.getSecret(secrets, SecureVaultConstants.MASTER_PASSWORD);
-        masterPassword.setSecretValue("wso2carbon");
+        Secret keyStorePassword = SecureVaultUtils.getSecret(secrets, SecureVaultConstants.KEY_STORE_PASSWORD);
+        keyStorePassword.setSecretValue("wso2carbon");
 
         Secret privateKeyPassword = SecureVaultUtils.getSecret(secrets, SecureVaultConstants.PRIVATE_KEY_PASSWORD);
         privateKeyPassword.setSecretValue("wso2carbon");

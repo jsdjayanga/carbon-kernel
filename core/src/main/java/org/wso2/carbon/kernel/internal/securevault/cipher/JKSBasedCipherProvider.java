@@ -80,19 +80,21 @@ public class JKSBasedCipherProvider implements CipherProvider {
     public void init(SecureVaultConfiguration secureVaultConfiguration, List<Secret> secrets)
             throws SecureVaultException {
         String keystoreLocation = secureVaultConfiguration.getString(
-                SecureVaultConstants.CIPHER_PROVIDER, SecureVaultConstants.KEYSTORE, SecureVaultConstants.LOCATION);
-        String privateKeyAlias = secureVaultConfiguration.getString(
-                SecureVaultConstants.CIPHER_PROVIDER, SecureVaultConstants.KEYSTORE, SecureVaultConstants.ALIAS);
-        String algorithm = secureVaultConfiguration.getString(
-                SecureVaultConstants.CIPHER_PROVIDER, SecureVaultConstants.KEYSTORE, SecureVaultConstants.ALGORITHM);
-        if (algorithm == null || algorithm.isEmpty()) {
-            algorithm = SecureVaultConstants.RSA;
-        }
+                SecureVaultConstants.CIPHER_PROVIDER, SecureVaultConstants.KEYSTORE, SecureVaultConstants.LOCATION)
+                .orElseThrow(() -> new SecureVaultException("Key store location is mandatory"));
 
-        Secret masterPassword = SecureVaultUtils.getSecret(secrets, SecureVaultConstants.MASTER_PASSWORD);
+        String privateKeyAlias = secureVaultConfiguration.getString(
+                SecureVaultConstants.CIPHER_PROVIDER, SecureVaultConstants.KEYSTORE, SecureVaultConstants.ALIAS)
+                .orElseThrow(() -> new SecureVaultException("Private key alias is mandatory"));
+
+        String algorithm = secureVaultConfiguration.getString(
+                SecureVaultConstants.CIPHER_PROVIDER, SecureVaultConstants.KEYSTORE, SecureVaultConstants.ALGORITHM)
+                .orElse(SecureVaultConstants.RSA);
+
+        Secret keyStorePassword = SecureVaultUtils.getSecret(secrets, SecureVaultConstants.KEY_STORE_PASSWORD);
         Secret privateKeyPassword = SecureVaultUtils.getSecret(secrets, SecureVaultConstants.PRIVATE_KEY_PASSWORD);
 
-        KeyStore keyStore = loadKeyStore(keystoreLocation, masterPassword.getSecretValue().toCharArray());
+        KeyStore keyStore = loadKeyStore(keystoreLocation, keyStorePassword.getSecretValue().toCharArray());
 
         encryptionCipher = getEncryptionCipher(keyStore, privateKeyAlias, algorithm);
 
@@ -102,7 +104,7 @@ public class JKSBasedCipherProvider implements CipherProvider {
 
     @Override
     public void loadSecrets(List<Secret> secrets) {
-        secrets.add(new Secret(SecureVaultConstants.MASTER_PASSWORD));
+        secrets.add(new Secret(SecureVaultConstants.KEY_STORE_PASSWORD));
         secrets.add(new Secret(SecureVaultConstants.PRIVATE_KEY_PASSWORD));
     }
 

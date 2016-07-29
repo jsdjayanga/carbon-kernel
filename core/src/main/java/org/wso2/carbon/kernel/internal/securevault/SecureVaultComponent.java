@@ -152,11 +152,14 @@ public class SecureVaultComponent implements RequiredCapabilityListener {
         try {
             SecureVaultConfiguration secureVaultConfiguration = SecureVaultConfiguration.getInstance();
             String secretRepositoryType = secureVaultConfiguration.getString(SecureVaultConstants.SECRET_REPOSITORY,
-                    SecureVaultConstants.TYPE);
+                    SecureVaultConstants.TYPE).orElseThrow(() ->
+                    new SecureVaultRuntimeException("Secret repository type is mandatory"));
             String secretRetrieverType = secureVaultConfiguration.getString(SecureVaultConstants.SECRET_RETRIEVER,
-                    SecureVaultConstants.TYPE);
+                    SecureVaultConstants.TYPE).orElseThrow(() ->
+                    new SecureVaultRuntimeException("Secret retriever type is mandatory"));
             String cipherProviderType = secureVaultConfiguration.getString(SecureVaultConstants.CIPHER_PROVIDER,
-                    SecureVaultConstants.TYPE);
+                    SecureVaultConstants.TYPE).orElseThrow(() ->
+                    new SecureVaultRuntimeException("Cipher provider type is mandatory"));
 
             logger.debug("Initializing the secure vault with, SecretRepositoryType={}, SecretRetrieverType={}, " +
                     "CipherProviderType={}", secretRepositoryType, secretRetrieverType, cipherProviderType);

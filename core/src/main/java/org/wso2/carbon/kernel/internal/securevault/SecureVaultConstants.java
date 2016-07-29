@@ -26,7 +26,7 @@ public class SecureVaultConstants {
     public static final String SECRET_RETRIEVER_PROPERTY_NAME = "secretRetrieverType";
     public static final String CIPHER_PROVIDER = "cipherProvider";
     public static final String CIPHER_PROVIDER_PROPERTY_NAME = "cipherProviderType";
-    public static final String MASTER_PASSWORD = "masterPassword";
+    public static final String KEY_STORE_PASSWORD = "keyStorePassword";
     public static final String PRIVATE_KEY_PASSWORD = "privateKeyPassword";
 
     public static final String LOCATION = "location";

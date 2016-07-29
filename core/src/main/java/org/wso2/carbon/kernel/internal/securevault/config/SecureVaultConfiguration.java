@@ -26,6 +26,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Created by jayanga on 7/12/16.
@@ -74,7 +75,7 @@ public class SecureVaultConfiguration {
         }
     }
 
-    public String getString(String... keys) {
+    public Optional<String> getString(String... keys) {
         Map<String, Object> config = secureVaultConfiguration;
         Object object;
         for (int i = 0; i < keys.length; i++) {
@@ -85,9 +86,9 @@ public class SecureVaultConfiguration {
             }
 
             if (object instanceof String && i == keys.length - 1) {
-                return (String) object;
+                return Optional.ofNullable((String) object);
             }
         }
-        return null;
+        return Optional.empty();
     }
 }
