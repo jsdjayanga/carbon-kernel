@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.wso2.carbon.kernel.internal.securevault.secret.retriever;
+package org.wso2.carbon.kernel.internal.securevault.retriever;
 
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
