@@ -35,7 +35,6 @@ import org.wso2.carbon.kernel.securevault.SecretRepository;
 import org.wso2.carbon.kernel.securevault.SecretRetriever;
 import org.wso2.carbon.kernel.securevault.SecureVault;
 import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
-import org.wso2.carbon.kernel.securevault.exception.SecureVaultRuntimeException;
 import org.wso2.carbon.kernel.startupresolver.RequiredCapabilityListener;
 
 import java.util.ArrayList;
@@ -153,20 +152,20 @@ public class SecureVaultComponent implements RequiredCapabilityListener {
             SecureVaultConfiguration secureVaultConfiguration = SecureVaultConfiguration.getInstance();
             String secretRepositoryType = secureVaultConfiguration.getString(SecureVaultConstants.SECRET_REPOSITORY,
                     SecureVaultConstants.TYPE).orElseThrow(() ->
-                    new SecureVaultRuntimeException("Secret repository type is mandatory"));
+                    new SecureVaultException("Secret repository type is mandatory"));
             String secretRetrieverType = secureVaultConfiguration.getString(SecureVaultConstants.SECRET_RETRIEVER,
                     SecureVaultConstants.TYPE).orElseThrow(() ->
-                    new SecureVaultRuntimeException("Secret retriever type is mandatory"));
+                    new SecureVaultException("Secret retriever type is mandatory"));
             String cipherProviderType = secureVaultConfiguration.getString(SecureVaultConstants.CIPHER_PROVIDER,
                     SecureVaultConstants.TYPE).orElseThrow(() ->
-                    new SecureVaultRuntimeException("Cipher provider type is mandatory"));
+                    new SecureVaultException("Cipher provider type is mandatory"));
 
             logger.debug("Initializing the secure vault with, SecretRepositoryType={}, SecretRetrieverType={}, " +
                     "CipherProviderType={}", secretRepositoryType, secretRetrieverType, cipherProviderType);
 
             Optional<BundleContext> optBundleContext = Optional.ofNullable(
                     DataHolder.getInstance().getBundleContext());
-            BundleContext bundleContext = optBundleContext.orElseThrow(() -> new SecureVaultRuntimeException(
+            BundleContext bundleContext = optBundleContext.orElseThrow(() -> new SecureVaultException(
                     "Unable to initialize secure vault as bundle context is null"));
 
             activeSecretRetriever = SecureVaultUtils.getServiceReference(bundleContext,
@@ -201,7 +200,7 @@ public class SecureVaultComponent implements RequiredCapabilityListener {
 
             firstInitializationDone = true;
             initialized = true;
-        } catch (SecureVaultException | SecureVaultRuntimeException e) {
+        } catch (SecureVaultException e) {
             logger.error("Failed to initialize Secure Vault.", e);
         }
     }

@@ -24,7 +24,6 @@ import org.wso2.carbon.kernel.securevault.Secret;
 import org.wso2.carbon.kernel.securevault.SecretRepository;
 import org.wso2.carbon.kernel.securevault.SecretRetriever;
 import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
-import org.wso2.carbon.kernel.securevault.exception.SecureVaultRuntimeException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -68,13 +67,13 @@ public class CipherTool {
 
         String secretRepositoryType = secureVaultConfiguration.getString(SecureVaultConstants.SECRET_REPOSITORY,
                 SecureVaultConstants.TYPE).orElseThrow(() ->
-                new SecureVaultRuntimeException("Secret repository type is mandatory"));
+                new SecureVaultException("Secret repository type is mandatory"));
         String secretRetrieverType = secureVaultConfiguration.getString(SecureVaultConstants.SECRET_RETRIEVER,
                 SecureVaultConstants.TYPE).orElseThrow(() ->
-                new SecureVaultRuntimeException("Secret retriever type is mandatory"));
+                new SecureVaultException("Secret retriever type is mandatory"));
         String cipherProviderType = secureVaultConfiguration.getString(SecureVaultConstants.CIPHER_PROVIDER,
                 SecureVaultConstants.TYPE).orElseThrow(() ->
-                new SecureVaultRuntimeException("Cipher provider type is mandatory"));
+                new SecureVaultException("Cipher provider type is mandatory"));
 
         try {
             secretRetriever = (SecretRetriever) Class.forName(secretRetrieverType).newInstance();
