@@ -17,7 +17,7 @@
 package org.wso2.carbon.kernel.internal.securevault;
 
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceException;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -169,20 +169,23 @@ public class SecureVaultComponent implements RequiredCapabilityListener {
             BundleContext bundleContext = optBundleContext.orElseThrow(() -> new SecureVaultRuntimeException(
                     "Unable to initialize secure vault as bundle context is null"));
 
-            ServiceReference secretRetrieverSR = SecureVaultUtils.getServiceReference(bundleContext,
+            activeSecretRetriever = SecureVaultUtils.getServiceReference(bundleContext,
                     SecureVaultConstants.SECRET_RETRIEVER_PROPERTY_NAME, SecretRetriever.class.getName(),
-                    secretRetrieverType);
-            activeSecretRetriever = (SecretRetriever) bundleContext.getService(secretRetrieverSR);
+                    secretRetrieverType)
+                    .map(serviceReference -> (SecretRetriever) bundleContext.getService(serviceReference))
+                    .orElseThrow(() -> new ServiceException("Filed to get SecretRetriever OSGi service"));
 
-            ServiceReference cipherProviderSR = SecureVaultUtils.getServiceReference(bundleContext,
+            activeCipherProvider = SecureVaultUtils.getServiceReference(bundleContext,
                     SecureVaultConstants.CIPHER_PROVIDER_PROPERTY_NAME, CipherProvider.class.getName(),
-                    cipherProviderType);
-            activeCipherProvider = (CipherProvider) bundleContext.getService(cipherProviderSR);
+                    cipherProviderType)
+                    .map(serviceReference -> (CipherProvider) bundleContext.getService(serviceReference))
+                    .orElseThrow(() -> new ServiceException("Filed to get CipherProvider OSGi service"));
 
-            ServiceReference secretRepositorySR = SecureVaultUtils.getServiceReference(bundleContext,
+            activeSecretRepository = SecureVaultUtils.getServiceReference(bundleContext,
                     SecureVaultConstants.SECRET_REPOSITORY_PROPERTY_NAME, SecretRepository.class.getName(),
-                    secretRepositoryType);
-            activeSecretRepository = (SecretRepository) bundleContext.getService(secretRepositorySR);
+                    secretRepositoryType)
+                    .map(serviceReference -> (SecretRepository) bundleContext.getService(serviceReference))
+                    .orElseThrow(() -> new ServiceException("Filed to get SecretRepository OSGi service"));
 
             List<Secret> secrets = new ArrayList<>();
             activeSecretRetriever.init(secureVaultConfiguration);

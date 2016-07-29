@@ -35,8 +35,10 @@ import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
+import java.util.Optional;
 import java.util.Properties;
 
 /**
@@ -45,26 +47,17 @@ import java.util.Properties;
 public class SecureVaultUtils {
     private static final Logger logger = LoggerFactory.getLogger(SecureVaultUtils.class);
 
-    public static ServiceReference getServiceReference(BundleContext bundleContext, String propertyName,
-                                                       String serviceClassName, String serviceName)
+    public static Optional<ServiceReference<?>> getServiceReference(BundleContext bundleContext, String propertyName,
+                                                                     String serviceClassName, String serviceName)
             throws SecureVaultException {
-        ServiceReference[] serviceReferences;
         try {
-            serviceReferences = bundleContext.getServiceReferences(serviceClassName,
-                    "(" + propertyName + "=" + serviceName + ")");
+            return Arrays.stream(Optional.ofNullable(bundleContext.getServiceReferences(serviceClassName,
+                    "(" + propertyName + "=" + serviceName + ")")).orElse(new ServiceReference[0]))
+                    .filter(serviceReference -> serviceName.equals(serviceReference.getProperty(propertyName)))
+                    .findFirst();
         } catch (InvalidSyntaxException e) {
             throw new SecureVaultException("Error while retrieving OSGi service reference");
         }
-
-        for (ServiceReference serviceReference : serviceReferences) {
-            if (serviceName.equals(serviceReference.getProperty(propertyName))) {
-                logger.debug("Service provider '{}' found with given property '{}'", serviceName, propertyName);
-                return serviceReference;
-            }
-        }
-
-        throw new SecureVaultException("Unable to find an implementation for '" + serviceName
-                + "' with property '" + propertyName + "'");
     }
 
     public static Secret getSecret(List<Secret> secrets, String secretName) throws SecureVaultException {
