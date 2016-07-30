@@ -48,7 +48,6 @@ import java.util.Properties;
         name = "org.wso2.carbon.kernel.securevault.repository.FileBasedSecretRepository",
         immediate = true,
         property = {
-                "capabilityName=SecretRepository",
                 "secretRepositoryType=org.wso2.carbon.kernel.securevault.repository.FileBasedSecretRepository"
         }
 )
