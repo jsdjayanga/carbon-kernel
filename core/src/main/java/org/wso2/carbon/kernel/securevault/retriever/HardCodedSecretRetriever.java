@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package org.wso2.carbon.kernel.internal.securevault.retriever;
+package org.wso2.carbon.kernel.securevault.retriever;
 
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.kernel.internal.securevault.SecureVaultConstants;
-import org.wso2.carbon.kernel.internal.securevault.SecureVaultUtils;
 import org.wso2.carbon.kernel.securevault.Secret;
 import org.wso2.carbon.kernel.securevault.SecretRetriever;
+import org.wso2.carbon.kernel.securevault.SecureVaultConstants;
+import org.wso2.carbon.kernel.securevault.SecureVaultUtils;
 import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
 
 import java.util.List;
@@ -37,11 +37,11 @@ import java.util.List;
  * @since 5.2.0
  */
 @Component(
-        name = "org.wso2.carbon.kernel.internal.securevault.retriever.HardCodedSecretRetriever",
+        name = "org.wso2.carbon.kernel.securevault.retriever.HardCodedSecretRetriever",
         immediate = true,
         property = {
                 "capabilityName=SecretProvider",
-                "secretRetrieverType=org.wso2.carbon.kernel.internal.securevault.retriever.HardCodedSecretRetriever"
+                "secretRetrieverType=org.wso2.carbon.kernel.securevault.retriever.HardCodedSecretRetriever"
         }
 )
 public class HardCodedSecretRetriever implements SecretRetriever {

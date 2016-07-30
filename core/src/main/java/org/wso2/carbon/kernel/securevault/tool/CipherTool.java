@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package org.wso2.carbon.kernel.internal.securevault.tool;
+package org.wso2.carbon.kernel.securevault.tool;
 
-import org.wso2.carbon.kernel.internal.securevault.SecureVaultConstants;
-import org.wso2.carbon.kernel.internal.securevault.SecureVaultUtils;
-import org.wso2.carbon.kernel.internal.securevault.config.SecureVaultConfiguration;
 import org.wso2.carbon.kernel.securevault.CipherProvider;
 import org.wso2.carbon.kernel.securevault.Secret;
 import org.wso2.carbon.kernel.securevault.SecretRepository;
 import org.wso2.carbon.kernel.securevault.SecretRetriever;
+import org.wso2.carbon.kernel.securevault.SecureVaultConstants;
+import org.wso2.carbon.kernel.securevault.SecureVaultUtils;
+import org.wso2.carbon.kernel.securevault.config.SecureVaultConfiguration;
 import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
 
 import java.util.ArrayList;

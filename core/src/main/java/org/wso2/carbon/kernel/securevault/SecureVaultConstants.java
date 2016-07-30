@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.wso2.carbon.kernel.internal.securevault;
+package org.wso2.carbon.kernel.securevault;
 
 /**
  * Created by jayanga on 7/13/16.

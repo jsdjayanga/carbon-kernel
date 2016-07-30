@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-package org.wso2.carbon.kernel.internal.securevault.repository;
+package org.wso2.carbon.kernel.securevault.repository;
 
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.kernel.internal.securevault.SecureVaultConstants;
-import org.wso2.carbon.kernel.internal.securevault.SecureVaultUtils;
-import org.wso2.carbon.kernel.internal.securevault.config.SecureVaultConfiguration;
 import org.wso2.carbon.kernel.internal.utils.Utils;
 import org.wso2.carbon.kernel.securevault.CipherProvider;
 import org.wso2.carbon.kernel.securevault.Secret;
 import org.wso2.carbon.kernel.securevault.SecretRepository;
+import org.wso2.carbon.kernel.securevault.SecureVaultConstants;
+import org.wso2.carbon.kernel.securevault.SecureVaultUtils;
+import org.wso2.carbon.kernel.securevault.config.SecureVaultConfiguration;
 import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
 
 import java.nio.file.Paths;
@@ -45,11 +45,11 @@ import java.util.Properties;
  * @since 5.2.0
  */
 @Component(
-        name = "org.wso2.carbon.kernel.internal.securevault.repository.FileBasedSecretRepository",
+        name = "org.wso2.carbon.kernel.securevault.repository.FileBasedSecretRepository",
         immediate = true,
         property = {
                 "capabilityName=SecretRepository",
-                "secretRepositoryType=org.wso2.carbon.kernel.internal.securevault.repository.FileBasedSecretRepository"
+                "secretRepositoryType=org.wso2.carbon.kernel.securevault.repository.FileBasedSecretRepository"
         }
 )
 public class FileBasedSecretRepository implements SecretRepository {

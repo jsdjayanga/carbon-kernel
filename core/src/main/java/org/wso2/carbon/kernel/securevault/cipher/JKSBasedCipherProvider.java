@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-package org.wso2.carbon.kernel.internal.securevault.cipher;
+package org.wso2.carbon.kernel.securevault.cipher;
 
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.kernel.internal.securevault.SecureVaultConstants;
-import org.wso2.carbon.kernel.internal.securevault.SecureVaultUtils;
-import org.wso2.carbon.kernel.internal.securevault.config.SecureVaultConfiguration;
 import org.wso2.carbon.kernel.securevault.CipherProvider;
 import org.wso2.carbon.kernel.securevault.Secret;
+import org.wso2.carbon.kernel.securevault.SecureVaultConstants;
+import org.wso2.carbon.kernel.securevault.SecureVaultUtils;
+import org.wso2.carbon.kernel.securevault.config.SecureVaultConfiguration;
 import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
 
 import java.io.BufferedInputStream;
@@ -54,17 +54,17 @@ import javax.crypto.NoSuchPaddingException;
  * @since 5.2.0
  */
 @Component(
-        name = "org.wso2.carbon.kernel.internal.securevault.cipher.JKSBasedCipherProvider",
+        name = "org.wso2.carbon.kernel.securevault.cipher.JKSBasedCipherProvider",
         immediate = true,
         property = {
                 "capabilityName=CipherProvider",
-                "cipherProviderType=org.wso2.carbon.kernel.internal.securevault.cipher.JKSBasedCipherProvider"
+                "cipherProviderType=org.wso2.carbon.kernel.securevault.cipher.JKSBasedCipherProvider"
         }
 )
 public class JKSBasedCipherProvider implements CipherProvider {
     private static Logger logger = LoggerFactory.getLogger(JKSBasedCipherProvider.class);
-    Cipher encryptionCipher;
-    Cipher decryptionCipher;
+    private Cipher encryptionCipher;
+    private Cipher decryptionCipher;
 
     @Activate
     public void activate() {

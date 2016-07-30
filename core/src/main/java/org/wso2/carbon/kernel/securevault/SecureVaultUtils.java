@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-package org.wso2.carbon.kernel.internal.securevault;
+package org.wso2.carbon.kernel.securevault;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.kernel.securevault.Secret;
 import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
 
 import java.io.ByteArrayOutputStream;

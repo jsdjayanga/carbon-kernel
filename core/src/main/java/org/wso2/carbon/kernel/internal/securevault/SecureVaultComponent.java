@@ -28,12 +28,14 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.kernel.internal.DataHolder;
-import org.wso2.carbon.kernel.internal.securevault.config.SecureVaultConfiguration;
 import org.wso2.carbon.kernel.securevault.CipherProvider;
 import org.wso2.carbon.kernel.securevault.Secret;
 import org.wso2.carbon.kernel.securevault.SecretRepository;
 import org.wso2.carbon.kernel.securevault.SecretRetriever;
 import org.wso2.carbon.kernel.securevault.SecureVault;
+import org.wso2.carbon.kernel.securevault.SecureVaultConstants;
+import org.wso2.carbon.kernel.securevault.SecureVaultUtils;
+import org.wso2.carbon.kernel.securevault.config.SecureVaultConfiguration;
 import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
 import org.wso2.carbon.kernel.startupresolver.RequiredCapabilityListener;
 
@@ -208,10 +210,9 @@ public class SecureVaultComponent implements RequiredCapabilityListener {
     private void unInitializeSecureVault() {
         initialized = false;
 
-        BundleContext bundleContext = DataHolder.getInstance().getBundleContext();
-        bundleContext.ungetService(secureVaultSReg.getReference());
-
+        secureVaultSReg.unregister();
         secureVaultSReg = null;
+
         activeSecretRepository = null;
         activeSecretRetriever = null;
         activeCipherProvider = null;

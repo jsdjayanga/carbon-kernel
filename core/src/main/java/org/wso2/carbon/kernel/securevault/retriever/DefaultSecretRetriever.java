@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.wso2.carbon.kernel.internal.securevault.retriever;
+package org.wso2.carbon.kernel.securevault.retriever;
 
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -48,11 +48,11 @@ import java.util.Properties;
  * @since 5.2.0
  */
 @Component(
-        name = "org.wso2.carbon.kernel.internal.securevault.retriever.DefaultSecretRetriever",
+        name = "org.wso2.carbon.kernel.securevault.retriever.DefaultSecretRetriever",
         immediate = true,
         property = {
                 "capabilityName=SecretProvider",
-                "secretRetrieverType=org.wso2.carbon.kernel.internal.securevault.retriever.DefaultSecretRetriever"
+                "secretRetrieverType=org.wso2.carbon.kernel.securevault.retriever.DefaultSecretRetriever"
         }
 )
 public class DefaultSecretRetriever implements SecretRetriever {
