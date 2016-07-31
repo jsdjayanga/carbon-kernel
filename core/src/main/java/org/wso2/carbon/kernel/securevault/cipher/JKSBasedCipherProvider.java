@@ -101,7 +101,7 @@ public class JKSBasedCipherProvider implements CipherProvider {
     }
 
     @Override
-    public void loadSecrets(List<Secret> secrets) {
+    public void getInitializationSecrets(List<Secret> secrets) {
         secrets.add(new Secret(SecureVaultConstants.KEY_STORE_PASSWORD));
         secrets.add(new Secret(SecureVaultConstants.PRIVATE_KEY_PASSWORD));
     }

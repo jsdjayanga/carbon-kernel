@@ -27,7 +27,7 @@ import java.util.List;
 public interface CipherProvider {
     void init(SecureVaultConfiguration secureVaultConfiguration, List<Secret> secrets)
             throws SecureVaultException;
-    default void loadSecrets(List<Secret> secrets) {}
+    default void getInitializationSecrets(List<Secret> secrets) {}
     byte[] encrypt(byte[] plainText) throws SecureVaultException;
     byte[] decrypt(byte[] cipherText) throws SecureVaultException;
 }

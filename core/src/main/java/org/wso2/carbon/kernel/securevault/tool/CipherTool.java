@@ -84,11 +84,12 @@ public class CipherTool {
         }
 
         secretRetriever.init(secureVaultConfiguration);
-        cipherProvider.loadSecrets(secrets);
-        secretRepository.loadSecrets(secrets);
+        cipherProvider.getInitializationSecrets(secrets);
+        secretRepository.getInitializationSecrets(secrets);
         secretRetriever.readSecrets(secrets);
 
         cipherProvider.init(secureVaultConfiguration, secrets);
+        secretRepository.init(secureVaultConfiguration, cipherProvider, secrets);
     }
 
     private void process() throws SecureVaultException  {

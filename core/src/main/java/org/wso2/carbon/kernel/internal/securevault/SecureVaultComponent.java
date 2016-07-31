@@ -190,12 +190,13 @@ public class SecureVaultComponent implements RequiredCapabilityListener {
 
             List<Secret> secrets = new ArrayList<>();
             activeSecretRetriever.init(secureVaultConfiguration);
-            activeCipherProvider.loadSecrets(secrets);
-            activeSecretRepository.loadSecrets(secrets);
+            activeCipherProvider.getInitializationSecrets(secrets);
+            activeSecretRepository.getInitializationSecrets(secrets);
             activeSecretRetriever.readSecrets(secrets);
 
             activeCipherProvider.init(secureVaultConfiguration, secrets);
             activeSecretRepository.init(secureVaultConfiguration, activeCipherProvider, secrets);
+            activeSecretRepository.loadSecrets(secureVaultConfiguration, activeCipherProvider, secrets);
 
             secureVaultSReg = bundleContext.registerService(SecureVault.class,
                     new SecureVaultImpl(activeSecretRepository), null);

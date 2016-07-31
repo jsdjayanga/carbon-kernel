@@ -21,6 +21,8 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.kernel.internal.utils.Utils;
+import org.wso2.carbon.kernel.securevault.config.SecureVaultConfiguration;
 import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
 
 import java.io.ByteArrayOutputStream;
@@ -34,6 +36,7 @@ import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
@@ -118,5 +121,17 @@ public class SecureVaultUtils {
             throw new SecureVaultException("Cannot access secrets file in given location. (location: "
                     + secretsFilePath + ")", e);
         }
+    }
+
+    public static Properties getSecretProperties(SecureVaultConfiguration secureVaultConfiguration)
+            throws SecureVaultException {
+        String secretPropertiesFileLocation = getSecretPropertiesFileLocation(secureVaultConfiguration);
+        Properties secretsProperties = SecureVaultUtils.loadSecretFile(Paths.get(secretPropertiesFileLocation));
+        return secretsProperties;
+    }
+
+    public static String getSecretPropertiesFileLocation(SecureVaultConfiguration secureVaultConfiguration) {
+        return secureVaultConfiguration.getString(SecureVaultConstants.SECRET_REPOSITORY, SecureVaultConstants.LOCATION)
+                .orElse(Utils.getSecretsPropertiesLocation());
     }
 }

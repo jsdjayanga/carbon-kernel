@@ -21,7 +21,6 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.kernel.internal.utils.Utils;
 import org.wso2.carbon.kernel.securevault.CipherProvider;
 import org.wso2.carbon.kernel.securevault.Secret;
 import org.wso2.carbon.kernel.securevault.SecretRepository;
@@ -70,8 +69,14 @@ public class FileBasedSecretRepository implements SecretRepository {
                      List<Secret> secrets)
             throws SecureVaultException {
         logger.debug("Initializing FileBasedSecretRepository");
+    }
 
-        Properties secretsProperties = getSecretProperties(secureVaultConfiguration);
+    @Override
+    public void loadSecrets(SecureVaultConfiguration secureVaultConfiguration, CipherProvider cipherProvider,
+                            List<Secret> secrets) throws SecureVaultException {
+        logger.debug("Loading secrets to FileBasedSecretRepository");
+
+        Properties secretsProperties = SecureVaultUtils.getSecretProperties(secureVaultConfiguration);
 
         for (Object alias : secretsProperties.keySet()) {
             String key = String.valueOf(alias);
@@ -95,7 +100,7 @@ public class FileBasedSecretRepository implements SecretRepository {
                               List<Secret> secrets) throws SecureVaultException {
         logger.info("Securing FileBasedSecretRepository");
 
-        Properties secretsProperties = getSecretProperties(secureVaultConfiguration);
+        Properties secretsProperties = SecureVaultUtils.getSecretProperties(secureVaultConfiguration);
 
         for (Object alias : secretsProperties.keySet()) {
             String key = String.valueOf(alias);
@@ -105,17 +110,15 @@ public class FileBasedSecretRepository implements SecretRepository {
             String[] tokens = secret.split(SecureVaultConstants.SPACE);
             if (SecureVaultConstants.PLAIN_TEXT.equals(tokens[0])) {
                 encryptedPassword = cipherProvider.encrypt(SecureVaultUtils.toBytes(tokens[1].trim().toCharArray()));
-            } else if (SecureVaultConstants.CIPHER_TEXT.equals(tokens[0])) {
-                encryptedPassword = SecureVaultUtils.toBytes(tokens[1].toCharArray());
-            } else {
-                throw new SecureVaultException("Unknown prefix in secrets file");
+
+                secretsProperties.setProperty(key, SecureVaultConstants.CIPHER_TEXT + " "
+                        + new String(SecureVaultUtils.toChars(encryptedPassword)));
             }
 
-            secretsProperties.setProperty(key, SecureVaultConstants.CIPHER_TEXT + " "
-                    + new String(SecureVaultUtils.toChars(encryptedPassword)));
         }
 
-        String secretPropertiesFileLocation = getSecretPropertiesFileLocation(secureVaultConfiguration);
+        String secretPropertiesFileLocation = SecureVaultUtils
+                .getSecretPropertiesFileLocation(secureVaultConfiguration);
         SecureVaultUtils.updateSecretFile(Paths.get(secretPropertiesFileLocation), secretsProperties);
     }
 
@@ -126,17 +129,5 @@ public class FileBasedSecretRepository implements SecretRepository {
             return secret;
         }
         return new char[0];
-    }
-
-    private Properties getSecretProperties(SecureVaultConfiguration secureVaultConfiguration)
-            throws SecureVaultException {
-        String secretPropertiesFileLocation = getSecretPropertiesFileLocation(secureVaultConfiguration);
-        Properties secretsProperties = SecureVaultUtils.loadSecretFile(Paths.get(secretPropertiesFileLocation));
-        return secretsProperties;
-    }
-
-    private String getSecretPropertiesFileLocation(SecureVaultConfiguration secureVaultConfiguration) {
-        return secureVaultConfiguration.getString(SecureVaultConstants.SECRET_REPOSITORY, SecureVaultConstants.LOCATION)
-                .orElse(Utils.getSecretsPropertiesLocation());
     }
 }
