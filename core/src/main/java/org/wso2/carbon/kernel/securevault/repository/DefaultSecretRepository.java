@@ -24,16 +24,13 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.kernel.securevault.CipherProvider;
 import org.wso2.carbon.kernel.securevault.Secret;
 import org.wso2.carbon.kernel.securevault.SecretRepository;
-import org.wso2.carbon.kernel.securevault.SecureVaultConstants;
 import org.wso2.carbon.kernel.securevault.SecureVaultUtils;
 import org.wso2.carbon.kernel.securevault.config.SecureVaultConfiguration;
 import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
 
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 /**
  * This service component is responsible for exposing the secrets given in the secrets.properties file. By default
@@ -50,7 +47,7 @@ import java.util.Properties;
                 "secretRepositoryType=org.wso2.carbon.kernel.securevault.repository.DefaultSecretRepository"
         }
 )
-public class DefaultSecretRepository implements SecretRepository {
+public class DefaultSecretRepository extends FileBasedRepository implements SecretRepository {
     private static Logger logger = LoggerFactory.getLogger(DefaultSecretRepository.class);
     private final Map<String, char[]> secrets = new HashMap<>();
 
@@ -73,52 +70,16 @@ public class DefaultSecretRepository implements SecretRepository {
 
     @Override
     public void loadSecrets(SecureVaultConfiguration secureVaultConfiguration, CipherProvider cipherProvider,
-                            List<Secret> secrets) throws SecureVaultException {
+                            List<Secret> initializationSecrets) throws SecureVaultException {
         logger.debug("Loading secrets to FileBasedSecretRepository");
-
-        Properties secretsProperties = SecureVaultUtils.getSecretProperties(secureVaultConfiguration);
-
-        for (Object alias : secretsProperties.keySet()) {
-            String key = String.valueOf(alias);
-            String secret = secretsProperties.getProperty(key);
-            char[] decryptedPassword;
-            String[] tokens = secret.split(SecureVaultConstants.SPACE);
-            if (SecureVaultConstants.CIPHER_TEXT.equals(tokens[0])) {
-                decryptedPassword = SecureVaultUtils.toChars(cipherProvider
-                        .decrypt(SecureVaultUtils.toBytes(tokens[1].trim().toCharArray())));
-            } else if (SecureVaultConstants.PLAIN_TEXT.equals(tokens[0])) {
-                decryptedPassword = tokens[1].toCharArray();
-            } else {
-                throw new SecureVaultException("Unknown prefix in secrets file");
-            }
-            this.secrets.put(key, decryptedPassword);
-        }
+        super.loadDecryptedSecrets(secureVaultConfiguration, cipherProvider, secrets);
     }
 
     @Override
-    public void secureSecrets(SecureVaultConfiguration secureVaultConfiguration, CipherProvider cipherProvider,
-                              List<Secret> secrets) throws SecureVaultException {
-        logger.info("Securing FileBasedSecretRepository");
-
-        Properties secretsProperties = SecureVaultUtils.getSecretProperties(secureVaultConfiguration);
-
-        for (Object alias : secretsProperties.keySet()) {
-            String key = String.valueOf(alias);
-            String secret = secretsProperties.getProperty(key);
-
-            byte[] encryptedPassword;
-            String[] tokens = secret.split(SecureVaultConstants.SPACE);
-            if (SecureVaultConstants.PLAIN_TEXT.equals(tokens[0])) {
-                encryptedPassword = cipherProvider.encrypt(SecureVaultUtils.toBytes(tokens[1].trim().toCharArray()));
-
-                secretsProperties.setProperty(key, SecureVaultConstants.CIPHER_TEXT + " "
-                        + new String(SecureVaultUtils.toChars(encryptedPassword)));
-            }
-        }
-
-        String secretPropertiesFileLocation = SecureVaultUtils
-                .getSecretPropertiesFileLocation(secureVaultConfiguration);
-        SecureVaultUtils.updateSecretFile(Paths.get(secretPropertiesFileLocation), secretsProperties);
+    public void persistSecrets(SecureVaultConfiguration secureVaultConfiguration, CipherProvider cipherProvider,
+                               List<Secret> initializationSecrets) throws SecureVaultException {
+        logger.debug("Securing FileBasedSecretRepository");
+        super.persistEncryptedSecrets(secureVaultConfiguration, cipherProvider);
     }
 
     @Override
@@ -128,5 +89,17 @@ public class DefaultSecretRepository implements SecretRepository {
             return secret;
         }
         return new char[0];
+    }
+
+    @Override
+    protected char[] decryptSecret(String key, char[] cipherText, CipherProvider cipherProvider)
+            throws SecureVaultException {
+        return SecureVaultUtils.toChars(cipherProvider.decrypt(SecureVaultUtils.toBytes(cipherText)));
+    }
+
+    @Override
+    protected byte[] encryptSecret(String key, char[] plainText, CipherProvider cipherProvider)
+            throws SecureVaultException {
+        return cipherProvider.encrypt(SecureVaultUtils.toBytes(plainText));
     }
 }
