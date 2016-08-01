@@ -76,7 +76,7 @@ public class JKSBasedCipherProvider implements CipherProvider {
     }
 
     @Override
-    public void init(SecureVaultConfiguration secureVaultConfiguration, List<Secret> secrets)
+    public void init(SecureVaultConfiguration secureVaultConfiguration, List<Secret> initializationSecrets)
             throws SecureVaultException {
         String keystoreLocation = secureVaultConfiguration.getString(
                 SecureVaultConstants.CIPHER_PROVIDER, SecureVaultConstants.KEYSTORE, SecureVaultConstants.LOCATION)
@@ -90,8 +90,10 @@ public class JKSBasedCipherProvider implements CipherProvider {
                 SecureVaultConstants.CIPHER_PROVIDER, SecureVaultConstants.ALGORITHM)
                 .orElse(SecureVaultConstants.RSA);
 
-        Secret keyStorePassword = SecureVaultUtils.getSecret(secrets, SecureVaultConstants.KEY_STORE_PASSWORD);
-        Secret privateKeyPassword = SecureVaultUtils.getSecret(secrets, SecureVaultConstants.PRIVATE_KEY_PASSWORD);
+        Secret keyStorePassword = SecureVaultUtils.getSecret(initializationSecrets,
+                SecureVaultConstants.KEY_STORE_PASSWORD);
+        Secret privateKeyPassword = SecureVaultUtils.getSecret(initializationSecrets,
+                SecureVaultConstants.PRIVATE_KEY_PASSWORD);
 
         KeyStore keyStore = loadKeyStore(keystoreLocation, keyStorePassword.getSecretValue().toCharArray());
 

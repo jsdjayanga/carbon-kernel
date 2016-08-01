@@ -188,15 +188,15 @@ public class SecureVaultComponent implements RequiredCapabilityListener {
                     .map(serviceReference -> (SecretRepository) bundleContext.getService(serviceReference))
                     .orElseThrow(() -> new ServiceException("Filed to get SecretRepository OSGi service"));
 
-            List<Secret> secrets = new ArrayList<>();
+            List<Secret> initializationSecrets = new ArrayList<>();
             activeSecretRetriever.init(secureVaultConfiguration);
-            activeCipherProvider.getInitializationSecrets(secrets);
-            activeSecretRepository.getInitializationSecrets(secrets);
-            activeSecretRetriever.readSecrets(secrets);
+            activeCipherProvider.getInitializationSecrets(initializationSecrets);
+            activeSecretRepository.getInitializationSecrets(initializationSecrets);
+            activeSecretRetriever.readSecrets(initializationSecrets);
 
-            activeCipherProvider.init(secureVaultConfiguration, secrets);
-            activeSecretRepository.init(secureVaultConfiguration, activeCipherProvider, secrets);
-            activeSecretRepository.loadSecrets(secureVaultConfiguration, activeCipherProvider, secrets);
+            activeCipherProvider.init(secureVaultConfiguration, initializationSecrets);
+            activeSecretRepository.init(secureVaultConfiguration, activeCipherProvider, initializationSecrets);
+            activeSecretRepository.loadSecrets(secureVaultConfiguration, activeCipherProvider, initializationSecrets);
 
             secureVaultSReg = bundleContext.registerService(SecureVault.class,
                     new SecureVaultImpl(activeSecretRepository), null);
