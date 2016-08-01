@@ -28,9 +28,9 @@ public interface SecretRepository {
     void init(SecureVaultConfiguration secureVaultConfiguration, CipherProvider cipherProvider, List<Secret> secrets)
             throws SecureVaultException;
     void loadSecrets(SecureVaultConfiguration secureVaultConfiguration, CipherProvider cipherProvider,
-                       List<Secret> secrets) throws SecureVaultException;
-    void secureSecrets(SecureVaultConfiguration secureVaultConfiguration, CipherProvider cipherProvider,
-                       List<Secret> secrets) throws SecureVaultException;
+                       List<Secret> initializationSecrets) throws SecureVaultException;
+    void persistSecrets(SecureVaultConfiguration secureVaultConfiguration, CipherProvider cipherProvider,
+                        List<Secret> initializationSecrets) throws SecureVaultException;
     default void getInitializationSecrets(List<Secret> secrets) {}
     char[] getSecret(String alias);
 }
