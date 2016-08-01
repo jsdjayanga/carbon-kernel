@@ -108,14 +108,12 @@ public class JKSBasedCipherProvider implements CipherProvider {
 
     @Override
     public byte[] encrypt(byte[] plainText) throws SecureVaultException {
-        byte[] encryptedPassword = doCipher(encryptionCipher, plainText);
-        return SecureVaultUtils.base64Encode(encryptedPassword);
+        return doCipher(encryptionCipher, plainText);
     }
 
     @Override
     public byte[] decrypt(byte[] cipherText) throws SecureVaultException {
-        byte[] base64DecodedPassword = SecureVaultUtils.base64Decode(cipherText);
-        return doCipher(decryptionCipher, base64DecodedPassword);
+        return doCipher(decryptionCipher, cipherText);
     }
 
     private KeyStore loadKeyStore(String keyStorePath, char[] keyStorePassword) throws SecureVaultException {

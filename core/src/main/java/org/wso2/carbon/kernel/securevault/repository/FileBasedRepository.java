@@ -41,7 +41,8 @@ public abstract class FileBasedRepository {
             char[] decryptedPassword;
             String[] tokens = secret.split(SecureVaultConstants.SPACE);
             if (SecureVaultConstants.CIPHER_TEXT.equals(tokens[0])) {
-                decryptedPassword = decryptSecret(key, tokens[1].toCharArray(), cipherProvider);
+                byte[] base64Decoded = SecureVaultUtils.base64Decode(SecureVaultUtils.toBytes(tokens[1].toCharArray()));
+                decryptedPassword = decryptSecret(key, base64Decoded, cipherProvider);
             } else if (SecureVaultConstants.PLAIN_TEXT.equals(tokens[0])) {
                 decryptedPassword = tokens[1].toCharArray();
             } else {
@@ -62,8 +63,8 @@ public abstract class FileBasedRepository {
             byte[] encryptedPassword;
             String[] tokens = secret.split(SecureVaultConstants.SPACE);
             if (SecureVaultConstants.PLAIN_TEXT.equals(tokens[0])) {
-                encryptedPassword = encryptSecret(key, tokens[1].trim().toCharArray(), cipherProvider);
-
+                encryptedPassword = SecureVaultUtils.base64Encode(
+                        encryptSecret(key, tokens[1].trim().toCharArray(), cipherProvider));
                 secretsProperties.setProperty(key, SecureVaultConstants.CIPHER_TEXT + " "
                         + new String(SecureVaultUtils.toChars(encryptedPassword)));
             }
@@ -74,7 +75,7 @@ public abstract class FileBasedRepository {
         SecureVaultUtils.updateSecretFile(Paths.get(secretPropertiesFileLocation), secretsProperties);
     }
 
-    protected abstract char[] decryptSecret(String key, char[] cipherText, CipherProvider cipherProvider)
+    protected abstract char[] decryptSecret(String key, byte[] cipherText, CipherProvider cipherProvider)
             throws SecureVaultException;
 
     protected abstract byte[] encryptSecret(String key, char[] plainText, CipherProvider cipherProvider)

@@ -92,9 +92,9 @@ public class DefaultSecretRepository extends FileBasedRepository implements Secr
     }
 
     @Override
-    protected char[] decryptSecret(String key, char[] cipherText, CipherProvider cipherProvider)
+    protected char[] decryptSecret(String key, byte[] cipherText, CipherProvider cipherProvider)
             throws SecureVaultException {
-        return SecureVaultUtils.toChars(cipherProvider.decrypt(SecureVaultUtils.toBytes(cipherText)));
+        return SecureVaultUtils.toChars(cipherProvider.decrypt(cipherText));
     }
 
     @Override

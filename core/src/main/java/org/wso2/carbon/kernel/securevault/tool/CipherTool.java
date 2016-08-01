@@ -113,8 +113,8 @@ public class CipherTool {
     }
 
     private void encryptText(String plainText) throws SecureVaultException {
-        byte[] encryptedPassword = cipherProvider.encrypt(SecureVaultUtils.toBytes(
-                plainText.trim().toCharArray()));
+        byte[] encryptedPassword = SecureVaultUtils.base64Encode(cipherProvider.encrypt(SecureVaultUtils.toBytes(
+                plainText.trim().toCharArray())));
         logger.info(new String(SecureVaultUtils.toChars(encryptedPassword)));
     }
 }
