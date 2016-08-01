@@ -108,12 +108,14 @@ public class JKSBasedCipherProvider implements CipherProvider {
 
     @Override
     public byte[] encrypt(byte[] plainText) throws SecureVaultException {
-        return doEncrypt(plainText);
+        byte[] encryptedPassword = doCipher(encryptionCipher, plainText);
+        return SecureVaultUtils.base64Encode(encryptedPassword);
     }
 
     @Override
     public byte[] decrypt(byte[] cipherText) throws SecureVaultException {
-        return doDecrypt(cipherText);
+        byte[] base64DecodedPassword = SecureVaultUtils.base64Decode(cipherText);
+        return doCipher(decryptionCipher, base64DecodedPassword);
     }
 
     private KeyStore loadKeyStore(String keyStorePath, char[] keyStorePassword) throws SecureVaultException {
@@ -169,16 +171,6 @@ public class JKSBasedCipherProvider implements CipherProvider {
         } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException e) {
             throw new SecureVaultException("Failed to initialize Cipher for mode '" + Cipher.DECRYPT_MODE + "'", e);
         }
-    }
-
-    private byte[] doEncrypt(byte[] plainTextPassword) throws SecureVaultException {
-        byte[] encryptedPassword = doCipher(encryptionCipher, plainTextPassword);
-        return SecureVaultUtils.base64Encode(encryptedPassword);
-    }
-
-    private byte[] doDecrypt(byte[] encryptedPassword) throws SecureVaultException {
-        byte[] base64DecodedPassword = SecureVaultUtils.base64Decode(encryptedPassword);
-        return doCipher(decryptionCipher, base64DecodedPassword);
     }
 
     private byte[] doCipher(Cipher cipher, byte[] original) throws SecureVaultException {
