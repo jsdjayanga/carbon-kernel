@@ -44,14 +44,14 @@ import java.util.Properties;
  * @since 5.2.0
  */
 @Component(
-        name = "org.wso2.carbon.kernel.securevault.repository.FileBasedSecretRepository",
+        name = "org.wso2.carbon.kernel.securevault.repository.DefaultSecretRepository",
         immediate = true,
         property = {
-                "secretRepositoryType=org.wso2.carbon.kernel.securevault.repository.FileBasedSecretRepository"
+                "secretRepositoryType=org.wso2.carbon.kernel.securevault.repository.DefaultSecretRepository"
         }
 )
-public class FileBasedSecretRepository implements SecretRepository {
-    private static Logger logger = LoggerFactory.getLogger(FileBasedSecretRepository.class);
+public class DefaultSecretRepository implements SecretRepository {
+    private static Logger logger = LoggerFactory.getLogger(DefaultSecretRepository.class);
     private final Map<String, char[]> secrets = new HashMap<>();
 
     @Activate
@@ -114,7 +114,6 @@ public class FileBasedSecretRepository implements SecretRepository {
                 secretsProperties.setProperty(key, SecureVaultConstants.CIPHER_TEXT + " "
                         + new String(SecureVaultUtils.toChars(encryptedPassword)));
             }
-
         }
 
         String secretPropertiesFileLocation = SecureVaultUtils

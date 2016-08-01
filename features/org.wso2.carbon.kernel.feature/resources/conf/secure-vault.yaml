@@ -1,7 +1,7 @@
 secretRepository:
-  type: org.wso2.carbon.kernel.securevault.repository.FileBasedSecretRepository
+  type: org.wso2.carbon.kernel.securevault.repository.DefaultSecretRepository
 secretRetriever:
-  type: org.wso2.carbon.kernel.securevault.retriever.HardCodedSecretRetriever
+  type: org.wso2.carbon.kernel.securevault.retriever.DefaultHardCodedSecretRetriever
 cipherProvider:
   type: org.wso2.carbon.kernel.securevault.cipher.JKSBasedCipherProvider
   keystore:

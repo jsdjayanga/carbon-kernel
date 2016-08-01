@@ -37,14 +37,14 @@ import java.util.List;
  * @since 5.2.0
  */
 @Component(
-        name = "org.wso2.carbon.kernel.securevault.retriever.HardCodedSecretRetriever",
+        name = "org.wso2.carbon.kernel.securevault.retriever.DefaultHardCodedSecretRetriever",
         immediate = true,
         property = {
-                "secretRetrieverType=org.wso2.carbon.kernel.securevault.retriever.HardCodedSecretRetriever"
+                "secretRetrieverType=org.wso2.carbon.kernel.securevault.retriever.DefaultHardCodedSecretRetriever"
         }
 )
-public class HardCodedSecretRetriever implements SecretRetriever {
-    private static Logger logger = LoggerFactory.getLogger(HardCodedSecretRetriever.class);
+public class DefaultHardCodedSecretRetriever implements SecretRetriever {
+    private static Logger logger = LoggerFactory.getLogger(DefaultHardCodedSecretRetriever.class);
 
     @Activate
     public void activate() {
