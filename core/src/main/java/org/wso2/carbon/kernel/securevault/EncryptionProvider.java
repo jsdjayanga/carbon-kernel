@@ -19,22 +19,15 @@ package org.wso2.carbon.kernel.securevault;
 import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
 
 /**
- * This interface is used to register SecureVault.
- * Any component that needs SecureVault capabilities should depend on this interface.
- *
- * @since 5.2.0
+ * Created by jayanga on 8/2/16.
  */
-public interface SecureVault {
-
+public interface EncryptionProvider {
     /**
-     * Resolves the given alias in to a plain text password
+     * An implementation of this method should provide the relevant encryption logic.
      *
-     * @param alias alias of the secret
-     * @return      if the alias exist return the plain text password else return an empty char[]
+     * @param plainText             plain text as a byte array
+     * @return byte[]               cipher text
+     * @throws SecureVaultException on an error while trying to encrypt.
      */
-    char[] resolve(String alias) throws SecureVaultException;
-
     byte[] encrypt(byte[] plainText) throws SecureVaultException;
-
-    byte[] decrypt(byte[] cipherText) throws SecureVaultException;
 }

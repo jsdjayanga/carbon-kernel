@@ -22,6 +22,8 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.kernel.securevault.CipherProvider;
+import org.wso2.carbon.kernel.securevault.DecryptionProvider;
+import org.wso2.carbon.kernel.securevault.EncryptionProvider;
 import org.wso2.carbon.kernel.securevault.Secret;
 import org.wso2.carbon.kernel.securevault.SecretRepository;
 import org.wso2.carbon.kernel.securevault.SecretRetriever;
@@ -97,6 +99,16 @@ public class DefaultSecretRepository implements SecretRepository {
             return secret;
         }
         return new char[0];
+    }
+
+    @Override
+    public EncryptionProvider getEncryptionProvider() {
+        return cipherProvider;
+    }
+
+    @Override
+    public DecryptionProvider getDecryptionProvider() {
+        return cipherProvider;
     }
 
     public CipherProvider createCipherProvider(SecureVaultConfiguration secureVaultConfiguration,

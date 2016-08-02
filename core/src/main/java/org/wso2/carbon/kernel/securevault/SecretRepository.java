@@ -74,4 +74,8 @@ public interface SecretRepository {
      * @return      if the given alias is available, a char[] consisting the plain text secret else and empty char[]
      */
     char[] getSecret(String alias);
+
+    EncryptionProvider getEncryptionProvider();
+
+    DecryptionProvider getDecryptionProvider();
 }

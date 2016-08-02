@@ -16,7 +16,6 @@
 
 package org.wso2.carbon.kernel.securevault.tool;
 
-import org.wso2.carbon.kernel.securevault.CipherProvider;
 import org.wso2.carbon.kernel.securevault.Secret;
 import org.wso2.carbon.kernel.securevault.SecretRepository;
 import org.wso2.carbon.kernel.securevault.SecretRetriever;
@@ -37,7 +36,6 @@ public class CipherTool {
     private static final Logger logger = Logger.getLogger(CipherTool.class.getName());
     private SecureVaultConfiguration secureVaultConfiguration;
     private SecretRetriever secretRetriever;
-    private CipherProvider cipherProvider;
     private SecretRepository secretRepository;
     List<Secret> secrets = new ArrayList<>();
 
@@ -71,29 +69,20 @@ public class CipherTool {
         String secretRetrieverType = secureVaultConfiguration.getString(SecureVaultConstants.SECRET_RETRIEVER,
                 SecureVaultConstants.TYPE).orElseThrow(() ->
                 new SecureVaultException("Secret retriever type is mandatory"));
-        String cipherProviderType = secureVaultConfiguration.getString(SecureVaultConstants.CIPHER_PROVIDER,
-                SecureVaultConstants.TYPE).orElseThrow(() ->
-                new SecureVaultException("Cipher provider type is mandatory"));
 
         try {
             secretRetriever = (SecretRetriever) Class.forName(secretRetrieverType).newInstance();
-            cipherProvider = (CipherProvider) Class.forName(cipherProviderType).newInstance();
             secretRepository = (SecretRepository) Class.forName(secretRepositoryType).newInstance();
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
             throw new SecureVaultException("Failed to instantiate implementation classes.", e);
         }
 
         secretRetriever.init(secureVaultConfiguration);
-        cipherProvider.getInitializationSecrets(secrets);
-        secretRepository.getInitializationSecrets(secrets);
-        secretRetriever.readSecrets(secrets);
-
-        cipherProvider.init(secureVaultConfiguration, secrets);
-        secretRepository.init(secureVaultConfiguration, cipherProvider, secrets);
+        secretRepository.init(secureVaultConfiguration, secretRetriever);
     }
 
-    private void process() throws SecureVaultException  {
-        secretRepository.persistSecrets(secureVaultConfiguration, cipherProvider, secrets);
+    private void process() throws SecureVaultException {
+        secretRepository.persistSecrets(secureVaultConfiguration, secrets);
     }
 
     private void processArgs(String[] args) throws SecureVaultException {
@@ -113,8 +102,8 @@ public class CipherTool {
     }
 
     private void encryptText(String plainText) throws SecureVaultException {
-        byte[] encryptedPassword = SecureVaultUtils.base64Encode(cipherProvider.encrypt(SecureVaultUtils.toBytes(
-                plainText.trim().toCharArray())));
+        byte[] encryptedPassword = SecureVaultUtils.base64Encode(secretRepository
+                .getEncryptionProvider().encrypt(SecureVaultUtils.toBytes(plainText.trim().toCharArray())));
         logger.info(new String(SecureVaultUtils.toChars(encryptedPassword)));
     }
 }

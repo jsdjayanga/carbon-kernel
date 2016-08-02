@@ -17,6 +17,7 @@
 package org.wso2.carbon.kernel.internal.securevault;
 
 import org.wso2.carbon.kernel.securevault.SecureVault;
+import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
 
 /**
  * Created by jayanga on 7/18/16.
@@ -24,9 +25,23 @@ import org.wso2.carbon.kernel.securevault.SecureVault;
 public class SecureVaultImpl implements SecureVault {
 
     @Override
-    public char[] resolve(String alias) {
+    public char[] resolve(String alias) throws SecureVaultException {
         return SecureVaultDataHolder.getInstance().getSecretRepository()
-                .orElseThrow(() -> new SecurityException("No secret repository found."))
+                .orElseThrow(() -> new SecureVaultException("No secret repository found."))
                 .getSecret(alias);
+    }
+
+    @Override
+    public byte[] encrypt(byte[] plainText) throws SecureVaultException {
+        return SecureVaultDataHolder.getInstance().getSecretRepository()
+                .orElseThrow(() -> new SecureVaultException("No secret repository found."))
+                .getEncryptionProvider().encrypt(plainText);
+    }
+
+    @Override
+    public byte[] decrypt(byte[] cipherText) throws SecureVaultException {
+        return SecureVaultDataHolder.getInstance().getSecretRepository()
+                .orElseThrow(() -> new SecureVaultException("No secret repository found."))
+                .getDecryptionProvider().decrypt(cipherText);
     }
 }

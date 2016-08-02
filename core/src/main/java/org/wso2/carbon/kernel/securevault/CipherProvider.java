@@ -32,7 +32,7 @@ import java.util.List;
  *
  * @since 5.2.0
  */
-public interface CipherProvider {
+public interface CipherProvider extends EncryptionProvider, DecryptionProvider {
 
     /**
      * This method will be called with a {@link SecureVaultConfiguration} and a list of {@link Secret}s.
@@ -45,31 +45,4 @@ public interface CipherProvider {
      */
     void init(SecureVaultConfiguration secureVaultConfiguration, List<Secret> initializationSecrets)
             throws SecureVaultException;
-
-    /**
-     * An implementation of this method should add the {@link Secret}s that are needed for the initialization
-     * to the list (only need to provide the secret name). The given secrets will be populated via a
-     * {@link SecretRetriever} and will be provided back in the {@code init} method.
-     *
-     * @param initializationSecrets a list of secrets that is needed for CipherProvider to initialize {@link Secret}.
-     */
-    default void getInitializationSecrets(List<Secret> initializationSecrets) {}
-
-    /**
-     * An implementation of this method should provide the relevant encryption logic.
-     *
-     * @param plainText             plain text as a byte array
-     * @return byte[]               cipher text
-     * @throws SecureVaultException on an error while trying to encrypt.
-     */
-    byte[] encrypt(byte[] plainText) throws SecureVaultException;
-
-    /**
-     * An implementation of this method should provide the relevant decryption logic.
-     *
-     * @param cipherText            cipher text as a byte array
-     * @return byte[]               plain text
-     * @throws SecureVaultException on an error while trying to encrypt.
-     */
-    byte[] decrypt(byte[] cipherText) throws SecureVaultException;
 }
