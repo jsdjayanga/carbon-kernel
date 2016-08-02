@@ -40,6 +40,7 @@ import java.util.List;
         name = "org.wso2.carbon.kernel.securevault.retriever.DefaultHardCodedSecretRetriever",
         immediate = true,
         property = {
+                "capabilityName=org.wso2.carbon.kernel.securevault.SecretRetriever",
                 "secretRetrieverType=org.wso2.carbon.kernel.securevault.retriever.DefaultHardCodedSecretRetriever"
         }
 )

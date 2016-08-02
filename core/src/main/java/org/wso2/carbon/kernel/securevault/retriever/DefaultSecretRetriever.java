@@ -51,6 +51,7 @@ import java.util.Properties;
         name = "org.wso2.carbon.kernel.securevault.retriever.DefaultSecretRetriever",
         immediate = true,
         property = {
+                "capabilityName=org.wso2.carbon.kernel.securevault.SecretRetriever",
                 "secretRetrieverType=org.wso2.carbon.kernel.securevault.retriever.DefaultSecretRetriever"
         }
 )
