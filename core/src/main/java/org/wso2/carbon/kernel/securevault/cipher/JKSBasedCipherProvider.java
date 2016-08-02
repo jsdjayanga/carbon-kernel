@@ -17,7 +17,6 @@
 package org.wso2.carbon.kernel.securevault.cipher;
 
 import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,13 +52,6 @@ import javax.crypto.NoSuchPaddingException;
  *
  * @since 5.2.0
  */
-@Component(
-        name = "org.wso2.carbon.kernel.securevault.cipher.JKSBasedCipherProvider",
-        immediate = true,
-        property = {
-                "cipherProviderType=org.wso2.carbon.kernel.securevault.cipher.JKSBasedCipherProvider"
-        }
-)
 public class JKSBasedCipherProvider implements CipherProvider {
     private static Logger logger = LoggerFactory.getLogger(JKSBasedCipherProvider.class);
     private Cipher encryptionCipher;
@@ -78,17 +70,13 @@ public class JKSBasedCipherProvider implements CipherProvider {
     @Override
     public void init(SecureVaultConfiguration secureVaultConfiguration, List<Secret> initializationSecrets)
             throws SecureVaultException {
-        String keystoreLocation = secureVaultConfiguration.getString(
-                SecureVaultConstants.CIPHER_PROVIDER, SecureVaultConstants.KEYSTORE, SecureVaultConstants.LOCATION)
+        String keystoreLocation = secureVaultConfiguration.getString(SecureVaultConstants.SECRET_REPOSITORY,
+                SecureVaultConstants.CIPHER_PROVIDER, SecureVaultConstants.LOCATION)
                 .orElseThrow(() -> new SecureVaultException("Key store location is mandatory"));
 
-        String privateKeyAlias = secureVaultConfiguration.getString(
-                SecureVaultConstants.CIPHER_PROVIDER, SecureVaultConstants.KEYSTORE, SecureVaultConstants.ALIAS)
+        String privateKeyAlias = secureVaultConfiguration.getString(SecureVaultConstants.SECRET_REPOSITORY,
+                SecureVaultConstants.CIPHER_PROVIDER,  SecureVaultConstants.ALIAS)
                 .orElseThrow(() -> new SecureVaultException("Private key alias is mandatory"));
-
-        String algorithm = secureVaultConfiguration.getString(
-                SecureVaultConstants.CIPHER_PROVIDER, SecureVaultConstants.ALGORITHM)
-                .orElse(SecureVaultConstants.RSA);
 
         Secret keyStorePassword = SecureVaultUtils.getSecret(initializationSecrets,
                 SecureVaultConstants.KEY_STORE_PASSWORD);
@@ -97,15 +85,9 @@ public class JKSBasedCipherProvider implements CipherProvider {
 
         KeyStore keyStore = loadKeyStore(keystoreLocation, keyStorePassword.getSecretValue().toCharArray());
 
-        encryptionCipher = getEncryptionCipher(keyStore, privateKeyAlias, algorithm);
-        decryptionCipher = getDecryptionCipher(keyStore, privateKeyAlias, algorithm,
+        encryptionCipher = getEncryptionCipher(keyStore, privateKeyAlias);
+        decryptionCipher = getDecryptionCipher(keyStore, privateKeyAlias,
                 privateKeyPassword.getSecretValue().toCharArray());
-    }
-
-    @Override
-    public void getInitializationSecrets(List<Secret> secrets) {
-        secrets.add(new Secret(SecureVaultConstants.KEY_STORE_PASSWORD));
-        secrets.add(new Secret(SecureVaultConstants.PRIVATE_KEY_PASSWORD));
     }
 
     @Override
@@ -137,7 +119,7 @@ public class JKSBasedCipherProvider implements CipherProvider {
         }
     }
 
-    private Cipher getEncryptionCipher(KeyStore keyStore, String alias, String algorithm)
+    private Cipher getEncryptionCipher(KeyStore keyStore, String alias)
             throws SecureVaultException {
         Certificate certificate;
         try {
@@ -147,7 +129,7 @@ public class JKSBasedCipherProvider implements CipherProvider {
         }
 
         try {
-            Cipher cipher = Cipher.getInstance(algorithm);
+            Cipher cipher = Cipher.getInstance(certificate.getPublicKey().getAlgorithm());
             cipher.init(Cipher.ENCRYPT_MODE, certificate);
             return cipher;
         } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException e) {
@@ -155,7 +137,7 @@ public class JKSBasedCipherProvider implements CipherProvider {
         }
     }
 
-    private Cipher getDecryptionCipher(KeyStore keyStore, String alias, String algorithm, char[] privateKeyPassword)
+    private Cipher getDecryptionCipher(KeyStore keyStore, String alias, char[] privateKeyPassword)
             throws SecureVaultException {
         PrivateKey privateKey;
         try {
@@ -165,7 +147,7 @@ public class JKSBasedCipherProvider implements CipherProvider {
         }
 
         try {
-            Cipher cipher = Cipher.getInstance(algorithm);
+            Cipher cipher = Cipher.getInstance(privateKey.getAlgorithm());
             cipher.init(Cipher.DECRYPT_MODE, privateKey);
             return cipher;
         } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException e) {

@@ -24,12 +24,15 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.kernel.securevault.CipherProvider;
 import org.wso2.carbon.kernel.securevault.Secret;
 import org.wso2.carbon.kernel.securevault.SecretRepository;
+import org.wso2.carbon.kernel.securevault.SecretRetriever;
 import org.wso2.carbon.kernel.securevault.SecureVaultConstants;
 import org.wso2.carbon.kernel.securevault.SecureVaultUtils;
+import org.wso2.carbon.kernel.securevault.cipher.JKSBasedCipherProvider;
 import org.wso2.carbon.kernel.securevault.config.SecureVaultConfiguration;
 import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
 
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,6 +56,7 @@ import java.util.Properties;
 public class DefaultSecretRepository implements SecretRepository {
     private static Logger logger = LoggerFactory.getLogger(DefaultSecretRepository.class);
     private final Map<String, char[]> secrets = new HashMap<>();
+    protected CipherProvider cipherProvider;
 
     @Activate
     public void activate() {
@@ -65,22 +69,23 @@ public class DefaultSecretRepository implements SecretRepository {
     }
 
     @Override
-    public void init(SecureVaultConfiguration secureVaultConfiguration, CipherProvider cipherProvider,
-                     List<Secret> secrets)
+    public void init(SecureVaultConfiguration secureVaultConfiguration, SecretRetriever secretRetriever)
             throws SecureVaultException {
         logger.debug("Initializing FileBasedSecretRepository");
+
+        cipherProvider = createCipherProvider(secureVaultConfiguration, secretRetriever);
     }
 
     @Override
-    public void loadSecrets(SecureVaultConfiguration secureVaultConfiguration, CipherProvider cipherProvider,
-                            List<Secret> initializationSecrets) throws SecureVaultException {
+    public void loadSecrets(SecureVaultConfiguration secureVaultConfiguration, SecretRetriever secretRetriever)
+            throws SecureVaultException {
         logger.debug("Loading secrets to FileBasedSecretRepository");
-        loadDecryptedSecrets(secureVaultConfiguration, cipherProvider, secrets);
+        loadDecryptedSecrets(secureVaultConfiguration, cipherProvider);
     }
 
     @Override
-    public void persistSecrets(SecureVaultConfiguration secureVaultConfiguration, CipherProvider cipherProvider,
-                               List<Secret> initializationSecrets) throws SecureVaultException {
+    public void persistSecrets(SecureVaultConfiguration secureVaultConfiguration, List<Secret> initializationSecrets)
+            throws SecureVaultException {
         logger.debug("Securing FileBasedSecretRepository");
         persistEncryptedSecrets(secureVaultConfiguration, cipherProvider);
     }
@@ -94,6 +99,18 @@ public class DefaultSecretRepository implements SecretRepository {
         return new char[0];
     }
 
+    public CipherProvider createCipherProvider(SecureVaultConfiguration secureVaultConfiguration,
+                                               SecretRetriever secretRetriever) throws SecureVaultException {
+        List<Secret> initializationSecrets = new ArrayList<>();
+        initializationSecrets.add(new Secret(SecureVaultConstants.KEY_STORE_PASSWORD));
+        initializationSecrets.add(new Secret(SecureVaultConstants.PRIVATE_KEY_PASSWORD));
+        secretRetriever.readSecrets(initializationSecrets);
+
+        CipherProvider cipherProvider = new JKSBasedCipherProvider();
+        cipherProvider.init(secureVaultConfiguration, initializationSecrets);
+        return cipherProvider;
+    }
+
     protected char[] decryptSecret(String key, byte[] cipherText, CipherProvider cipherProvider)
             throws SecureVaultException {
         return SecureVaultUtils.toChars(cipherProvider.decrypt(cipherText));
@@ -105,8 +122,7 @@ public class DefaultSecretRepository implements SecretRepository {
     }
 
     protected void loadDecryptedSecrets(SecureVaultConfiguration secureVaultConfiguration,
-                                        CipherProvider cipherProvider,
-                                        Map<String, char[]> secrets) throws SecureVaultException {
+                                        CipherProvider cipherProvider) throws SecureVaultException {
         Properties secretsProperties = SecureVaultUtils.getSecretProperties(secureVaultConfiguration);
 
         for (Object alias : secretsProperties.keySet()) {

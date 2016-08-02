@@ -41,44 +41,31 @@ public interface SecretRepository {
      * SecretRepository ready for {@code loadSecrets} and {@code persistSecrets}
      *
      * @param secureVaultConfiguration {@link SecureVaultConfiguration}
-     * @param cipherProvider           {@link CipherProvider}
-     * @param initializationSecrets    a list of {@link Secret} with initialization secrets
+     * @param secretRetriever          an initialized secret retriever {@link SecretRetriever}
      * @throws SecureVaultException    on error while trying to initializing the SecretRepository
      */
-    void init(SecureVaultConfiguration secureVaultConfiguration, CipherProvider cipherProvider,
-              List<Secret> initializationSecrets) throws SecureVaultException;
+    void init(SecureVaultConfiguration secureVaultConfiguration, SecretRetriever secretRetriever)
+            throws SecureVaultException;
 
     /**
      * An implementation of this method should load the secrets from underlying secret repository.
      *
      * @param secureVaultConfiguration {@link SecureVaultConfiguration}
-     * @param cipherProvider           {@link CipherProvider}
-     * @param initializationSecrets    a list of {@link Secret} with initialization secrets
+     * @param secretRetriever          an initialized secret retriever {@link SecretRetriever}
      * @throws SecureVaultException    on error while trying to load secrets
      */
-    void loadSecrets(SecureVaultConfiguration secureVaultConfiguration, CipherProvider cipherProvider,
-                       List<Secret> initializationSecrets) throws SecureVaultException;
+    void loadSecrets(SecureVaultConfiguration secureVaultConfiguration, SecretRetriever secretRetriever)
+            throws SecureVaultException;
 
     /**
      * An implementation of this method should persist the secrets to the underlying secret repository.
      *
      * @param secureVaultConfiguration {@link SecureVaultConfiguration}
-     * @param cipherProvider           {@link CipherProvider}
      * @param initializationSecrets    a list of {@link Secret} with initialization secrets
      * @throws SecureVaultException    on error while trying to persis secrets
      */
-    void persistSecrets(SecureVaultConfiguration secureVaultConfiguration, CipherProvider cipherProvider,
-                        List<Secret> initializationSecrets) throws SecureVaultException;
-
-    /**
-     * An implementation of this method should add the {@link Secret}s that are needed for the initialization
-     * of the {@link SecretRepository} to the list (only need to provide the secret name).
-     * The given secrets will be populated via a {@link SecretRetriever} and will be provided back
-     * in the {@code init} method.
-     *
-     * @param initializationSecrets A list of secrets that is needed for CipherProvider to initialize {@link Secret}
-     */
-    default void getInitializationSecrets(List<Secret> initializationSecrets) {}
+    void persistSecrets(SecureVaultConfiguration secureVaultConfiguration, List<Secret> initializationSecrets)
+            throws SecureVaultException;
 
     /**
      * An implementation of this method should provide the plain text secret for a given alias.

@@ -16,9 +16,6 @@
 
 package org.wso2.carbon.kernel.securevault;
 
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.kernel.internal.utils.Utils;
@@ -37,10 +34,8 @@ import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
-import java.util.Optional;
 import java.util.Properties;
 
 /**
@@ -48,19 +43,6 @@ import java.util.Properties;
  */
 public class SecureVaultUtils {
     private static final Logger logger = LoggerFactory.getLogger(SecureVaultUtils.class);
-
-    public static Optional<ServiceReference<?>> getServiceReference(BundleContext bundleContext, String propertyName,
-                                                                     String serviceClassName, String serviceName)
-            throws SecureVaultException {
-        try {
-            return Arrays.stream(Optional.ofNullable(bundleContext.getServiceReferences(serviceClassName,
-                    "(" + propertyName + "=" + serviceName + ")")).orElse(new ServiceReference[0]))
-                    .filter(serviceReference -> serviceName.equals(serviceReference.getProperty(propertyName)))
-                    .findFirst();
-        } catch (InvalidSyntaxException e) {
-            throw new SecureVaultException("Error while retrieving OSGi service reference");
-        }
-    }
 
     public static Secret getSecret(List<Secret> secrets, String secretName) throws SecureVaultException {
         return secrets.stream()

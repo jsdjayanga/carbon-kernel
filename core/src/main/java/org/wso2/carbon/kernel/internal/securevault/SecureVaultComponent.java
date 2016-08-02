@@ -16,9 +16,6 @@
 
 package org.wso2.carbon.kernel.internal.securevault;
 
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceException;
-import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -28,19 +25,15 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.kernel.internal.DataHolder;
-import org.wso2.carbon.kernel.securevault.CipherProvider;
-import org.wso2.carbon.kernel.securevault.Secret;
 import org.wso2.carbon.kernel.securevault.SecretRepository;
 import org.wso2.carbon.kernel.securevault.SecretRetriever;
 import org.wso2.carbon.kernel.securevault.SecureVault;
 import org.wso2.carbon.kernel.securevault.SecureVaultConstants;
-import org.wso2.carbon.kernel.securevault.SecureVaultUtils;
 import org.wso2.carbon.kernel.securevault.config.SecureVaultConfiguration;
 import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
 import org.wso2.carbon.kernel.startupresolver.RequiredCapabilityListener;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -60,15 +53,25 @@ import java.util.Optional;
 )
 public class SecureVaultComponent implements RequiredCapabilityListener {
     private static final Logger logger = LoggerFactory.getLogger(SecureVaultComponent.class);
-    private ServiceRegistration secureVaultSReg = null;
-    private SecretRepository activeSecretRepository = null;
-    private SecretRetriever activeSecretRetriever = null;
-    private CipherProvider activeCipherProvider = null;
-    private List<SecretRepository> secretRepositories = new ArrayList<>();
-    private List<SecretRetriever> secretRetrievers = new ArrayList<>();
-    private List<CipherProvider> cipherProviders = new ArrayList<>();
-    private boolean firstInitializationDone = false;
-    private boolean initialized = false;
+
+    private String secretRepositoryType;
+    private String secretRetrieverType;
+
+    public SecureVaultComponent() {
+        Optional<SecureVaultConfiguration> optSecureVaultConfiguration;
+        try {
+            optSecureVaultConfiguration = Optional.of(SecureVaultConfiguration.getInstance());
+            optSecureVaultConfiguration.ifPresent(secureVaultConfiguration -> {
+                secretRepositoryType = secureVaultConfiguration.getString(SecureVaultConstants.SECRET_REPOSITORY,
+                        SecureVaultConstants.TYPE).orElse("");
+                secretRetrieverType = secureVaultConfiguration.getString(SecureVaultConstants.SECRET_RETRIEVER,
+                        SecureVaultConstants.TYPE).orElse("");
+
+            });
+        } catch (SecureVaultException e) {
+            logger.error("Error while acquiring secure vault configuration");
+        }
+    }
 
     @Activate
     public void activate() {
@@ -93,18 +96,21 @@ public class SecureVaultComponent implements RequiredCapabilityListener {
             policy = ReferencePolicy.DYNAMIC,
             unbind = "unRegisterSecretRepository"
     )
-    protected void registerSecretRepository(SecretRepository secretRepository) {
-        secretRepositories.add(secretRepository);
-        if (firstInitializationDone == true && initialized == false) {
-            initializeSecureVault();
-        }
+    protected void registerSecretRepository(SecretRepository secretRepository, Map<String, Object> configs) {
+        Optional.ofNullable(configs.get(SecureVaultConstants.SECRET_REPOSITORY_PROPERTY_NAME))
+                .ifPresent(o -> {
+                    if (secretRepositoryType.equals(o.toString())) {
+                        SecureVaultDataHolder.getInstance().setSecretRepository(secretRepository);
+                    }
+                });
     }
 
     protected void unRegisterSecretRepository(SecretRepository secretRepository) {
-        if (activeSecretRepository == secretRepository) {
-            unInitializeSecureVault();
-        }
-        secretRepositories.remove(secretRepository);
+        SecureVaultDataHolder.getInstance().getSecretRepository().ifPresent(currentSecretRepository -> {
+            if (currentSecretRepository == secretRepository) {
+                SecureVaultDataHolder.getInstance().setSecretRepository(null);
+            }
+        });
     }
 
     @Reference(
@@ -114,108 +120,46 @@ public class SecureVaultComponent implements RequiredCapabilityListener {
             policy = ReferencePolicy.DYNAMIC,
             unbind = "unregisterSecretRetriever"
     )
-    protected void registerSecretRetriever(SecretRetriever secretRetriever) {
-        secretRetrievers.add(secretRetriever);
-        if (firstInitializationDone == true && initialized == false) {
-            initializeSecureVault();
-        }
+    protected void registerSecretRetriever(SecretRetriever secretRetriever, Map<String, Object> configs) {
+        Optional.ofNullable(configs.get(SecureVaultConstants.SECRET_RETRIEVER_PROPERTY_NAME))
+                .ifPresent(o -> {
+                    if (secretRetrieverType.equals(o.toString())) {
+                        SecureVaultDataHolder.getInstance().setSecretRetriever(secretRetriever);
+                    }
+                });
     }
 
     protected void unregisterSecretRetriever(SecretRetriever secretRetriever) {
-        if (activeSecretRetriever == secretRetriever) {
-            unInitializeSecureVault();
-        }
-        secretRetrievers.remove(secretRetriever);
-    }
-
-    @Reference(
-            name = "secure.vault.cipher.provider",
-            service = CipherProvider.class,
-            cardinality = ReferenceCardinality.MULTIPLE,
-            policy = ReferencePolicy.DYNAMIC,
-            unbind = "unregisterCipherProvider"
-    )
-    protected void registerCipherProvider(CipherProvider cipherProvider) {
-        cipherProviders.add(cipherProvider);
-        if (firstInitializationDone == true && initialized == false) {
-            initializeSecureVault();
-        }
-    }
-
-    protected void unregisterCipherProvider(CipherProvider cipherProvider) {
-        if (activeCipherProvider == cipherProvider) {
-            unInitializeSecureVault();
-        }
-        cipherProviders.remove(cipherProvider);
+        SecureVaultDataHolder.getInstance().getSecretRepository().ifPresent(currentSecretRetriever -> {
+            if (currentSecretRetriever == secretRetriever) {
+                SecureVaultDataHolder.getInstance().setSecretRetriever(null);
+            }
+        });
     }
 
     private void initializeSecureVault() {
         try {
+            logger.debug("Initializing the secure vault with, SecretRepositoryType={}, SecretRetrieverType={}",
+                    secretRepositoryType, secretRetrieverType);
             SecureVaultConfiguration secureVaultConfiguration = SecureVaultConfiguration.getInstance();
-            String secretRepositoryType = secureVaultConfiguration.getString(SecureVaultConstants.SECRET_REPOSITORY,
-                    SecureVaultConstants.TYPE).orElseThrow(() ->
-                    new SecureVaultException("Secret repository type is mandatory"));
-            String secretRetrieverType = secureVaultConfiguration.getString(SecureVaultConstants.SECRET_RETRIEVER,
-                    SecureVaultConstants.TYPE).orElseThrow(() ->
-                    new SecureVaultException("Secret retriever type is mandatory"));
-            String cipherProviderType = secureVaultConfiguration.getString(SecureVaultConstants.CIPHER_PROVIDER,
-                    SecureVaultConstants.TYPE).orElseThrow(() ->
-                    new SecureVaultException("Cipher provider type is mandatory"));
 
-            logger.debug("Initializing the secure vault with, SecretRepositoryType={}, SecretRetrieverType={}, " +
-                    "CipherProviderType={}", secretRepositoryType, secretRetrieverType, cipherProviderType);
+            SecretRetriever secretRetriever = SecureVaultDataHolder.getInstance().getSecretRetriever()
+                    .orElseThrow(() ->
+                            new SecureVaultException("Cannot initialise secure vault without secret retriever"));
+            SecretRepository secretRepository = SecureVaultDataHolder.getInstance().getSecretRepository()
+                    .orElseThrow(() ->
+                            new SecureVaultException("Cannot initialise secure vault without secret repository"));
 
-            Optional<BundleContext> optBundleContext = Optional.ofNullable(
-                    DataHolder.getInstance().getBundleContext());
-            BundleContext bundleContext = optBundleContext.orElseThrow(() -> new SecureVaultException(
-                    "Unable to initialize secure vault as bundle context is null"));
+            secretRetriever.init(secureVaultConfiguration);
 
-            activeSecretRetriever = SecureVaultUtils.getServiceReference(bundleContext,
-                    SecureVaultConstants.SECRET_RETRIEVER_PROPERTY_NAME, SecretRetriever.class.getName(),
-                    secretRetrieverType)
-                    .map(serviceReference -> (SecretRetriever) bundleContext.getService(serviceReference))
-                    .orElseThrow(() -> new ServiceException("Filed to get SecretRetriever OSGi service"));
+            secretRepository.init(secureVaultConfiguration, secretRetriever);
+            secretRepository.loadSecrets(secureVaultConfiguration, secretRetriever);
 
-            activeCipherProvider = SecureVaultUtils.getServiceReference(bundleContext,
-                    SecureVaultConstants.CIPHER_PROVIDER_PROPERTY_NAME, CipherProvider.class.getName(),
-                    cipherProviderType)
-                    .map(serviceReference -> (CipherProvider) bundleContext.getService(serviceReference))
-                    .orElseThrow(() -> new ServiceException("Filed to get CipherProvider OSGi service"));
-
-            activeSecretRepository = SecureVaultUtils.getServiceReference(bundleContext,
-                    SecureVaultConstants.SECRET_REPOSITORY_PROPERTY_NAME, SecretRepository.class.getName(),
-                    secretRepositoryType)
-                    .map(serviceReference -> (SecretRepository) bundleContext.getService(serviceReference))
-                    .orElseThrow(() -> new ServiceException("Filed to get SecretRepository OSGi service"));
-
-            List<Secret> initializationSecrets = new ArrayList<>();
-            activeSecretRetriever.init(secureVaultConfiguration);
-            activeCipherProvider.getInitializationSecrets(initializationSecrets);
-            activeSecretRepository.getInitializationSecrets(initializationSecrets);
-            activeSecretRetriever.readSecrets(initializationSecrets);
-
-            activeCipherProvider.init(secureVaultConfiguration, initializationSecrets);
-            activeSecretRepository.init(secureVaultConfiguration, activeCipherProvider, initializationSecrets);
-            activeSecretRepository.loadSecrets(secureVaultConfiguration, activeCipherProvider, initializationSecrets);
-
-            secureVaultSReg = bundleContext.registerService(SecureVault.class,
-                    new SecureVaultImpl(activeSecretRepository), null);
-
-            firstInitializationDone = true;
-            initialized = true;
+            Optional.ofNullable(DataHolder.getInstance().getBundleContext())
+                    .ifPresent(bundleContext -> bundleContext
+                            .registerService(SecureVault.class, new SecureVaultImpl(), null));
         } catch (SecureVaultException e) {
             logger.error("Failed to initialize Secure Vault.", e);
         }
-    }
-
-    private void unInitializeSecureVault() {
-        initialized = false;
-
-        secureVaultSReg.unregister();
-        secureVaultSReg = null;
-
-        activeSecretRepository = null;
-        activeSecretRetriever = null;
-        activeCipherProvider = null;
     }
 }
