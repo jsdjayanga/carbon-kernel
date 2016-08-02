@@ -112,7 +112,7 @@ public class DefaultSecretRepository implements SecretRepository {
         return cipherProvider;
     }
 
-    public CipherProvider createCipherProvider(SecureVaultConfiguration secureVaultConfiguration,
+    protected CipherProvider createCipherProvider(SecureVaultConfiguration secureVaultConfiguration,
                                                SecretRetriever secretRetriever) throws SecureVaultException {
         List<Secret> initializationSecrets = new ArrayList<>();
         initializationSecrets.add(new Secret(SecureVaultConstants.KEY_STORE_PASSWORD));
