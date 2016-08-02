@@ -35,48 +35,41 @@ import java.util.List;
 public interface CipherProvider {
 
     /**
-     * Initialize the CipherProvider.
-     *
      * This method will be called with a {@link SecureVaultConfiguration} and a list of {@link Secret}s.
      * An implementation of this interface can read configurations needed from the {@code secureVaultConfiguration} and
      * secrets to initialize the CipherProvider from {@code initializationSecrets}
      *
-     * @param secureVaultConfiguration  {@see SecureVaultConfiguration}
-     * @param initializationSecrets     A list of initialization secrets
-     *
-     * @throws SecureVaultException - on error while trying to initializing the CipherProvider
+     * @param secureVaultConfiguration  {@link SecureVaultConfiguration}
+     * @param initializationSecrets     a list of initialization secrets
+     * @throws SecureVaultException     on error while trying to initializing the CipherProvider
      */
     void init(SecureVaultConfiguration secureVaultConfiguration, List<Secret> initializationSecrets)
             throws SecureVaultException;
 
     /**
-     * Provides initialization secrets for CipherProvider.
-     *
-     * In the implementation of this method, it should add the {@link Secret}s that are needed for the initialization
+     * An implementation of this method should add the {@link Secret}s that are needed for the initialization
      * to the list (only need to provide the secret name). The given secrets will be populated via a
      * {@link SecretRetriever} and will be provided back in the {@code init} method.
      *
-     * @param initializationSecrets  A list of secrets that is needed for CipherProvider to initialize {@see Secret}
-     *
-     * @throws SecureVaultException - on error while trying to initializing the CipherProvider
+     * @param initializationSecrets a list of secrets that is needed for CipherProvider to initialize {@link Secret}.
      */
     default void getInitializationSecrets(List<Secret> initializationSecrets) {}
 
     /**
      * An implementation of this method should provide the relevant encryption logic.
      *
-     * @param plainText plain text as a byte array
-     * @return byte[]   cipher text
-     * @throws SecureVaultException - on an error while trying to encrypt.
+     * @param plainText             plain text as a byte array
+     * @return byte[]               cipher text
+     * @throws SecureVaultException on an error while trying to encrypt.
      */
     byte[] encrypt(byte[] plainText) throws SecureVaultException;
 
     /**
      * An implementation of this method should provide the relevant decryption logic.
      *
-     * @param cipherText cipher text as a byte array
-     * @return byte[]    plain text
-     * @throws SecureVaultException - on an error while trying to encrypt.
+     * @param cipherText            cipher text as a byte array
+     * @return byte[]               plain text
+     * @throws SecureVaultException on an error while trying to encrypt.
      */
     byte[] decrypt(byte[] cipherText) throws SecureVaultException;
 }

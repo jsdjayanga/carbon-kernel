@@ -23,9 +23,32 @@ import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
 import java.util.List;
 
 /**
- * Created by jayanga on 7/13/16.
+ * This interface is used to register SecretRetriever.
+ *
+ * An implementation of this interface should be registered as an OSGi service using the SecretRetriever interface.
+ *
+ * The implementation of this interface can be different from one SecretRepository to another depending on its
+ * requirements and behaviour.
+ *
+ * @since 5.2.0
  */
 public interface SecretRetriever {
+
+    /**
+     * An implementation of this method should initialize the SecretRetriever, so that it could perform the
+     * {@code readSecrets}
+     *
+     * @param secureVaultConfiguration  {@link SecureVaultConfiguration}
+     * @throws SecureVaultException     on error while trying to initializing the SecretRetriever
+     */
     default void init(SecureVaultConfiguration secureVaultConfiguration) throws SecureVaultException {}
-    void readSecrets(List<Secret> secrets) throws SecureVaultException;
+
+    /**
+     * An implementation of this method should populate the secretValue of all the Secrets provided in the
+     * initializationSecrets list.
+     *
+     * @param initializationSecrets a list of {@link Secret} with initialization secrets
+     * @throws SecureVaultException on error while trying to initializing the SecretRetriever
+     */
+    void readSecrets(List<Secret> initializationSecrets) throws SecureVaultException;
 }

@@ -27,7 +27,10 @@ import java.util.Map;
 import java.util.Properties;
 
 /**
- * Created by jayanga on 8/1/16.
+ * This {@link FileBasedRepository} is an abstract class and all the secrets repositories that are based on the
+ * secrets.properties file should extend this class.
+ *
+ * @since 5.2.0
  */
 public abstract class FileBasedRepository {
     protected void loadDecryptedSecrets(SecureVaultConfiguration secureVaultConfiguration,

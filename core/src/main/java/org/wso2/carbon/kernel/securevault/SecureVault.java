@@ -17,8 +17,18 @@
 package org.wso2.carbon.kernel.securevault;
 
 /**
- * Created by jayanga on 7/18/16.
+ * This interface is used to register SecureVault.
+ * Any component that needs SecureVault capabilities should depend on this interface.
+ *
+ * @since 5.2.0
  */
 public interface SecureVault {
+
+    /**
+     * Resolves the given alias in to a plain text password
+     *
+     * @param alias alias of the secret
+     * @return      if the alias exist return the plain text password else return an empty char[]
+     */
     char[] resolve(String alias);
 }
