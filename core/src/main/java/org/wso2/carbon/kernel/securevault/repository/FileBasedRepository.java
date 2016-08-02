@@ -43,6 +43,10 @@ public abstract class FileBasedRepository {
             String secret = secretsProperties.getProperty(key);
             char[] decryptedPassword;
             String[] tokens = secret.split(SecureVaultConstants.SPACE);
+            if (tokens.length != 2) {
+                throw new SecureVaultException("Secret properties file contains an invalid entry at key : " + key);
+            }
+
             if (SecureVaultConstants.CIPHER_TEXT.equals(tokens[0])) {
                 byte[] base64Decoded = SecureVaultUtils.base64Decode(SecureVaultUtils.toBytes(tokens[1].toCharArray()));
                 decryptedPassword = decryptSecret(key, base64Decoded, cipherProvider);
@@ -65,6 +69,10 @@ public abstract class FileBasedRepository {
 
             byte[] encryptedPassword;
             String[] tokens = secret.split(SecureVaultConstants.SPACE);
+            if (tokens.length != 2) {
+                throw new SecureVaultException("Secret properties file contains an invalid entry at key : " + key);
+            }
+
             if (SecureVaultConstants.PLAIN_TEXT.equals(tokens[0])) {
                 encryptedPassword = SecureVaultUtils.base64Encode(
                         encryptSecret(key, tokens[1].trim().toCharArray(), cipherProvider));
