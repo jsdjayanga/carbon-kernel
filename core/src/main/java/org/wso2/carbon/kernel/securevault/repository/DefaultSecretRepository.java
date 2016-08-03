@@ -22,8 +22,6 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.kernel.securevault.CipherProvider;
-import org.wso2.carbon.kernel.securevault.DecryptionProvider;
-import org.wso2.carbon.kernel.securevault.EncryptionProvider;
 import org.wso2.carbon.kernel.securevault.Secret;
 import org.wso2.carbon.kernel.securevault.SecretRepository;
 import org.wso2.carbon.kernel.securevault.SecretRetriever;
@@ -38,6 +36,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
 
 /**
@@ -59,7 +58,7 @@ import java.util.Properties;
 public class DefaultSecretRepository implements SecretRepository {
     private static Logger logger = LoggerFactory.getLogger(DefaultSecretRepository.class);
     private final Map<String, char[]> secrets = new HashMap<>();
-    protected CipherProvider cipherProvider;
+    private Optional<CipherProvider> optCipherProvider;
 
     @Activate
     public void activate() {
@@ -76,21 +75,21 @@ public class DefaultSecretRepository implements SecretRepository {
             throws SecureVaultException {
         logger.debug("Initializing FileBasedSecretRepository");
 
-        cipherProvider = createCipherProvider(secureVaultConfiguration, secretRetriever);
+        optCipherProvider = Optional.ofNullable(createCipherProvider(secureVaultConfiguration, secretRetriever));
     }
 
     @Override
     public void loadSecrets(SecureVaultConfiguration secureVaultConfiguration, SecretRetriever secretRetriever)
             throws SecureVaultException {
         logger.debug("Loading secrets to FileBasedSecretRepository");
-        loadDecryptedSecrets(secureVaultConfiguration, cipherProvider);
+        loadDecryptedSecrets(secureVaultConfiguration);
     }
 
     @Override
     public void persistSecrets(SecureVaultConfiguration secureVaultConfiguration, List<Secret> initializationSecrets)
             throws SecureVaultException {
         logger.debug("Securing FileBasedSecretRepository");
-        persistEncryptedSecrets(secureVaultConfiguration, cipherProvider);
+        persistEncryptedSecrets(secureVaultConfiguration);
     }
 
     @Override
@@ -103,13 +102,8 @@ public class DefaultSecretRepository implements SecretRepository {
     }
 
     @Override
-    public EncryptionProvider getEncryptionProvider() {
-        return cipherProvider;
-    }
-
-    @Override
-    public DecryptionProvider getDecryptionProvider() {
-        return cipherProvider;
+    public Optional<CipherProvider> getCipherProvider() {
+        return optCipherProvider;
     }
 
     protected CipherProvider createCipherProvider(SecureVaultConfiguration secureVaultConfiguration,
@@ -119,23 +113,26 @@ public class DefaultSecretRepository implements SecretRepository {
         initializationSecrets.add(new Secret(SecureVaultConstants.PRIVATE_KEY_PASSWORD));
         secretRetriever.readSecrets(initializationSecrets);
 
-        CipherProvider cipherProvider = new JKSBasedCipherProvider();
-        cipherProvider.init(secureVaultConfiguration, initializationSecrets);
-        return cipherProvider;
+        JKSBasedCipherProvider jksBasedCipherProvider = new JKSBasedCipherProvider();
+        jksBasedCipherProvider.init(secureVaultConfiguration, initializationSecrets);
+        return jksBasedCipherProvider;
     }
 
-    protected char[] decryptSecret(String key, byte[] cipherText, CipherProvider cipherProvider)
+    protected char[] decryptSecret(String key, byte[] cipherText)
             throws SecureVaultException {
-        return SecureVaultUtils.toChars(cipherProvider.decrypt(cipherText));
+        return SecureVaultUtils.toChars(optCipherProvider
+                .orElseThrow(() -> new SecureVaultException("No Cipher provider"))
+                .decrypt(cipherText));
     }
 
-    protected byte[] encryptSecret(String key, char[] plainText, CipherProvider cipherProvider)
+    protected byte[] encryptSecret(String key, char[] plainText)
             throws SecureVaultException {
-        return cipherProvider.encrypt(SecureVaultUtils.toBytes(plainText));
+        return optCipherProvider.orElseThrow(() -> new SecureVaultException("No Cipher provider"))
+                .encrypt(SecureVaultUtils.toBytes(plainText));
     }
 
-    protected void loadDecryptedSecrets(SecureVaultConfiguration secureVaultConfiguration,
-                                        CipherProvider cipherProvider) throws SecureVaultException {
+    protected void loadDecryptedSecrets(SecureVaultConfiguration secureVaultConfiguration)
+            throws SecureVaultException {
         Properties secretsProperties = SecureVaultUtils.getSecretProperties(secureVaultConfiguration);
 
         for (Object alias : secretsProperties.keySet()) {
@@ -149,7 +146,7 @@ public class DefaultSecretRepository implements SecretRepository {
 
             if (SecureVaultConstants.CIPHER_TEXT.equals(tokens[0])) {
                 byte[] base64Decoded = SecureVaultUtils.base64Decode(SecureVaultUtils.toBytes(tokens[1].toCharArray()));
-                decryptedPassword = decryptSecret(key, base64Decoded, cipherProvider);
+                decryptedPassword = decryptSecret(key, base64Decoded);
             } else if (SecureVaultConstants.PLAIN_TEXT.equals(tokens[0])) {
                 decryptedPassword = tokens[1].toCharArray();
             } else {
@@ -159,8 +156,8 @@ public class DefaultSecretRepository implements SecretRepository {
         }
     }
 
-    protected void persistEncryptedSecrets(SecureVaultConfiguration secureVaultConfiguration,
-                                           CipherProvider cipherProvider) throws SecureVaultException {
+    protected void persistEncryptedSecrets(SecureVaultConfiguration secureVaultConfiguration)
+            throws SecureVaultException {
         Properties secretsProperties = SecureVaultUtils.getSecretProperties(secureVaultConfiguration);
 
         for (Object alias : secretsProperties.keySet()) {
@@ -175,7 +172,7 @@ public class DefaultSecretRepository implements SecretRepository {
 
             if (SecureVaultConstants.PLAIN_TEXT.equals(tokens[0])) {
                 encryptedPassword = SecureVaultUtils.base64Encode(
-                        encryptSecret(key, tokens[1].trim().toCharArray(), cipherProvider));
+                        encryptSecret(key, tokens[1].trim().toCharArray()));
                 secretsProperties.setProperty(key, SecureVaultConstants.CIPHER_TEXT + " "
                         + new String(SecureVaultUtils.toChars(encryptedPassword)));
             }

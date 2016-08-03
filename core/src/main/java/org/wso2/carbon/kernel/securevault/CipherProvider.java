@@ -16,10 +16,7 @@
 
 package org.wso2.carbon.kernel.securevault;
 
-import org.wso2.carbon.kernel.securevault.config.SecureVaultConfiguration;
 import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
-
-import java.util.List;
 
 /**
  * This interface is used to register CipherProviders. A CipherProvider is expected to provide
@@ -32,17 +29,22 @@ import java.util.List;
  *
  * @since 5.2.0
  */
-public interface CipherProvider extends EncryptionProvider, DecryptionProvider {
+public interface CipherProvider {
+    /**
+     * An implementation of this method should provide the relevant encryption logic.
+     *
+     * @param plainText             plain text as a byte array
+     * @return byte[]               cipher text
+     * @throws SecureVaultException on an error while trying to encrypt.
+     */
+    byte[] encrypt(byte[] plainText) throws SecureVaultException;
 
     /**
-     * This method will be called with a {@link SecureVaultConfiguration} and a list of {@link Secret}s.
-     * An implementation of this interface can read configurations needed from the {@code secureVaultConfiguration} and
-     * secrets to initialize the CipherProvider from {@code initializationSecrets}
+     * An implementation of this method should provide the relevant decryption logic.
      *
-     * @param secureVaultConfiguration  {@link SecureVaultConfiguration}
-     * @param initializationSecrets     a list of initialization secrets
-     * @throws SecureVaultException     on error while trying to initializing the CipherProvider
+     * @param cipherText            cipher text as a byte array
+     * @return byte[]               plain text
+     * @throws SecureVaultException on an error while trying to encrypt.
      */
-    void init(SecureVaultConfiguration secureVaultConfiguration, List<Secret> initializationSecrets)
-            throws SecureVaultException;
+    byte[] decrypt(byte[] cipherText) throws SecureVaultException;
 }

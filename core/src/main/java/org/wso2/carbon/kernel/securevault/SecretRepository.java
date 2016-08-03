@@ -20,6 +20,7 @@ import org.wso2.carbon.kernel.securevault.config.SecureVaultConfiguration;
 import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * This interface is used to register SecretRepositories.
@@ -75,7 +76,5 @@ public interface SecretRepository {
      */
     char[] getSecret(String alias);
 
-    EncryptionProvider getEncryptionProvider();
-
-    DecryptionProvider getDecryptionProvider();
+    Optional<CipherProvider> getCipherProvider();
 }

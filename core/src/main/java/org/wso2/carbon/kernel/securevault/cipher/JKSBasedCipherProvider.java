@@ -16,8 +16,6 @@
 
 package org.wso2.carbon.kernel.securevault.cipher;
 
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Deactivate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.kernel.securevault.CipherProvider;
@@ -57,17 +55,6 @@ public class JKSBasedCipherProvider implements CipherProvider {
     private Cipher encryptionCipher;
     private Cipher decryptionCipher;
 
-    @Activate
-    public void activate() {
-        logger.debug("Activating JKSBasedCipherProvider");
-    }
-
-    @Deactivate
-    public void deactivate() {
-        logger.debug("Deactivating JKSBasedCipherProvider");
-    }
-
-    @Override
     public void init(SecureVaultConfiguration secureVaultConfiguration, List<Secret> initializationSecrets)
             throws SecureVaultException {
         String keystoreLocation = secureVaultConfiguration.getString(SecureVaultConstants.SECRET_REPOSITORY,

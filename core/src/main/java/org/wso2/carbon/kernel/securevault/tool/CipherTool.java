@@ -16,6 +16,7 @@
 
 package org.wso2.carbon.kernel.securevault.tool;
 
+import org.wso2.carbon.kernel.internal.securevault.SecureVaultDataHolder;
 import org.wso2.carbon.kernel.securevault.Secret;
 import org.wso2.carbon.kernel.securevault.SecretRepository;
 import org.wso2.carbon.kernel.securevault.SecretRetriever;
@@ -102,8 +103,11 @@ public class CipherTool {
     }
 
     private void encryptText(String plainText) throws SecureVaultException {
-        byte[] encryptedPassword = SecureVaultUtils.base64Encode(secretRepository
-                .getEncryptionProvider().encrypt(SecureVaultUtils.toBytes(plainText.trim().toCharArray())));
+        byte[] encryptedPassword = SecureVaultDataHolder.getInstance().getSecretRepository()
+                .orElseThrow(() -> new SecureVaultException("No secret repository found."))
+                .getCipherProvider()
+                .orElseThrow(() -> new SecureVaultException("No cipher provider found."))
+                .encrypt(SecureVaultUtils.toBytes(plainText.trim().toCharArray()));
         logger.info(new String(SecureVaultUtils.toChars(encryptedPassword)));
     }
 }
