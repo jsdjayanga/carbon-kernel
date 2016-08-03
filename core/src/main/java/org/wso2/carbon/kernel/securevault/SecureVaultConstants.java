@@ -25,16 +25,13 @@ public class SecureVaultConstants {
     public static final String SECRET_RETRIEVER = "secretRetriever";
     public static final String SECRET_RETRIEVER_PROPERTY_NAME = "secretRetrieverType";
     public static final String CIPHER_PROVIDER = "cipherProvider";
-    public static final String CIPHER_PROVIDER_PROPERTY_NAME = "cipherProviderType";
+
     public static final String KEY_STORE_PASSWORD = "keyStorePassword";
     public static final String PRIVATE_KEY_PASSWORD = "privateKeyPassword";
 
     public static final String LOCATION = "location";
-    public static final String KEYSTORE = "keystore";
     public static final String TYPE = "type";
     public static final String ALIAS = "alias";
-    public static final String ALGORITHM = "algorithm";
-    public static final String RSA = "RSA";
     public static final String CIPHER_TEXT = "cipherText";
     public static final String PLAIN_TEXT = "plainText";
     public static final String ENCRYPT_TEXT = "encryptText";

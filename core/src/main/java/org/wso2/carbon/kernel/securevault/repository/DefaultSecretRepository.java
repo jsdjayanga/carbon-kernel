@@ -102,8 +102,16 @@ public class DefaultSecretRepository implements SecretRepository {
     }
 
     @Override
-    public Optional<CipherProvider> getCipherProvider() {
-        return optCipherProvider;
+    public byte[] encrypt(byte[] plainText) throws SecureVaultException {
+        return optCipherProvider.orElseThrow(() -> new SecureVaultException("No Cipher provider"))
+                .encrypt(plainText);
+    }
+
+    @Override
+    public byte[] decrypt(byte[] cipherText) throws SecureVaultException {
+        return optCipherProvider
+                .orElseThrow(() -> new SecureVaultException("No Cipher provider"))
+                .decrypt(cipherText);
     }
 
     protected CipherProvider createCipherProvider(SecureVaultConfiguration secureVaultConfiguration,
@@ -116,19 +124,6 @@ public class DefaultSecretRepository implements SecretRepository {
         JKSBasedCipherProvider jksBasedCipherProvider = new JKSBasedCipherProvider();
         jksBasedCipherProvider.init(secureVaultConfiguration, initializationSecrets);
         return jksBasedCipherProvider;
-    }
-
-    protected char[] decryptSecret(String key, byte[] cipherText)
-            throws SecureVaultException {
-        return SecureVaultUtils.toChars(optCipherProvider
-                .orElseThrow(() -> new SecureVaultException("No Cipher provider"))
-                .decrypt(cipherText));
-    }
-
-    protected byte[] encryptSecret(String key, char[] plainText)
-            throws SecureVaultException {
-        return optCipherProvider.orElseThrow(() -> new SecureVaultException("No Cipher provider"))
-                .encrypt(SecureVaultUtils.toBytes(plainText));
     }
 
     protected void loadDecryptedSecrets(SecureVaultConfiguration secureVaultConfiguration)
@@ -146,7 +141,7 @@ public class DefaultSecretRepository implements SecretRepository {
 
             if (SecureVaultConstants.CIPHER_TEXT.equals(tokens[0])) {
                 byte[] base64Decoded = SecureVaultUtils.base64Decode(SecureVaultUtils.toBytes(tokens[1].toCharArray()));
-                decryptedPassword = decryptSecret(key, base64Decoded);
+                decryptedPassword = SecureVaultUtils.toChars(decrypt(base64Decoded));
             } else if (SecureVaultConstants.PLAIN_TEXT.equals(tokens[0])) {
                 decryptedPassword = tokens[1].toCharArray();
             } else {
@@ -172,7 +167,7 @@ public class DefaultSecretRepository implements SecretRepository {
 
             if (SecureVaultConstants.PLAIN_TEXT.equals(tokens[0])) {
                 encryptedPassword = SecureVaultUtils.base64Encode(
-                        encryptSecret(key, tokens[1].trim().toCharArray()));
+                        encrypt(SecureVaultUtils.toBytes(tokens[1].trim().toCharArray())));
                 secretsProperties.setProperty(key, SecureVaultConstants.CIPHER_TEXT + " "
                         + new String(SecureVaultUtils.toChars(encryptedPassword)));
             }

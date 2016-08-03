@@ -53,13 +53,11 @@ public class SecureVaultUtils {
     }
 
     public static byte[] base64Decode(byte[] base64Encoded) {
-        byte[] decodedValue = Base64.getDecoder().decode(base64Encoded);
-        return decodedValue;
+        return Base64.getDecoder().decode(base64Encoded);
     }
 
     public static byte[] base64Encode(byte[] original) {
-        byte[] encodedValue = Base64.getEncoder().encode(original);
-        return encodedValue;
+        return Base64.getEncoder().encode(original);
     }
 
     public static char[] toChars(byte[] bytes) {
@@ -108,8 +106,7 @@ public class SecureVaultUtils {
     public static Properties getSecretProperties(SecureVaultConfiguration secureVaultConfiguration)
             throws SecureVaultException {
         String secretPropertiesFileLocation = getSecretPropertiesFileLocation(secureVaultConfiguration);
-        Properties secretsProperties = SecureVaultUtils.loadSecretFile(Paths.get(secretPropertiesFileLocation));
-        return secretsProperties;
+        return SecureVaultUtils.loadSecretFile(Paths.get(secretPropertiesFileLocation));
     }
 
     public static String getSecretPropertiesFileLocation(SecureVaultConfiguration secureVaultConfiguration) {

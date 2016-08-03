@@ -20,7 +20,6 @@ import org.wso2.carbon.kernel.securevault.config.SecureVaultConfiguration;
 import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
 
 import java.util.List;
-import java.util.Optional;
 
 /**
  * This interface is used to register SecretRepositories.
@@ -76,5 +75,21 @@ public interface SecretRepository {
      */
     char[] getSecret(String alias);
 
-    Optional<CipherProvider> getCipherProvider();
+    /**
+     * An implementation of this method should provide the relevant encryption logic.
+     *
+     * @param plainText             plain text as a byte array
+     * @return byte[]               cipher text
+     * @throws SecureVaultException on an error while trying to encrypt.
+     */
+    byte[] encrypt(byte[] plainText) throws SecureVaultException;
+
+    /**
+     * An implementation of this method should provide the relevant decryption logic.
+     *
+     * @param cipherText            cipher text as a byte array
+     * @return byte[]               plain text
+     * @throws SecureVaultException on an error while trying to encrypt.
+     */
+    byte[] decrypt(byte[] cipherText) throws SecureVaultException;
 }

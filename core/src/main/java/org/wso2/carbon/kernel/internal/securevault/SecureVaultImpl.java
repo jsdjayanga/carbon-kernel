@@ -35,8 +35,6 @@ public class SecureVaultImpl implements SecureVault {
     public byte[] encrypt(byte[] plainText) throws SecureVaultException {
         return SecureVaultDataHolder.getInstance().getSecretRepository()
                 .orElseThrow(() -> new SecureVaultException("No secret repository found."))
-                .getCipherProvider()
-                .orElseThrow(() -> new SecureVaultException("No cipher provider found."))
                 .encrypt(plainText);
     }
 
@@ -44,8 +42,6 @@ public class SecureVaultImpl implements SecureVault {
     public byte[] decrypt(byte[] cipherText) throws SecureVaultException {
         return SecureVaultDataHolder.getInstance().getSecretRepository()
                 .orElseThrow(() -> new SecureVaultException("No secret repository found."))
-                .getCipherProvider()
-                .orElseThrow(() -> new SecureVaultException("No cipher provider found."))
                 .decrypt(cipherText);
     }
 }
