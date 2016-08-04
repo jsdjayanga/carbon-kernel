@@ -61,12 +61,12 @@ public class DefaultMasterKeyReader implements MasterKeyReader {
 
     @Activate
     public void activate() {
-            logger.debug("Activating DefaultSecretRetriever");
+            logger.debug("Activating DefaultMasterKeyReader");
     }
 
     @Deactivate
     public void deactivate() {
-            logger.debug("Deactivating DefaultSecretRetriever");
+            logger.debug("Deactivating DefaultMasterKeyReader");
     }
 
     @Override

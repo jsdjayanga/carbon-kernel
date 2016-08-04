@@ -49,12 +49,12 @@ public class DefaultHardCodedMasterKeyReader implements MasterKeyReader {
 
     @Activate
     public void activate() {
-        logger.debug("Activating HardCodedSecretRetriever");
+        logger.debug("Activating DefaultHardCodedMasterKeyReader");
     }
 
     @Deactivate
     public void deactivate() {
-        logger.debug("Deactivating HardCodedSecretRetriever");
+        logger.debug("Deactivating DefaultHardCodedMasterKeyReader");
     }
 
     @Override

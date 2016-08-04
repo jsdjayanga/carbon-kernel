@@ -67,12 +67,12 @@ public class CipherTool {
         String secretRepositoryType = secureVaultConfiguration.getString(SecureVaultConstants.SECRET_REPOSITORY,
                 SecureVaultConstants.TYPE).orElseThrow(() ->
                 new SecureVaultException("Secret repository type is mandatory"));
-        String secretRetrieverType = secureVaultConfiguration.getString(SecureVaultConstants.MASTER_KEY_READER,
+        String masterKeyReaderType = secureVaultConfiguration.getString(SecureVaultConstants.MASTER_KEY_READER,
                 SecureVaultConstants.TYPE).orElseThrow(() ->
-                new SecureVaultException("Secret retriever type is mandatory"));
+                new SecureVaultException("Master key reader type is mandatory"));
 
         try {
-            masterKeyReader = (MasterKeyReader) Class.forName(secretRetrieverType).newInstance();
+            masterKeyReader = (MasterKeyReader) Class.forName(masterKeyReaderType).newInstance();
             secretRepository = (SecretRepository) Class.forName(secretRepositoryType).newInstance();
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
             throw new SecureVaultException("Failed to instantiate implementation classes.", e);

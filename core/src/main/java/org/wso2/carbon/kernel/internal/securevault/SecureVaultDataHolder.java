@@ -57,9 +57,9 @@ public class SecureVaultDataHolder {
     }
 
     /**
-     * Getter method of SecretRetriever instance.
+     * Getter method of MasterKeyReader instance.
      *
-     * @return SecretRetriever returns an {@link Optional} {@link MasterKeyReader} instance
+     * @return MasterKeyReader returns an {@link Optional} {@link MasterKeyReader} instance
      */
     public Optional<MasterKeyReader> getMasterKeyReader() {
         return Optional.ofNullable(masterKeyReader);
@@ -68,7 +68,7 @@ public class SecureVaultDataHolder {
     /**
      * Setter method of {@link MasterKeyReader}
      *
-     * @param masterKeyReader SecretRetriever instance to be set
+     * @param masterKeyReader MasterKeyReader instance to be set
      */
     public void setMasterKeyReader(MasterKeyReader masterKeyReader) {
         this.masterKeyReader = masterKeyReader;

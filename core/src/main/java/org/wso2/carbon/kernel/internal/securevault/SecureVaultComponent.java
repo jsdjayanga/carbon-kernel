@@ -37,10 +37,10 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * This service component acts as a RequiredCapabilityListener for all the SecretRepositories, SecretRetrievers
- * and CipherProviders. Once those are available, this component choose which instance to be used, based on the
- * secure vault configuration and registered the SecureVault OSGi service, which can then be used by other components
- * for encryption and decryption.
+ * This service component acts as a RequiredCapabilityListener for all the ${@link SecretRepository}s
+ * and ${@link MasterKeyReader}s. Once those are available, this component choose which instance to be used,
+ * based on the secure vault configuration and registered the SecureVault OSGi service, which can then be used
+ * by other components for encryption and decryption.
  *
  * @since 5.2.0
  */
@@ -55,7 +55,7 @@ public class SecureVaultComponent implements RequiredCapabilityListener {
     private static final Logger logger = LoggerFactory.getLogger(SecureVaultComponent.class);
 
     private String secretRepositoryType;
-    private String secretRetrieverType;
+    private String massterKeyReaderType;
 
     public SecureVaultComponent() {
         Optional<SecureVaultConfiguration> optSecureVaultConfiguration;
@@ -63,7 +63,7 @@ public class SecureVaultComponent implements RequiredCapabilityListener {
             SecureVaultConfiguration secureVaultConfiguration = SecureVaultConfiguration.getInstance();
             secretRepositoryType = secureVaultConfiguration.getString(SecureVaultConstants.SECRET_REPOSITORY,
                     SecureVaultConstants.TYPE).orElse("");
-            secretRetrieverType = secureVaultConfiguration.getString(SecureVaultConstants.MASTER_KEY_READER,
+            massterKeyReaderType = secureVaultConfiguration.getString(SecureVaultConstants.MASTER_KEY_READER,
                     SecureVaultConstants.TYPE).orElse("");
         } catch (SecureVaultException e) {
             logger.error("Error while acquiring secure vault configuration");
@@ -120,15 +120,15 @@ public class SecureVaultComponent implements RequiredCapabilityListener {
     protected void registerMasterKeyReader(MasterKeyReader masterKeyReader, Map<String, Object> configs) {
         Optional.ofNullable(configs.get(SecureVaultConstants.MASTER_KEY_READER_PROPERTY_NAME))
                 .ifPresent(o -> {
-                    if (o.toString().equals(secretRetrieverType)) {
+                    if (o.toString().equals(massterKeyReaderType)) {
                         SecureVaultDataHolder.getInstance().setMasterKeyReader(masterKeyReader);
                     }
                 });
     }
 
     protected void unregisterMasterKeyReader(MasterKeyReader masterKeyReader) {
-        SecureVaultDataHolder.getInstance().getSecretRepository().ifPresent(currentSecretRetriever -> {
-            if (currentSecretRetriever == masterKeyReader) {
+        SecureVaultDataHolder.getInstance().getMasterKeyReader().ifPresent(currentMasterKeyReader -> {
+            if (currentMasterKeyReader == masterKeyReader) {
                 SecureVaultDataHolder.getInstance().setMasterKeyReader(null);
             }
         });
@@ -136,13 +136,13 @@ public class SecureVaultComponent implements RequiredCapabilityListener {
 
     private void initializeSecureVault() {
         try {
-            logger.debug("Initializing the secure vault with, SecretRepositoryType={}, SecretRetrieverType={}",
-                    secretRepositoryType, secretRetrieverType);
+            logger.debug("Initializing the secure vault with, SecretRepositoryType={}, MasterKeyReaderType={}",
+                    secretRepositoryType, massterKeyReaderType);
             SecureVaultConfiguration secureVaultConfiguration = SecureVaultConfiguration.getInstance();
 
             MasterKeyReader masterKeyReader = SecureVaultDataHolder.getInstance().getMasterKeyReader()
                     .orElseThrow(() ->
-                            new SecureVaultException("Cannot initialise secure vault without secret retriever"));
+                            new SecureVaultException("Cannot initialise secure vault without master key reader"));
             SecretRepository secretRepository = SecureVaultDataHolder.getInstance().getSecretRepository()
                     .orElseThrow(() ->
                             new SecureVaultException("Cannot initialise secure vault without secret repository"));

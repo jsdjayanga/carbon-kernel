@@ -23,9 +23,9 @@ import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
 import java.util.List;
 
 /**
- * This interface is used to register SecretRetriever.
+ * This interface is used to register MasterKeyReader.
  *
- * An implementation of this interface should be registered as an OSGi service using the SecretRetriever interface.
+ * An implementation of this interface should be registered as an OSGi service using the MasterKeyReader interface.
  *
  * The implementation of this interface can be different from one SecretRepository to another depending on its
  * requirements and behaviour.
@@ -35,11 +35,11 @@ import java.util.List;
 public interface MasterKeyReader {
 
     /**
-     * An implementation of this method should initialize the SecretRetriever, so that it could perform the
+     * An implementation of this method should initialize the MasterKeyReader, so that it could perform the
      * {@code readSecrets}
      *
      * @param secureVaultConfiguration  {@link SecureVaultConfiguration}
-     * @throws SecureVaultException     on error while trying to initializing the SecretRetriever
+     * @throws SecureVaultException     on an error while trying to initializing the MasterKeyReader
      */
     default void init(SecureVaultConfiguration secureVaultConfiguration) throws SecureVaultException {}
 
@@ -48,7 +48,7 @@ public interface MasterKeyReader {
      * initializationSecrets list.
      *
      * @param masterKeys a list of {@link MasterKey} with initialization secrets
-     * @throws SecureVaultException on error while trying to initializing the SecretRetriever
+     * @throws SecureVaultException on an error while trying to initializing the MasterKeyReader
      */
     void readSecrets(List<MasterKey> masterKeys) throws SecureVaultException;
 }

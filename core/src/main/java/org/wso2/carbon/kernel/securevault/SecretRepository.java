@@ -40,7 +40,7 @@ public interface SecretRepository {
      * SecretRepository ready for {@code loadSecrets} and {@code persistSecrets}
      *
      * @param secureVaultConfiguration {@link SecureVaultConfiguration}
-     * @param masterKeyReader          an initialized secret retriever {@link MasterKeyReader}
+     * @param masterKeyReader          an initialized {@link MasterKeyReader}
      * @throws SecureVaultException    on an error while trying to initialize the SecretRepository
      */
     void init(SecureVaultConfiguration secureVaultConfiguration, MasterKeyReader masterKeyReader)
@@ -50,7 +50,7 @@ public interface SecretRepository {
      * An implementation of this method should load the secrets from underlying secret repository.
      *
      * @param secureVaultConfiguration {@link SecureVaultConfiguration}
-     * @param masterKeyReader          an initialized secret retriever {@link MasterKeyReader}
+     * @param masterKeyReader          an initialized {@link MasterKeyReader}
      * @throws SecureVaultException    on an error while trying to load secrets
      */
     void loadSecrets(SecureVaultConfiguration secureVaultConfiguration, MasterKeyReader masterKeyReader)
