@@ -22,7 +22,9 @@ import org.wso2.carbon.kernel.securevault.SecretRetriever;
 import java.util.Optional;
 
 /**
- * Created by jayanga on 8/2/16.
+ * Secure Vault DataHolder.
+ *
+ * @since 5.2.0
  */
 public class SecureVaultDataHolder {
     private static SecureVaultDataHolder instance = new SecureVaultDataHolder();
@@ -36,18 +38,38 @@ public class SecureVaultDataHolder {
     private SecureVaultDataHolder() {
     }
 
+    /**
+     * Getter method of SecretRepository instance.
+     *
+     * @return Optional<SecretRepository> returns an {@link Optional} {@link SecretRepository} instance
+     */
     public Optional<SecretRepository> getSecretRepository() {
         return Optional.ofNullable(secretRepository);
     }
 
+    /**
+     * Setter method of {@link SecretRepository}
+     *
+     * @param secretRepository SecretRepository instance to be set
+     */
     public void setSecretRepository(SecretRepository secretRepository) {
         this.secretRepository = secretRepository;
     }
 
+    /**
+     * Getter method of SecretRetriever instance.
+     *
+     * @return Optional<SecretRetriever> returns an {@link Optional} {@link SecretRetriever} instance
+     */
     public Optional<SecretRetriever> getSecretRetriever() {
         return Optional.ofNullable(secretRetriever);
     }
 
+    /**
+     * Setter method of {@link SecretRetriever}
+     *
+     * @param secretRetriever SecretRetriever instance to be set
+     */
     public void setSecretRetriever(SecretRetriever secretRetriever) {
         this.secretRetriever = secretRetriever;
     }

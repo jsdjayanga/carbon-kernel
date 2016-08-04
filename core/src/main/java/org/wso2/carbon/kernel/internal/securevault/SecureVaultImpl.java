@@ -20,7 +20,9 @@ import org.wso2.carbon.kernel.securevault.SecureVault;
 import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
 
 /**
- * Created by jayanga on 7/18/16.
+ * The default implementation of the SecureVault.
+ *
+ * @since 5.2.0
  */
 public class SecureVaultImpl implements SecureVault {
 
