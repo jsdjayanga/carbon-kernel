@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.wso2.carbon.kernel.securevault.retriever;
+package org.wso2.carbon.kernel.securevault.reader;
 
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -37,11 +37,11 @@ import java.util.List;
  * @since 5.2.0
  */
 @Component(
-        name = "org.wso2.carbon.kernel.securevault.retriever.DefaultHardCodedMasterKeyReader",
+        name = "org.wso2.carbon.kernel.securevault.reader.DefaultHardCodedMasterKeyReader",
         immediate = true,
         property = {
                 "capabilityName=org.wso2.carbon.kernel.securevault.SecretRetriever",
-                "masterKeyReaderType=org.wso2.carbon.kernel.securevault.retriever.DefaultHardCodedMasterKeyReader"
+                "masterKeyReaderType=org.wso2.carbon.kernel.securevault.reader.DefaultHardCodedMasterKeyReader"
         }
 )
 public class DefaultHardCodedMasterKeyReader implements MasterKeyReader {
