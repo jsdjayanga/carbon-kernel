@@ -42,14 +42,14 @@ public abstract class AbstractSecretRepository implements SecretRepository {
     @Override
     public void loadSecrets(SecureVaultConfiguration secureVaultConfiguration, MasterKeyReader masterKeyReader)
             throws SecureVaultException {
-        logger.debug("Loading secrets to AbstractSecretRepository");
+        logger.debug("Loading secrets to SecretRepository");
         loadDecryptedSecrets(secureVaultConfiguration);
     }
 
     @Override
     public void persistSecrets(SecureVaultConfiguration secureVaultConfiguration, List<MasterKey> masterKeys)
             throws SecureVaultException {
-        logger.debug("Securing AbstractSecretRepository");
+        logger.debug("Persisting secrets to SecretRepository");
         persistEncryptedSecrets(secureVaultConfiguration);
     }
 

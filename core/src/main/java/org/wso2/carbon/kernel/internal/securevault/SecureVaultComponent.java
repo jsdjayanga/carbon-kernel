@@ -55,18 +55,17 @@ public class SecureVaultComponent implements RequiredCapabilityListener {
     private static final Logger logger = LoggerFactory.getLogger(SecureVaultComponent.class);
 
     private String secretRepositoryType;
-    private String massterKeyReaderType;
+    private String masterKeyReaderType;
 
     public SecureVaultComponent() {
-        Optional<SecureVaultConfiguration> optSecureVaultConfiguration;
         try {
             SecureVaultConfiguration secureVaultConfiguration = SecureVaultConfiguration.getInstance();
             secretRepositoryType = secureVaultConfiguration.getString(SecureVaultConstants.SECRET_REPOSITORY,
                     SecureVaultConstants.TYPE).orElse("");
-            massterKeyReaderType = secureVaultConfiguration.getString(SecureVaultConstants.MASTER_KEY_READER,
+            masterKeyReaderType = secureVaultConfiguration.getString(SecureVaultConstants.MASTER_KEY_READER,
                     SecureVaultConstants.TYPE).orElse("");
         } catch (SecureVaultException e) {
-            logger.error("Error while acquiring secure vault configuration");
+            logger.error("Error while acquiring secure vault configuration", e);
         }
     }
 
@@ -120,7 +119,7 @@ public class SecureVaultComponent implements RequiredCapabilityListener {
     protected void registerMasterKeyReader(MasterKeyReader masterKeyReader, Map<String, Object> configs) {
         Optional.ofNullable(configs.get(SecureVaultConstants.MASTER_KEY_READER_PROPERTY_NAME))
                 .ifPresent(o -> {
-                    if (o.toString().equals(massterKeyReaderType)) {
+                    if (o.toString().equals(masterKeyReaderType)) {
                         SecureVaultDataHolder.getInstance().setMasterKeyReader(masterKeyReader);
                     }
                 });
@@ -137,7 +136,7 @@ public class SecureVaultComponent implements RequiredCapabilityListener {
     private void initializeSecureVault() {
         try {
             logger.debug("Initializing the secure vault with, SecretRepositoryType={}, MasterKeyReaderType={}",
-                    secretRepositoryType, massterKeyReaderType);
+                    secretRepositoryType, masterKeyReaderType);
             SecureVaultConfiguration secureVaultConfiguration = SecureVaultConfiguration.getInstance();
 
             MasterKeyReader masterKeyReader = SecureVaultDataHolder.getInstance().getMasterKeyReader()
