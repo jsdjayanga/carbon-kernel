@@ -40,6 +40,7 @@ import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.util.List;
+import java.util.Optional;
 import javax.crypto.Cipher;
 import javax.crypto.CipherOutputStream;
 import javax.crypto.NoSuchPaddingException;
@@ -110,7 +111,9 @@ public class JKSBasedCipherProvider implements CipherProvider {
             throws SecureVaultException {
         Certificate certificate;
         try {
-            certificate = keyStore.getCertificate(alias);
+            certificate = Optional.ofNullable(keyStore.getCertificate(alias))
+                    .orElseThrow(() ->
+                            new SecureVaultException("No certificate found with the given alias : " + alias));
         } catch (KeyStoreException e) {
             throw new SecureVaultException("Failed to get certificate for alias '" + alias + "'", e);
         }
@@ -128,7 +131,8 @@ public class JKSBasedCipherProvider implements CipherProvider {
             throws SecureVaultException {
         PrivateKey privateKey;
         try {
-            privateKey = (PrivateKey) keyStore.getKey(alias, privateKeyPassword);
+            privateKey = Optional.ofNullable((PrivateKey) keyStore.getKey(alias, privateKeyPassword))
+                    .orElseThrow(() -> new SecureVaultException("No key found with the given alias : " + alias));
         } catch (KeyStoreException | NoSuchAlgorithmException | UnrecoverableKeyException e) {
             throw new SecureVaultException("Failed to get private key for alias '" + alias + "'", e);
         }
