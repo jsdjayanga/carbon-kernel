@@ -19,13 +19,8 @@ package org.wso2.carbon.kernel.securevault;
 import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
 
 /**
- * This interface is used to register CipherProviders. A CipherProvider is expected to provide
- * encryption and decryption functionality.
- *
- * An implementation of this interface should be registered as an OSGi service using the CipherProvider interface.
- *
- * The implementation of this interface can be different from one CipherProvider to another depending on its
- * requirements and behaviour.
+ * This interface provides encrypt() and decrypt() methods. An implementation of this interface should provide
+ * implementation specific encryption and decryption logic.
  *
  * @since 5.2.0
  */
@@ -34,7 +29,7 @@ public interface CipherProvider {
      * An implementation of this method should provide the relevant encryption logic.
      *
      * @param plainText             plain text as a byte array
-     * @return byte[]               cipher text
+     * @return byte[]               cipher text as a byte array
      * @throws SecureVaultException on an error while trying to encrypt.
      */
     byte[] encrypt(byte[] plainText) throws SecureVaultException;
@@ -43,7 +38,7 @@ public interface CipherProvider {
      * An implementation of this method should provide the relevant decryption logic.
      *
      * @param cipherText            cipher text as a byte array
-     * @return byte[]               plain text
+     * @return byte[]               plain text as a byte array
      * @throws SecureVaultException on an error while trying to encrypt.
      */
     byte[] decrypt(byte[] cipherText) throws SecureVaultException;

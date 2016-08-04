@@ -39,7 +39,9 @@ import java.util.List;
 import java.util.Properties;
 
 /**
- * Created by jayanga on 7/13/16.
+ * Secure Vault utility methods.
+ *
+ * @since 5.2.0
  */
 public class SecureVaultUtils {
     private static final Logger logger = LoggerFactory.getLogger(SecureVaultUtils.class);

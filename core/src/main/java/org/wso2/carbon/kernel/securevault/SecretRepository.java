@@ -34,15 +34,14 @@ import java.util.List;
 public interface SecretRepository {
 
     /**
-     * This method will be called with a {@link SecureVaultConfiguration}, a {@link CipherProvider}
-     * and a list of {@link Secret}s.
+     * This method will be called with a {@link SecureVaultConfiguration}, a {@link CipherProvider}.
      *
-     * An implementation of this interface should initialize the {@link SecretRepository}, which make the
+     * An implementation of this method should initialize the {@link SecretRepository}, which make the
      * SecretRepository ready for {@code loadSecrets} and {@code persistSecrets}
      *
      * @param secureVaultConfiguration {@link SecureVaultConfiguration}
      * @param secretRetriever          an initialized secret retriever {@link SecretRetriever}
-     * @throws SecureVaultException    on error while trying to initializing the SecretRepository
+     * @throws SecureVaultException    on an error while trying to initialize the SecretRepository
      */
     void init(SecureVaultConfiguration secureVaultConfiguration, SecretRetriever secretRetriever)
             throws SecureVaultException;
@@ -52,7 +51,7 @@ public interface SecretRepository {
      *
      * @param secureVaultConfiguration {@link SecureVaultConfiguration}
      * @param secretRetriever          an initialized secret retriever {@link SecretRetriever}
-     * @throws SecureVaultException    on error while trying to load secrets
+     * @throws SecureVaultException    on an error while trying to load secrets
      */
     void loadSecrets(SecureVaultConfiguration secureVaultConfiguration, SecretRetriever secretRetriever)
             throws SecureVaultException;
@@ -62,7 +61,7 @@ public interface SecretRepository {
      *
      * @param secureVaultConfiguration {@link SecureVaultConfiguration}
      * @param initializationSecrets    a list of {@link Secret} with initialization secrets
-     * @throws SecureVaultException    on error while trying to persis secrets
+     * @throws SecureVaultException    on an error while trying to persis secrets
      */
     void persistSecrets(SecureVaultConfiguration secureVaultConfiguration, List<Secret> initializationSecrets)
             throws SecureVaultException;
@@ -79,7 +78,7 @@ public interface SecretRepository {
      * An implementation of this method should provide the relevant encryption logic.
      *
      * @param plainText             plain text as a byte array
-     * @return byte[]               cipher text
+     * @return byte[]               cipher text as a byte array
      * @throws SecureVaultException on an error while trying to encrypt.
      */
     byte[] encrypt(byte[] plainText) throws SecureVaultException;
@@ -88,7 +87,7 @@ public interface SecretRepository {
      * An implementation of this method should provide the relevant decryption logic.
      *
      * @param cipherText            cipher text as a byte array
-     * @return byte[]               plain text
+     * @return byte[]               plain text as a byte array
      * @throws SecureVaultException on an error while trying to encrypt.
      */
     byte[] decrypt(byte[] cipherText) throws SecureVaultException;

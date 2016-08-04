@@ -17,7 +17,9 @@
 package org.wso2.carbon.kernel.securevault;
 
 /**
- * Created by jayanga on 7/13/16.
+ * Secure Vault Constants.
+ *
+ * @since 5.2.0
  */
 public class SecureVaultConstants {
     public static final String SECRET_REPOSITORY = "secretRepository";

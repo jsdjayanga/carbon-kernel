@@ -34,7 +34,23 @@ public interface SecureVault {
      */
     char[] resolve(String alias) throws SecureVaultException;
 
+    /**
+     * An implementation of this method should delegate the encryption to the underlying {@link SecretRepository}
+     * and get the {@code plainText} encrypted.
+     *
+     * @param plainText             plain text as a byte array
+     * @return byte[]               cipher text as a byte array
+     * @throws SecureVaultException on an error while trying to encrypt.
+     */
     byte[] encrypt(byte[] plainText) throws SecureVaultException;
 
+    /**
+     * An implementation of this method should delegate the decryption to the underlying {@link SecretRepository}
+     * and get the {@code cipherText} decrypted.
+     *
+     * @param cipherText            cipher text as a byte array
+     * @return byte[]               plain text as a byte array
+     * @throws SecureVaultException on an error while trying to encrypt.
+     */
     byte[] decrypt(byte[] cipherText) throws SecureVaultException;
 }
