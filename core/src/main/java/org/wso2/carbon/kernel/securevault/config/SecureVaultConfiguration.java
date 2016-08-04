@@ -29,7 +29,9 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * Created by jayanga on 7/12/16.
+ * Secure Vault Configuration.
+ *
+ * @since 5.2.0
  */
 public class SecureVaultConfiguration {
     private static final Logger logger = LoggerFactory.getLogger(SecureVaultConfiguration.class);
@@ -61,11 +63,12 @@ public class SecureVaultConfiguration {
             // ConfigUtil.parse(inputStream);
 
             Yaml yaml = new Yaml();
-            secureVaultConfiguration = (Map<String, Object>) yaml.load(inputStream);
-            if (secureVaultConfiguration == null || secureVaultConfiguration.isEmpty()) {
-                throw new SecureVaultException("Failed to load secure vault configuration yaml : "
-                        + configFileLocation);
-            }
+
+            secureVaultConfiguration = Optional.ofNullable((Map<String, Object>) yaml.load(inputStream))
+                    .filter(stringObjectMap -> !stringObjectMap.isEmpty())
+                    .orElseThrow(() -> new SecureVaultException(
+                            "Failed to load secure vault configuration yaml : " + configFileLocation));
+
             logger.debug("Secure vault configurations parsed successfully.");
 
             initialized = true;

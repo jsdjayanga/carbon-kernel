@@ -60,14 +60,11 @@ public class SecureVaultComponent implements RequiredCapabilityListener {
     public SecureVaultComponent() {
         Optional<SecureVaultConfiguration> optSecureVaultConfiguration;
         try {
-            optSecureVaultConfiguration = Optional.of(SecureVaultConfiguration.getInstance());
-            optSecureVaultConfiguration.ifPresent(secureVaultConfiguration -> {
-                secretRepositoryType = secureVaultConfiguration.getString(SecureVaultConstants.SECRET_REPOSITORY,
-                        SecureVaultConstants.TYPE).orElse("");
-                secretRetrieverType = secureVaultConfiguration.getString(SecureVaultConstants.SECRET_RETRIEVER,
-                        SecureVaultConstants.TYPE).orElse("");
-
-            });
+            SecureVaultConfiguration secureVaultConfiguration = SecureVaultConfiguration.getInstance();
+            secretRepositoryType = secureVaultConfiguration.getString(SecureVaultConstants.SECRET_REPOSITORY,
+                    SecureVaultConstants.TYPE).orElse("");
+            secretRetrieverType = secureVaultConfiguration.getString(SecureVaultConstants.SECRET_RETRIEVER,
+                    SecureVaultConstants.TYPE).orElse("");
         } catch (SecureVaultException e) {
             logger.error("Error while acquiring secure vault configuration");
         }
@@ -99,7 +96,7 @@ public class SecureVaultComponent implements RequiredCapabilityListener {
     protected void registerSecretRepository(SecretRepository secretRepository, Map<String, Object> configs) {
         Optional.ofNullable(configs.get(SecureVaultConstants.SECRET_REPOSITORY_PROPERTY_NAME))
                 .ifPresent(o -> {
-                    if (secretRepositoryType.equals(o.toString())) {
+                    if (o.toString().equals(secretRepositoryType)) {
                         SecureVaultDataHolder.getInstance().setSecretRepository(secretRepository);
                     }
                 });
@@ -123,7 +120,7 @@ public class SecureVaultComponent implements RequiredCapabilityListener {
     protected void registerSecretRetriever(SecretRetriever secretRetriever, Map<String, Object> configs) {
         Optional.ofNullable(configs.get(SecureVaultConstants.SECRET_RETRIEVER_PROPERTY_NAME))
                 .ifPresent(o -> {
-                    if (secretRetrieverType.equals(o.toString())) {
+                    if (o.toString().equals(secretRetrieverType)) {
                         SecureVaultDataHolder.getInstance().setSecretRetriever(secretRetriever);
                     }
                 });
