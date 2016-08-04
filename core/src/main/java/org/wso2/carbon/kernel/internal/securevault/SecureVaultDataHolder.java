@@ -41,7 +41,7 @@ public class SecureVaultDataHolder {
     /**
      * Getter method of SecretRepository instance.
      *
-     * @return Optional<SecretRepository> returns an {@link Optional} {@link SecretRepository} instance
+     * @return SecretRepository returns an {@link Optional} {@link SecretRepository} instance
      */
     public Optional<SecretRepository> getSecretRepository() {
         return Optional.ofNullable(secretRepository);
@@ -59,7 +59,7 @@ public class SecureVaultDataHolder {
     /**
      * Getter method of SecretRetriever instance.
      *
-     * @return Optional<SecretRetriever> returns an {@link Optional} {@link SecretRetriever} instance
+     * @return SecretRetriever returns an {@link Optional} {@link SecretRetriever} instance
      */
     public Optional<SecretRetriever> getSecretRetriever() {
         return Optional.ofNullable(secretRetriever);

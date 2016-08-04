@@ -31,6 +31,7 @@ public interface SecureVault {
      *
      * @param alias alias of the secret
      * @return      if the alias exist return the plain text password else return an empty char[]
+     * @throws SecureVaultException on an error while trying to resolve.
      */
     char[] resolve(String alias) throws SecureVaultException;
 
