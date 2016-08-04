@@ -40,30 +40,30 @@ public interface SecretRepository {
      * SecretRepository ready for {@code loadSecrets} and {@code persistSecrets}
      *
      * @param secureVaultConfiguration {@link SecureVaultConfiguration}
-     * @param secretRetriever          an initialized secret retriever {@link SecretRetriever}
+     * @param masterKeyReader          an initialized secret retriever {@link MasterKeyReader}
      * @throws SecureVaultException    on an error while trying to initialize the SecretRepository
      */
-    void init(SecureVaultConfiguration secureVaultConfiguration, SecretRetriever secretRetriever)
+    void init(SecureVaultConfiguration secureVaultConfiguration, MasterKeyReader masterKeyReader)
             throws SecureVaultException;
 
     /**
      * An implementation of this method should load the secrets from underlying secret repository.
      *
      * @param secureVaultConfiguration {@link SecureVaultConfiguration}
-     * @param secretRetriever          an initialized secret retriever {@link SecretRetriever}
+     * @param masterKeyReader          an initialized secret retriever {@link MasterKeyReader}
      * @throws SecureVaultException    on an error while trying to load secrets
      */
-    void loadSecrets(SecureVaultConfiguration secureVaultConfiguration, SecretRetriever secretRetriever)
+    void loadSecrets(SecureVaultConfiguration secureVaultConfiguration, MasterKeyReader masterKeyReader)
             throws SecureVaultException;
 
     /**
      * An implementation of this method should persist the secrets to the underlying secret repository.
      *
      * @param secureVaultConfiguration {@link SecureVaultConfiguration}
-     * @param initializationSecrets    a list of {@link Secret} with initialization secrets
+     * @param masterKeys    a list of {@link MasterKey} with initialization secrets
      * @throws SecureVaultException    on an error while trying to persis secrets
      */
-    void persistSecrets(SecureVaultConfiguration secureVaultConfiguration, List<Secret> initializationSecrets)
+    void persistSecrets(SecureVaultConfiguration secureVaultConfiguration, List<MasterKey> masterKeys)
             throws SecureVaultException;
 
     /**

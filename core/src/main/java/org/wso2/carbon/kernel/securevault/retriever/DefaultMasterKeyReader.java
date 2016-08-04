@@ -21,8 +21,8 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.kernel.securevault.Secret;
-import org.wso2.carbon.kernel.securevault.SecretRetriever;
+import org.wso2.carbon.kernel.securevault.MasterKey;
+import org.wso2.carbon.kernel.securevault.MasterKeyReader;
 import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
 import org.wso2.carbon.kernel.utils.Utils;
 
@@ -48,15 +48,15 @@ import java.util.Properties;
  * @since 5.2.0
  */
 @Component(
-        name = "org.wso2.carbon.kernel.securevault.retriever.DefaultSecretRetriever",
+        name = "org.wso2.carbon.kernel.securevault.retriever.DefaultMasterKeyReader",
         immediate = true,
         property = {
                 "capabilityName=org.wso2.carbon.kernel.securevault.SecretRetriever",
-                "secretRetrieverType=org.wso2.carbon.kernel.securevault.retriever.DefaultSecretRetriever"
+                "masterKeyReaderType=org.wso2.carbon.kernel.securevault.retriever.DefaultMasterKeyReader"
         }
 )
-public class DefaultSecretRetriever implements SecretRetriever {
-    private static Logger logger = LoggerFactory.getLogger(DefaultSecretRetriever.class);
+public class DefaultMasterKeyReader implements MasterKeyReader {
+    private static Logger logger = LoggerFactory.getLogger(DefaultMasterKeyReader.class);
     private boolean isPermanentFile = false;
 
     @Activate
@@ -70,16 +70,16 @@ public class DefaultSecretRetriever implements SecretRetriever {
     }
 
     @Override
-    public void readSecrets(List<Secret> secrets) throws SecureVaultException {
+    public void readSecrets(List<MasterKey> masterKeys) throws SecureVaultException {
         Path passwordFilePath = Paths.get(Utils.getCarbonHome().toString(), "password");
         if (Files.exists(passwordFilePath)) {
-            readSecretsFile(passwordFilePath, secrets);
+            readSecretsFile(passwordFilePath, masterKeys);
         } else {
-            readSecretsFromConsole(secrets);
+            readSecretsFromConsole(masterKeys);
         }
     }
 
-    private void readSecretsFile(Path passwordFilePath, List<Secret> secrets) throws SecureVaultException {
+    private void readSecretsFile(Path passwordFilePath, List<MasterKey> masterKeys) throws SecureVaultException {
         Properties properties = new Properties();
         try (InputStream inputStream = new FileInputStream(passwordFilePath.toFile())) {
             properties.load(inputStream);
@@ -92,8 +92,8 @@ public class DefaultSecretRetriever implements SecretRetriever {
                 isPermanentFile = Boolean.parseBoolean(permanentFile);
             }
 
-            for (Secret secret : secrets) {
-                secret.setSecretValue(properties.getProperty(secret.getSecretName(), ""));
+            for (MasterKey masterKey : masterKeys) {
+                masterKey.setSecretValue(properties.getProperty(masterKey.getSecretName(), ""));
             }
 
             inputStream.close();
@@ -108,12 +108,12 @@ public class DefaultSecretRetriever implements SecretRetriever {
         }
     }
 
-    private void readSecretsFromConsole(List<Secret> secrets) throws SecureVaultException {
+    private void readSecretsFromConsole(List<MasterKey> masterKeys) throws SecureVaultException {
         Console console = System.console();
         if (console != null) {
-            for (Secret secret : secrets) {
-                secret.setSecretValue(new String(console.readPassword("[%s]",
-                        "Enter " + secret.getSecretName() + " Password :")));
+            for (MasterKey masterKey : masterKeys) {
+                masterKey.setSecretValue(new String(console.readPassword("[%s]",
+                        "Enter " + masterKey.getSecretName() + " Password :")));
             }
         }
     }

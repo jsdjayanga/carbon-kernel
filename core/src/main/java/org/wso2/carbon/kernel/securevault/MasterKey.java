@@ -19,11 +19,11 @@ package org.wso2.carbon.kernel.securevault;
 /**
  * Created by jayanga on 7/13/16.
  */
-public class Secret {
+public class MasterKey {
     private String secretName;
     private String secretValue;
 
-    public Secret(String secretName) {
+    public MasterKey(String secretName) {
         this.secretName = secretName;
     }
 

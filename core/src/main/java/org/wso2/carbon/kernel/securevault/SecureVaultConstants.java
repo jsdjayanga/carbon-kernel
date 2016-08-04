@@ -24,8 +24,8 @@ package org.wso2.carbon.kernel.securevault;
 public class SecureVaultConstants {
     public static final String SECRET_REPOSITORY = "secretRepository";
     public static final String SECRET_REPOSITORY_PROPERTY_NAME = "secretRepositoryType";
-    public static final String SECRET_RETRIEVER = "secretRetriever";
-    public static final String SECRET_RETRIEVER_PROPERTY_NAME = "secretRetrieverType";
+    public static final String MASTER_KEY_READER = "masterKeyReader";
+    public static final String MASTER_KEY_READER_PROPERTY_NAME = "masterKeyReaderType";
     public static final String CIPHER_PROVIDER = "cipherProvider";
 
     public static final String KEY_STORE_PASSWORD = "keyStorePassword";

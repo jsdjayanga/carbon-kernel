@@ -21,8 +21,8 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.kernel.securevault.Secret;
-import org.wso2.carbon.kernel.securevault.SecretRetriever;
+import org.wso2.carbon.kernel.securevault.MasterKey;
+import org.wso2.carbon.kernel.securevault.MasterKeyReader;
 import org.wso2.carbon.kernel.securevault.SecureVaultConstants;
 import org.wso2.carbon.kernel.securevault.SecureVaultUtils;
 import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
@@ -37,15 +37,15 @@ import java.util.List;
  * @since 5.2.0
  */
 @Component(
-        name = "org.wso2.carbon.kernel.securevault.retriever.DefaultHardCodedSecretRetriever",
+        name = "org.wso2.carbon.kernel.securevault.retriever.DefaultHardCodedMasterKeyReader",
         immediate = true,
         property = {
                 "capabilityName=org.wso2.carbon.kernel.securevault.SecretRetriever",
-                "secretRetrieverType=org.wso2.carbon.kernel.securevault.retriever.DefaultHardCodedSecretRetriever"
+                "masterKeyReaderType=org.wso2.carbon.kernel.securevault.retriever.DefaultHardCodedMasterKeyReader"
         }
 )
-public class DefaultHardCodedSecretRetriever implements SecretRetriever {
-    private static Logger logger = LoggerFactory.getLogger(DefaultHardCodedSecretRetriever.class);
+public class DefaultHardCodedMasterKeyReader implements MasterKeyReader {
+    private static Logger logger = LoggerFactory.getLogger(DefaultHardCodedMasterKeyReader.class);
 
     @Activate
     public void activate() {
@@ -58,13 +58,14 @@ public class DefaultHardCodedSecretRetriever implements SecretRetriever {
     }
 
     @Override
-    public void readSecrets(List<Secret> secrets) throws SecureVaultException {
+    public void readSecrets(List<MasterKey> masterKeys) throws SecureVaultException {
         logger.debug("Providing hard coded secrets for 'keyStorePassword' and 'privateKeyPassword'");
 
-        Secret keyStorePassword = SecureVaultUtils.getSecret(secrets, SecureVaultConstants.KEY_STORE_PASSWORD);
+        MasterKey keyStorePassword = SecureVaultUtils.getSecret(masterKeys, SecureVaultConstants.KEY_STORE_PASSWORD);
         keyStorePassword.setSecretValue("wso2carbon");
 
-        Secret privateKeyPassword = SecureVaultUtils.getSecret(secrets, SecureVaultConstants.PRIVATE_KEY_PASSWORD);
+        MasterKey privateKeyPassword = SecureVaultUtils.getSecret(masterKeys,
+                SecureVaultConstants.PRIVATE_KEY_PASSWORD);
         privateKeyPassword.setSecretValue("wso2carbon");
     }
 }

@@ -17,9 +17,9 @@
 package org.wso2.carbon.kernel.securevault.tool;
 
 import org.wso2.carbon.kernel.internal.securevault.SecureVaultDataHolder;
-import org.wso2.carbon.kernel.securevault.Secret;
+import org.wso2.carbon.kernel.securevault.MasterKey;
+import org.wso2.carbon.kernel.securevault.MasterKeyReader;
 import org.wso2.carbon.kernel.securevault.SecretRepository;
-import org.wso2.carbon.kernel.securevault.SecretRetriever;
 import org.wso2.carbon.kernel.securevault.SecureVaultConstants;
 import org.wso2.carbon.kernel.securevault.SecureVaultUtils;
 import org.wso2.carbon.kernel.securevault.config.SecureVaultConfiguration;
@@ -36,9 +36,9 @@ import java.util.logging.Logger;
 public class CipherTool {
     private static final Logger logger = Logger.getLogger(CipherTool.class.getName());
     private SecureVaultConfiguration secureVaultConfiguration;
-    private SecretRetriever secretRetriever;
+    private MasterKeyReader masterKeyReader;
     private SecretRepository secretRepository;
-    List<Secret> secrets = new ArrayList<>();
+    List<MasterKey> masterKeys = new ArrayList<>();
 
     public static void main(String[] args) {
         logger.info("####### WSO2 CipherTool #######");
@@ -67,23 +67,23 @@ public class CipherTool {
         String secretRepositoryType = secureVaultConfiguration.getString(SecureVaultConstants.SECRET_REPOSITORY,
                 SecureVaultConstants.TYPE).orElseThrow(() ->
                 new SecureVaultException("Secret repository type is mandatory"));
-        String secretRetrieverType = secureVaultConfiguration.getString(SecureVaultConstants.SECRET_RETRIEVER,
+        String secretRetrieverType = secureVaultConfiguration.getString(SecureVaultConstants.MASTER_KEY_READER,
                 SecureVaultConstants.TYPE).orElseThrow(() ->
                 new SecureVaultException("Secret retriever type is mandatory"));
 
         try {
-            secretRetriever = (SecretRetriever) Class.forName(secretRetrieverType).newInstance();
+            masterKeyReader = (MasterKeyReader) Class.forName(secretRetrieverType).newInstance();
             secretRepository = (SecretRepository) Class.forName(secretRepositoryType).newInstance();
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
             throw new SecureVaultException("Failed to instantiate implementation classes.", e);
         }
 
-        secretRetriever.init(secureVaultConfiguration);
-        secretRepository.init(secureVaultConfiguration, secretRetriever);
+        masterKeyReader.init(secureVaultConfiguration);
+        secretRepository.init(secureVaultConfiguration, masterKeyReader);
     }
 
     private void process() throws SecureVaultException {
-        secretRepository.persistSecrets(secureVaultConfiguration, secrets);
+        secretRepository.persistSecrets(secureVaultConfiguration, masterKeys);
     }
 
     private void processArgs(String[] args) throws SecureVaultException {

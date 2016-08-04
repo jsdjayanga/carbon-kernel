@@ -32,7 +32,7 @@ import java.util.List;
  *
  * @since 5.2.0
  */
-public interface SecretRetriever {
+public interface MasterKeyReader {
 
     /**
      * An implementation of this method should initialize the SecretRetriever, so that it could perform the
@@ -47,8 +47,8 @@ public interface SecretRetriever {
      * An implementation of this method should populate the secretValue of all the Secrets provided in the
      * initializationSecrets list.
      *
-     * @param initializationSecrets a list of {@link Secret} with initialization secrets
+     * @param masterKeys a list of {@link MasterKey} with initialization secrets
      * @throws SecureVaultException on error while trying to initializing the SecretRetriever
      */
-    void readSecrets(List<Secret> initializationSecrets) throws SecureVaultException;
+    void readSecrets(List<MasterKey> masterKeys) throws SecureVaultException;
 }

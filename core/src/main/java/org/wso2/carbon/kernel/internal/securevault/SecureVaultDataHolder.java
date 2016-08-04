@@ -16,8 +16,8 @@
 
 package org.wso2.carbon.kernel.internal.securevault;
 
+import org.wso2.carbon.kernel.securevault.MasterKeyReader;
 import org.wso2.carbon.kernel.securevault.SecretRepository;
-import org.wso2.carbon.kernel.securevault.SecretRetriever;
 
 import java.util.Optional;
 
@@ -29,7 +29,7 @@ import java.util.Optional;
 public class SecureVaultDataHolder {
     private static SecureVaultDataHolder instance = new SecureVaultDataHolder();
     private SecretRepository secretRepository;
-    private SecretRetriever secretRetriever;
+    private MasterKeyReader masterKeyReader;
 
     public static SecureVaultDataHolder getInstance() {
         return instance;
@@ -59,18 +59,18 @@ public class SecureVaultDataHolder {
     /**
      * Getter method of SecretRetriever instance.
      *
-     * @return SecretRetriever returns an {@link Optional} {@link SecretRetriever} instance
+     * @return SecretRetriever returns an {@link Optional} {@link MasterKeyReader} instance
      */
-    public Optional<SecretRetriever> getSecretRetriever() {
-        return Optional.ofNullable(secretRetriever);
+    public Optional<MasterKeyReader> getMasterKeyReader() {
+        return Optional.ofNullable(masterKeyReader);
     }
 
     /**
-     * Setter method of {@link SecretRetriever}
+     * Setter method of {@link MasterKeyReader}
      *
-     * @param secretRetriever SecretRetriever instance to be set
+     * @param masterKeyReader SecretRetriever instance to be set
      */
-    public void setSecretRetriever(SecretRetriever secretRetriever) {
-        this.secretRetriever = secretRetriever;
+    public void setMasterKeyReader(MasterKeyReader masterKeyReader) {
+        this.masterKeyReader = masterKeyReader;
     }
 }

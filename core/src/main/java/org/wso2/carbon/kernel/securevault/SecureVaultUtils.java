@@ -46,8 +46,8 @@ import java.util.Properties;
 public class SecureVaultUtils {
     private static final Logger logger = LoggerFactory.getLogger(SecureVaultUtils.class);
 
-    public static Secret getSecret(List<Secret> secrets, String secretName) throws SecureVaultException {
-        return secrets.stream()
+    public static MasterKey getSecret(List<MasterKey> masterKeys, String secretName) throws SecureVaultException {
+        return masterKeys.stream()
                 .filter(secret -> secret.getSecretName().equals(secretName))
                 .findFirst()
                 .orElseThrow(() -> new SecureVaultException(

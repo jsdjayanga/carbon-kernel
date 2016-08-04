@@ -22,9 +22,9 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.kernel.securevault.CipherProvider;
-import org.wso2.carbon.kernel.securevault.Secret;
+import org.wso2.carbon.kernel.securevault.MasterKey;
+import org.wso2.carbon.kernel.securevault.MasterKeyReader;
 import org.wso2.carbon.kernel.securevault.SecretRepository;
-import org.wso2.carbon.kernel.securevault.SecretRetriever;
 import org.wso2.carbon.kernel.securevault.SecureVaultConstants;
 import org.wso2.carbon.kernel.securevault.cipher.JKSBasedCipherProvider;
 import org.wso2.carbon.kernel.securevault.config.SecureVaultConfiguration;
@@ -65,10 +65,10 @@ public class DefaultSecretRepository extends AbstractSecretRepository {
     }
 
     @Override
-    public void init(SecureVaultConfiguration secureVaultConfiguration, SecretRetriever secretRetriever)
+    public void init(SecureVaultConfiguration secureVaultConfiguration, MasterKeyReader masterKeyReader)
             throws SecureVaultException {
         logger.debug("Initializing FileBasedSecretRepository");
-        cipherProvider = createCipherProvider(secureVaultConfiguration, secretRetriever);
+        cipherProvider = createCipherProvider(secureVaultConfiguration, masterKeyReader);
     }
 
     @Override
@@ -82,14 +82,14 @@ public class DefaultSecretRepository extends AbstractSecretRepository {
     }
 
     protected CipherProvider createCipherProvider(SecureVaultConfiguration secureVaultConfiguration,
-                                               SecretRetriever secretRetriever) throws SecureVaultException {
-        List<Secret> initializationSecrets = new ArrayList<>();
-        initializationSecrets.add(new Secret(SecureVaultConstants.KEY_STORE_PASSWORD));
-        initializationSecrets.add(new Secret(SecureVaultConstants.PRIVATE_KEY_PASSWORD));
-        secretRetriever.readSecrets(initializationSecrets);
+                                               MasterKeyReader masterKeyReader) throws SecureVaultException {
+        List<MasterKey> masterKeys = new ArrayList<>();
+        masterKeys.add(new MasterKey(SecureVaultConstants.KEY_STORE_PASSWORD));
+        masterKeys.add(new MasterKey(SecureVaultConstants.PRIVATE_KEY_PASSWORD));
+        masterKeyReader.readSecrets(masterKeys);
 
         JKSBasedCipherProvider jksBasedCipherProvider = new JKSBasedCipherProvider();
-        jksBasedCipherProvider.init(secureVaultConfiguration, initializationSecrets);
+        jksBasedCipherProvider.init(secureVaultConfiguration, masterKeys);
         return jksBasedCipherProvider;
     }
 

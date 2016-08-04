@@ -25,8 +25,8 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.kernel.internal.DataHolder;
+import org.wso2.carbon.kernel.securevault.MasterKeyReader;
 import org.wso2.carbon.kernel.securevault.SecretRepository;
-import org.wso2.carbon.kernel.securevault.SecretRetriever;
 import org.wso2.carbon.kernel.securevault.SecureVault;
 import org.wso2.carbon.kernel.securevault.SecureVaultConstants;
 import org.wso2.carbon.kernel.securevault.config.SecureVaultConfiguration;
@@ -63,7 +63,7 @@ public class SecureVaultComponent implements RequiredCapabilityListener {
             SecureVaultConfiguration secureVaultConfiguration = SecureVaultConfiguration.getInstance();
             secretRepositoryType = secureVaultConfiguration.getString(SecureVaultConstants.SECRET_REPOSITORY,
                     SecureVaultConstants.TYPE).orElse("");
-            secretRetrieverType = secureVaultConfiguration.getString(SecureVaultConstants.SECRET_RETRIEVER,
+            secretRetrieverType = secureVaultConfiguration.getString(SecureVaultConstants.MASTER_KEY_READER,
                     SecureVaultConstants.TYPE).orElse("");
         } catch (SecureVaultException e) {
             logger.error("Error while acquiring secure vault configuration");
@@ -111,25 +111,25 @@ public class SecureVaultComponent implements RequiredCapabilityListener {
     }
 
     @Reference(
-            name = "secure.vault.secret.retriever",
-            service = SecretRetriever.class,
+            name = "secure.vault.master.key.reader",
+            service = MasterKeyReader.class,
             cardinality = ReferenceCardinality.MULTIPLE,
             policy = ReferencePolicy.DYNAMIC,
-            unbind = "unregisterSecretRetriever"
+            unbind = "unregisterMasterKeyReader"
     )
-    protected void registerSecretRetriever(SecretRetriever secretRetriever, Map<String, Object> configs) {
-        Optional.ofNullable(configs.get(SecureVaultConstants.SECRET_RETRIEVER_PROPERTY_NAME))
+    protected void registerMasterKeyReader(MasterKeyReader masterKeyReader, Map<String, Object> configs) {
+        Optional.ofNullable(configs.get(SecureVaultConstants.MASTER_KEY_READER_PROPERTY_NAME))
                 .ifPresent(o -> {
                     if (o.toString().equals(secretRetrieverType)) {
-                        SecureVaultDataHolder.getInstance().setSecretRetriever(secretRetriever);
+                        SecureVaultDataHolder.getInstance().setMasterKeyReader(masterKeyReader);
                     }
                 });
     }
 
-    protected void unregisterSecretRetriever(SecretRetriever secretRetriever) {
+    protected void unregisterMasterKeyReader(MasterKeyReader masterKeyReader) {
         SecureVaultDataHolder.getInstance().getSecretRepository().ifPresent(currentSecretRetriever -> {
-            if (currentSecretRetriever == secretRetriever) {
-                SecureVaultDataHolder.getInstance().setSecretRetriever(null);
+            if (currentSecretRetriever == masterKeyReader) {
+                SecureVaultDataHolder.getInstance().setMasterKeyReader(null);
             }
         });
     }
@@ -140,17 +140,17 @@ public class SecureVaultComponent implements RequiredCapabilityListener {
                     secretRepositoryType, secretRetrieverType);
             SecureVaultConfiguration secureVaultConfiguration = SecureVaultConfiguration.getInstance();
 
-            SecretRetriever secretRetriever = SecureVaultDataHolder.getInstance().getSecretRetriever()
+            MasterKeyReader masterKeyReader = SecureVaultDataHolder.getInstance().getMasterKeyReader()
                     .orElseThrow(() ->
                             new SecureVaultException("Cannot initialise secure vault without secret retriever"));
             SecretRepository secretRepository = SecureVaultDataHolder.getInstance().getSecretRepository()
                     .orElseThrow(() ->
                             new SecureVaultException("Cannot initialise secure vault without secret repository"));
 
-            secretRetriever.init(secureVaultConfiguration);
+            masterKeyReader.init(secureVaultConfiguration);
 
-            secretRepository.init(secureVaultConfiguration, secretRetriever);
-            secretRepository.loadSecrets(secureVaultConfiguration, secretRetriever);
+            secretRepository.init(secureVaultConfiguration, masterKeyReader);
+            secretRepository.loadSecrets(secureVaultConfiguration, masterKeyReader);
 
             Optional.ofNullable(DataHolder.getInstance().getBundleContext())
                     .ifPresent(bundleContext -> bundleContext

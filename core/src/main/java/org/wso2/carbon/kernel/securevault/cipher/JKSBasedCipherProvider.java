@@ -19,7 +19,7 @@ package org.wso2.carbon.kernel.securevault.cipher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.kernel.securevault.CipherProvider;
-import org.wso2.carbon.kernel.securevault.Secret;
+import org.wso2.carbon.kernel.securevault.MasterKey;
 import org.wso2.carbon.kernel.securevault.SecureVaultConstants;
 import org.wso2.carbon.kernel.securevault.SecureVaultUtils;
 import org.wso2.carbon.kernel.securevault.config.SecureVaultConfiguration;
@@ -56,7 +56,7 @@ public class JKSBasedCipherProvider implements CipherProvider {
     private Cipher encryptionCipher;
     private Cipher decryptionCipher;
 
-    public void init(SecureVaultConfiguration secureVaultConfiguration, List<Secret> initializationSecrets)
+    public void init(SecureVaultConfiguration secureVaultConfiguration, List<MasterKey> masterKeys)
             throws SecureVaultException {
         String keystoreLocation = secureVaultConfiguration.getString(SecureVaultConstants.SECRET_REPOSITORY,
                 SecureVaultConstants.CIPHER_PROVIDER, SecureVaultConstants.LOCATION)
@@ -66,9 +66,9 @@ public class JKSBasedCipherProvider implements CipherProvider {
                 SecureVaultConstants.CIPHER_PROVIDER,  SecureVaultConstants.ALIAS)
                 .orElseThrow(() -> new SecureVaultException("Private key alias is mandatory"));
 
-        Secret keyStorePassword = SecureVaultUtils.getSecret(initializationSecrets,
+        MasterKey keyStorePassword = SecureVaultUtils.getSecret(masterKeys,
                 SecureVaultConstants.KEY_STORE_PASSWORD);
-        Secret privateKeyPassword = SecureVaultUtils.getSecret(initializationSecrets,
+        MasterKey privateKeyPassword = SecureVaultUtils.getSecret(masterKeys,
                 SecureVaultConstants.PRIVATE_KEY_PASSWORD);
 
         KeyStore keyStore = loadKeyStore(keystoreLocation, keyStorePassword.getSecretValue().toCharArray());
