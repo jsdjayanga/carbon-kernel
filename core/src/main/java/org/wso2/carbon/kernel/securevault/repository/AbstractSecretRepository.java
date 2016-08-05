@@ -81,7 +81,8 @@ public abstract class AbstractSecretRepository implements SecretRepository {
             byte[] encryptedPassword;
             String[] tokens = secret.split(SecureVaultConstants.SPACE);
             if (tokens.length != 2) {
-                throw new SecureVaultException("Secret properties file contains an invalid entry at key : " + key);
+                logger.error("Secret properties file contains an invalid entry at key : {}", key);
+                continue;
             }
 
             if (SecureVaultConstants.PLAIN_TEXT.equals(tokens[0])) {
