@@ -32,7 +32,7 @@ import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
 public interface SecretRepository {
 
     /**
-     * This method will be called with a {@link SecureVaultConfiguration}, a {@link CipherProvider}.
+     * This method will be called with a {@link SecureVaultConfiguration}, a {@link MasterKeyReader}.
      *
      * An implementation of this method should initialize the {@link SecretRepository}, which make the
      * SecretRepository ready for {@code loadSecrets} and {@code persistSecrets}
