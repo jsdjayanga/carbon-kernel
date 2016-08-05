@@ -17,7 +17,7 @@
 package org.wso2.carbon.kernel.securevault;
 
 
-import org.wso2.carbon.kernel.securevault.config.SecureVaultConfiguration;
+import org.wso2.carbon.kernel.securevault.config.model.SecureVaultConfiguration;
 import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
 
 import java.util.List;

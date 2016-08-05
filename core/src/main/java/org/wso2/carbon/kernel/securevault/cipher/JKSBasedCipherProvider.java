@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.kernel.securevault.MasterKey;
 import org.wso2.carbon.kernel.securevault.SecureVaultConstants;
 import org.wso2.carbon.kernel.securevault.SecureVaultUtils;
-import org.wso2.carbon.kernel.securevault.config.SecureVaultConfiguration;
+import org.wso2.carbon.kernel.securevault.config.model.SecureVaultConfiguration;
 import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
 
 import java.io.BufferedInputStream;
@@ -52,17 +52,17 @@ import javax.crypto.NoSuchPaddingException;
  */
 public class JKSBasedCipherProvider {
     private static Logger logger = LoggerFactory.getLogger(JKSBasedCipherProvider.class);
+    private static final String location = "keystoreLocation";
+    private static final String alias = "privateKeyAlias";
     private Cipher encryptionCipher;
     private Cipher decryptionCipher;
 
     public void init(SecureVaultConfiguration secureVaultConfiguration, List<MasterKey> masterKeys)
             throws SecureVaultException {
-        String keystoreLocation = secureVaultConfiguration.getString(SecureVaultConstants.SECRET_REPOSITORY,
-                SecureVaultConstants.CIPHER_PROVIDER, SecureVaultConstants.LOCATION)
+        String keystoreLocation = secureVaultConfiguration.getSecretRepository().getParameter(location)
                 .orElseThrow(() -> new SecureVaultException("Key store location is mandatory"));
 
-        String privateKeyAlias = secureVaultConfiguration.getString(SecureVaultConstants.SECRET_REPOSITORY,
-                SecureVaultConstants.CIPHER_PROVIDER,  SecureVaultConstants.ALIAS)
+        String privateKeyAlias = secureVaultConfiguration.getSecretRepository().getParameter(alias)
                 .orElseThrow(() -> new SecureVaultException("Private key alias is mandatory"));
 
         MasterKey keyStorePassword = SecureVaultUtils.getSecret(masterKeys,

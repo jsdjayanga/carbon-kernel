@@ -14,19 +14,22 @@
  * limitations under the License.
  */
 
-package org.wso2.carbon.kernel.securevault.exception;
+package org.wso2.carbon.kernel.securevault.config.model;
 
 /**
- * This class {@link SecureVaultException} represents exceptions happens in Secure Vault.
+ * SecureVaultConfiguration class holds static configuration parameters specified in the secure-vault.yaml file.
  *
  * @since 5.2.0
  */
-public class SecureVaultException extends Exception {
-    public SecureVaultException(String message) {
-        super(message);
+public class SecureVaultConfiguration {
+    private ComponentConfiguration secretRepository;
+    private ComponentConfiguration masterKeyReader;
+
+    public ComponentConfiguration getSecretRepository() {
+        return secretRepository;
     }
 
-    public SecureVaultException(String message, Throwable cause) {
-        super(message, cause);
+    public ComponentConfiguration getMasterKeyReader() {
+        return masterKeyReader;
     }
 }

@@ -19,7 +19,7 @@ package org.wso2.carbon.kernel.securevault;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.kernel.internal.utils.Utils;
-import org.wso2.carbon.kernel.securevault.config.SecureVaultConfiguration;
+import org.wso2.carbon.kernel.securevault.config.model.SecureVaultConfiguration;
 import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
 
 import java.io.BufferedReader;
@@ -113,7 +113,7 @@ public class SecureVaultUtils {
     }
 
     public static String getSecretPropertiesFileLocation(SecureVaultConfiguration secureVaultConfiguration) {
-        return secureVaultConfiguration.getString(SecureVaultConstants.SECRET_REPOSITORY, SecureVaultConstants.LOCATION)
+        return secureVaultConfiguration.getSecretRepository().getParameter(SecureVaultConstants.LOCATION)
                 .orElse(Utils.getSecretsPropertiesLocation());
     }
 

@@ -22,7 +22,8 @@ import org.wso2.carbon.kernel.securevault.MasterKeyReader;
 import org.wso2.carbon.kernel.securevault.SecretRepository;
 import org.wso2.carbon.kernel.securevault.SecureVaultConstants;
 import org.wso2.carbon.kernel.securevault.SecureVaultUtils;
-import org.wso2.carbon.kernel.securevault.config.SecureVaultConfiguration;
+import org.wso2.carbon.kernel.securevault.config.SecureVaultConfigurationProvider;
+import org.wso2.carbon.kernel.securevault.config.model.SecureVaultConfiguration;
 import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
 
 import java.util.ArrayList;
@@ -62,14 +63,12 @@ public class CipherTool {
     }
 
     private void init() throws SecureVaultException {
-        secureVaultConfiguration = SecureVaultConfiguration.getInstance();
+        secureVaultConfiguration = SecureVaultConfigurationProvider.getConfiguration();
 
-        String secretRepositoryType = secureVaultConfiguration.getString(SecureVaultConstants.SECRET_REPOSITORY,
-                SecureVaultConstants.TYPE).orElseThrow(() ->
-                new SecureVaultException("Secret repository type is mandatory"));
-        String masterKeyReaderType = secureVaultConfiguration.getString(SecureVaultConstants.MASTER_KEY_READER,
-                SecureVaultConstants.TYPE).orElseThrow(() ->
-                new SecureVaultException("Master key reader type is mandatory"));
+        String secretRepositoryType = secureVaultConfiguration.getSecretRepository().getType()
+                .orElseThrow(() -> new SecureVaultException("Secret repository type is mandatory"));
+        String masterKeyReaderType = secureVaultConfiguration.getMasterKeyReader().getType()
+                .orElseThrow(() -> new SecureVaultException("Master key reader type is mandatory"));
 
         try {
             masterKeyReader = (MasterKeyReader) Class.forName(masterKeyReaderType).newInstance();

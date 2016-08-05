@@ -19,30 +19,33 @@ package org.wso2.carbon.kernel.securevault.config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.kernel.internal.utils.Utils;
+import org.wso2.carbon.kernel.securevault.config.model.SecureVaultConfiguration;
 import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.introspector.BeanAccess;
 
+import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Map;
-import java.util.Optional;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 
 /**
- * Secure Vault Configuration.
+ * This class takes care of parsing the secure-vault.yaml file and creating the SecureVaultConfiguration object model.
  *
  * @since 5.2.0
  */
-public class SecureVaultConfiguration {
+public class SecureVaultConfigurationProvider {
     private static final Logger logger = LoggerFactory.getLogger(SecureVaultConfiguration.class);
-    private static final SecureVaultConfiguration INSTANCE = new SecureVaultConfiguration();
+    private static final SecureVaultConfigurationProvider INSTANCE = new SecureVaultConfigurationProvider();
     private boolean initialized = false;
-    private Map<String, Object> configuration;
+    private SecureVaultConfiguration secureVaultConfiguration;
 
-    private SecureVaultConfiguration() {
+    private SecureVaultConfigurationProvider() {
     }
 
-    public static SecureVaultConfiguration getInstance() throws SecureVaultException {
+    private static SecureVaultConfigurationProvider getInstance() throws SecureVaultException {
         if (INSTANCE.initialized) {
             return INSTANCE;
         }
@@ -55,43 +58,27 @@ public class SecureVaultConfiguration {
         return INSTANCE;
     }
 
+    public static SecureVaultConfiguration getConfiguration() throws SecureVaultException {
+        return getInstance().secureVaultConfiguration;
+    }
+
     private void init() throws SecureVaultException {
         String configFileLocation = Utils.getSecureVaultYAMLLocation();
-        try (InputStream inputStream = new FileInputStream(configFileLocation)) {
+        try (InputStream inputStream = new FileInputStream(configFileLocation);
+             BufferedReader bufferedReader = new BufferedReader(
+                     new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
 
             // TODO : pass the inputStream to deployment properties to get the updated values before creating the Yaml
             // ConfigUtil.parse(inputStream);
 
             Yaml yaml = new Yaml();
-
-            configuration = Optional.ofNullable((Map<String, Object>) yaml.load(inputStream))
-                    .filter(stringObjectMap -> !stringObjectMap.isEmpty())
-                    .orElseThrow(() -> new SecureVaultException(
-                            "Failed to load secure vault configuration yaml : " + configFileLocation));
-
-            logger.debug("Secure vault configurations parsed successfully.");
+            yaml.setBeanAccess(BeanAccess.FIELD);
+            secureVaultConfiguration = yaml.loadAs(bufferedReader, SecureVaultConfiguration.class);
 
             initialized = true;
-            logger.debug("Secret repository configurations loaded successfully.");
+            logger.debug("Secure vault configurations loaded successfully.");
         } catch (IOException e) {
             throw new SecureVaultException("Failed to read secure vault configuration file : " + configFileLocation, e);
         }
-    }
-
-    public Optional<String> getString(String... keys) {
-        Map<String, Object> config = configuration;
-        Object object;
-        for (int i = 0; i < keys.length; i++) {
-            object = config.get(keys[i]);
-            if (object instanceof Map) {
-                config = (Map<String, Object>) object;
-                continue;
-            }
-
-            if (object instanceof String && i == keys.length - 1) {
-                return Optional.ofNullable((String) object);
-            }
-        }
-        return Optional.empty();
     }
 }

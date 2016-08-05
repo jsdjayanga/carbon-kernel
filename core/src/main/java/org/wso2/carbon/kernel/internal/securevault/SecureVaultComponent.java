@@ -28,8 +28,8 @@ import org.wso2.carbon.kernel.internal.DataHolder;
 import org.wso2.carbon.kernel.securevault.MasterKeyReader;
 import org.wso2.carbon.kernel.securevault.SecretRepository;
 import org.wso2.carbon.kernel.securevault.SecureVault;
-import org.wso2.carbon.kernel.securevault.SecureVaultConstants;
-import org.wso2.carbon.kernel.securevault.config.SecureVaultConfiguration;
+import org.wso2.carbon.kernel.securevault.config.SecureVaultConfigurationProvider;
+import org.wso2.carbon.kernel.securevault.config.model.SecureVaultConfiguration;
 import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
 import org.wso2.carbon.kernel.startupresolver.RequiredCapabilityListener;
 
@@ -58,11 +58,9 @@ public class SecureVaultComponent implements RequiredCapabilityListener {
 
     public SecureVaultComponent() {
         try {
-            SecureVaultConfiguration secureVaultConfiguration = SecureVaultConfiguration.getInstance();
-            secretRepositoryType = secureVaultConfiguration.getString(SecureVaultConstants.SECRET_REPOSITORY,
-                    SecureVaultConstants.TYPE).orElse("");
-            masterKeyReaderType = secureVaultConfiguration.getString(SecureVaultConstants.MASTER_KEY_READER,
-                    SecureVaultConstants.TYPE).orElse("");
+            SecureVaultConfiguration secureVaultConfiguration = SecureVaultConfigurationProvider.getConfiguration();
+            secretRepositoryType = secureVaultConfiguration.getSecretRepository().getType().orElse("");
+            masterKeyReaderType = secureVaultConfiguration.getMasterKeyReader().getType().orElse("");
         } catch (SecureVaultException e) {
             logger.error("Error while acquiring secure vault configuration", e);
         }
@@ -126,7 +124,7 @@ public class SecureVaultComponent implements RequiredCapabilityListener {
         try {
             logger.debug("Initializing the secure vault with, SecretRepositoryType={}, MasterKeyReaderType={}",
                     secretRepositoryType, masterKeyReaderType);
-            SecureVaultConfiguration secureVaultConfiguration = SecureVaultConfiguration.getInstance();
+            SecureVaultConfiguration secureVaultConfiguration = SecureVaultConfigurationProvider.getConfiguration();
 
             MasterKeyReader masterKeyReader = SecureVaultDataHolder.getInstance().getMasterKeyReader()
                     .orElseThrow(() ->

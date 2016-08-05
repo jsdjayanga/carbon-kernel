@@ -14,19 +14,27 @@
  * limitations under the License.
  */
 
-package org.wso2.carbon.kernel.securevault.exception;
+package org.wso2.carbon.kernel.securevault.config.model;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 /**
- * This class {@link SecureVaultException} represents exceptions happens in Secure Vault.
+ * Component Configuration bean.
  *
  * @since 5.2.0
  */
-public class SecureVaultException extends Exception {
-    public SecureVaultException(String message) {
-        super(message);
+public class ComponentConfiguration {
+
+    private String type = "";
+    private Map<String, String> parameters = new HashMap<>();
+
+    public Optional<String> getType() {
+        return Optional.ofNullable(type);
     }
 
-    public SecureVaultException(String message, Throwable cause) {
-        super(message, cause);
+    public Optional<String> getParameter(String key) {
+        return Optional.ofNullable(parameters.get(key));
     }
 }
