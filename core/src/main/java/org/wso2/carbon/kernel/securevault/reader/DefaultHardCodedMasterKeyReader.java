@@ -25,6 +25,7 @@ import org.wso2.carbon.kernel.securevault.MasterKey;
 import org.wso2.carbon.kernel.securevault.MasterKeyReader;
 import org.wso2.carbon.kernel.securevault.SecureVaultConstants;
 import org.wso2.carbon.kernel.securevault.SecureVaultUtils;
+import org.wso2.carbon.kernel.securevault.config.SecureVaultConfiguration;
 import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
 
 import java.util.List;
@@ -58,14 +59,20 @@ public class DefaultHardCodedMasterKeyReader implements MasterKeyReader {
     }
 
     @Override
-    public void readSecrets(List<MasterKey> masterKeys) throws SecureVaultException {
+    public void init(SecureVaultConfiguration secureVaultConfiguration) throws SecureVaultException {
+        // No initializations needed for the DefaultMasterKeyReader
+        return;
+    }
+
+    @Override
+    public void readMasterKeys(List<MasterKey> masterKeys) throws SecureVaultException {
         logger.debug("Providing hard coded secrets for 'keyStorePassword' and 'privateKeyPassword'");
 
         MasterKey keyStorePassword = SecureVaultUtils.getSecret(masterKeys, SecureVaultConstants.KEY_STORE_PASSWORD);
-        keyStorePassword.setSecretValue("wso2carbon");
+        keyStorePassword.setMasterKeyValue("wso2carbon");
 
         MasterKey privateKeyPassword = SecureVaultUtils.getSecret(masterKeys,
                 SecureVaultConstants.PRIVATE_KEY_PASSWORD);
-        privateKeyPassword.setSecretValue("wso2carbon");
+        privateKeyPassword.setMasterKeyValue("wso2carbon");
     }
 }

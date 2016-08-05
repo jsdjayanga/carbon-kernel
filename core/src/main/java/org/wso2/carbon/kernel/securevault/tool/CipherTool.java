@@ -91,7 +91,7 @@ public class CipherTool {
             process();
         } else if ("-help".equals(args[0]) || "--help".equals(args[0])) {
             printHelp();
-        } else if ((args[0].startsWith("-D" + SecureVaultConstants.ENCRYPT_TEXT + "="))) {
+        } else if (args[0].startsWith("-D" + SecureVaultConstants.ENCRYPT_TEXT + "=")) {
             encryptText(args[0].substring(14));
         } else {
             throw new SecureVaultException("Unknown option '" + args[0] + "'");

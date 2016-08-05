@@ -36,12 +36,12 @@ public interface MasterKeyReader {
 
     /**
      * An implementation of this method should initialize the MasterKeyReader, so that it could perform the
-     * {@code readSecrets}
+     * {@code readMasterKeys}
      *
      * @param secureVaultConfiguration  {@link SecureVaultConfiguration}
      * @throws SecureVaultException     on an error while trying to initializing the MasterKeyReader
      */
-    default void init(SecureVaultConfiguration secureVaultConfiguration) throws SecureVaultException {}
+    void init(SecureVaultConfiguration secureVaultConfiguration) throws SecureVaultException;
 
     /**
      * An implementation of this method should populate the secretValue of all the Secrets provided in the
@@ -50,5 +50,5 @@ public interface MasterKeyReader {
      * @param masterKeys a list of {@link MasterKey} with initialization secrets
      * @throws SecureVaultException on an error while trying to initializing the MasterKeyReader
      */
-    void readSecrets(List<MasterKey> masterKeys) throws SecureVaultException;
+    void readMasterKeys(List<MasterKey> masterKeys) throws SecureVaultException;
 }

@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.kernel.securevault.MasterKey;
 import org.wso2.carbon.kernel.securevault.MasterKeyReader;
+import org.wso2.carbon.kernel.securevault.config.SecureVaultConfiguration;
 import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
 import org.wso2.carbon.kernel.utils.Utils;
 
@@ -40,8 +41,8 @@ import java.util.Properties;
  * This service component is responsible for providing secrets to initialize the secret repositories. This provider
  * has two behaviours
  * 1. Reads the secrets from file
- *    It looks for a property file with name "password" in server home directory, read the passwords and delete the
- *    file. If the file has a property "permanent=true", the file will not be deleted.
+ * It looks for a property file with name "password" in server home directory, read the passwords and delete the
+ * file. If the file has a property "permanent=true", the file will not be deleted.
  * 2. Reads the secrets from command line.
  * And this component registers a SecretProvider as an OSGi service.
  *
@@ -61,16 +62,22 @@ public class DefaultMasterKeyReader implements MasterKeyReader {
 
     @Activate
     public void activate() {
-            logger.debug("Activating DefaultMasterKeyReader");
+        logger.debug("Activating DefaultMasterKeyReader");
     }
 
     @Deactivate
     public void deactivate() {
-            logger.debug("Deactivating DefaultMasterKeyReader");
+        logger.debug("Deactivating DefaultMasterKeyReader");
     }
 
     @Override
-    public void readSecrets(List<MasterKey> masterKeys) throws SecureVaultException {
+    public void init(SecureVaultConfiguration secureVaultConfiguration) throws SecureVaultException {
+        // No initializations needed for the DefaultMasterKeyReader
+        return;
+    }
+
+    @Override
+    public void readMasterKeys(List<MasterKey> masterKeys) throws SecureVaultException {
         Path passwordFilePath = Paths.get(Utils.getCarbonHome().toString(), "password");
         if (Files.exists(passwordFilePath)) {
             readSecretsFile(passwordFilePath, masterKeys);
@@ -93,18 +100,16 @@ public class DefaultMasterKeyReader implements MasterKeyReader {
             }
 
             for (MasterKey masterKey : masterKeys) {
-                masterKey.setSecretValue(properties.getProperty(masterKey.getSecretName(), ""));
+                masterKey.setMasterKeyValue(properties.getProperty(masterKey.getMasterKeyName(), ""));
             }
 
             inputStream.close();
 
-            if (!isPermanentFile) {
-                if (!passwordFilePath.toFile().delete()) {
-                    passwordFilePath.toFile().deleteOnExit();
-                }
+            if (!isPermanentFile && !passwordFilePath.toFile().delete()) {
+                passwordFilePath.toFile().deleteOnExit();
             }
         } catch (IOException e) {
-            throw new SecureVaultException("Failed to load secret file " + passwordFilePath.toFile());
+            throw new SecureVaultException("Failed to load secret file " + passwordFilePath.toFile(), e);
         }
     }
 
@@ -112,8 +117,8 @@ public class DefaultMasterKeyReader implements MasterKeyReader {
         Console console = System.console();
         if (console != null) {
             for (MasterKey masterKey : masterKeys) {
-                masterKey.setSecretValue(new String(console.readPassword("[%s]",
-                        "Enter " + masterKey.getSecretName() + " Password :")));
+                masterKey.setMasterKeyValue(new String(console.readPassword("[%s]",
+                        "Enter master key '" + masterKey.getMasterKeyName() + "' :")));
             }
         }
     }

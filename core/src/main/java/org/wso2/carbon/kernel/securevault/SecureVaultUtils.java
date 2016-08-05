@@ -48,7 +48,7 @@ public class SecureVaultUtils {
 
     public static MasterKey getSecret(List<MasterKey> masterKeys, String secretName) throws SecureVaultException {
         return masterKeys.stream()
-                .filter(secret -> secret.getSecretName().equals(secretName))
+                .filter(masterKey -> masterKey.getMasterKeyName().equals(secretName))
                 .findFirst()
                 .orElseThrow(() -> new SecureVaultException(
                         "No secret found with given secret name '" + secretName + "'"));
@@ -114,5 +114,12 @@ public class SecureVaultUtils {
     public static String getSecretPropertiesFileLocation(SecureVaultConfiguration secureVaultConfiguration) {
         return secureVaultConfiguration.getString(SecureVaultConstants.SECRET_REPOSITORY, SecureVaultConstants.LOCATION)
                 .orElse(Utils.getSecretsPropertiesLocation());
+    }
+
+    /**
+     * Remove default constructor and make it not available to initialize.
+     */
+    private SecureVaultUtils() {
+        throw new AssertionError("Trying to a instantiate a constant class");
     }
 }

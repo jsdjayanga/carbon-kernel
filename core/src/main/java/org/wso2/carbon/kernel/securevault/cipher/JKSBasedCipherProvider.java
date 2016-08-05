@@ -71,11 +71,11 @@ public class JKSBasedCipherProvider implements CipherProvider {
         MasterKey privateKeyPassword = SecureVaultUtils.getSecret(masterKeys,
                 SecureVaultConstants.PRIVATE_KEY_PASSWORD);
 
-        KeyStore keyStore = loadKeyStore(keystoreLocation, keyStorePassword.getSecretValue().toCharArray());
+        KeyStore keyStore = loadKeyStore(keystoreLocation, keyStorePassword.getMasterKeyValue().toCharArray());
 
         encryptionCipher = getEncryptionCipher(keyStore, privateKeyAlias);
         decryptionCipher = getDecryptionCipher(keyStore, privateKeyAlias,
-                privateKeyPassword.getSecretValue().toCharArray());
+                privateKeyPassword.getMasterKeyValue().toCharArray());
     }
 
     @Override

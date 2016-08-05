@@ -37,7 +37,7 @@ public class SecureVaultConfiguration {
     private static final Logger logger = LoggerFactory.getLogger(SecureVaultConfiguration.class);
     private static final SecureVaultConfiguration INSTANCE = new SecureVaultConfiguration();
     private boolean initialized = false;
-    private Map<String, Object> secureVaultConfiguration;
+    private Map<String, Object> configuration;
 
     private SecureVaultConfiguration() {
     }
@@ -64,7 +64,7 @@ public class SecureVaultConfiguration {
 
             Yaml yaml = new Yaml();
 
-            secureVaultConfiguration = Optional.ofNullable((Map<String, Object>) yaml.load(inputStream))
+            configuration = Optional.ofNullable((Map<String, Object>) yaml.load(inputStream))
                     .filter(stringObjectMap -> !stringObjectMap.isEmpty())
                     .orElseThrow(() -> new SecureVaultException(
                             "Failed to load secure vault configuration yaml : " + configFileLocation));
@@ -79,7 +79,7 @@ public class SecureVaultConfiguration {
     }
 
     public Optional<String> getString(String... keys) {
-        Map<String, Object> config = secureVaultConfiguration;
+        Map<String, Object> config = configuration;
         Object object;
         for (int i = 0; i < keys.length; i++) {
             object = config.get(keys[i]);

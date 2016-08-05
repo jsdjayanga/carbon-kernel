@@ -20,22 +20,22 @@ package org.wso2.carbon.kernel.securevault;
  * Created by jayanga on 7/13/16.
  */
 public class MasterKey {
-    private String secretName;
-    private String secretValue;
+    private String masterKeyName;
+    private String masterKeyValue;
 
-    public MasterKey(String secretName) {
-        this.secretName = secretName;
+    public MasterKey(String masterKeyName) {
+        this.masterKeyName = masterKeyName;
     }
 
-    public String getSecretName() {
-        return secretName;
+    public String getMasterKeyName() {
+        return masterKeyName;
     }
 
-    public String getSecretValue() {
-        return secretValue;
+    public String getMasterKeyValue() {
+        return masterKeyValue;
     }
 
-    public void setSecretValue(String secretValue) {
-        this.secretValue = secretValue;
+    public void setMasterKeyValue(String masterKeyValue) {
+        this.masterKeyValue = masterKeyValue;
     }
 }

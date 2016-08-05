@@ -40,4 +40,10 @@ public class SecureVaultConstants {
     public static final String SPACE = " ";
     public static final String JKS = "JKS";
 
+    /**
+     * Remove default constructor and make it not available to initialize.
+     */
+    private SecureVaultConstants() {
+        throw new AssertionError("Trying to a instantiate a constant class");
+    }
 }

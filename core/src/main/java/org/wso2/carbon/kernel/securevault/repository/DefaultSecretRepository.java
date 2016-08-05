@@ -86,7 +86,7 @@ public class DefaultSecretRepository extends AbstractSecretRepository {
         List<MasterKey> masterKeys = new ArrayList<>();
         masterKeys.add(new MasterKey(SecureVaultConstants.KEY_STORE_PASSWORD));
         masterKeys.add(new MasterKey(SecureVaultConstants.PRIVATE_KEY_PASSWORD));
-        masterKeyReader.readSecrets(masterKeys);
+        masterKeyReader.readMasterKeys(masterKeys);
 
         JKSBasedCipherProvider jksBasedCipherProvider = new JKSBasedCipherProvider();
         jksBasedCipherProvider.init(secureVaultConfiguration, masterKeys);
