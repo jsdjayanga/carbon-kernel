@@ -27,10 +27,13 @@ import org.wso2.carbon.kernel.securevault.config.model.SecureVaultConfiguration;
 import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
 import org.wso2.carbon.kernel.utils.Utils;
 
+import java.io.BufferedReader;
 import java.io.Console;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -86,8 +89,12 @@ public class DefaultMasterKeyReader implements MasterKeyReader {
 
     private void readSecretsFile(Path passwordFilePath, List<MasterKey> masterKeys) throws SecureVaultException {
         Properties properties = new Properties();
-        try (InputStream inputStream = new FileInputStream(passwordFilePath.toFile())) {
-            properties.load(inputStream);
+        try (InputStream inputStream = new FileInputStream(passwordFilePath.toFile());
+             BufferedReader bufferedReader = new BufferedReader(
+                     new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+
+            properties.load(bufferedReader);
+
             if (properties.isEmpty()) {
                 throw new SecureVaultException("Password file is empty " + passwordFilePath.toFile());
             }
