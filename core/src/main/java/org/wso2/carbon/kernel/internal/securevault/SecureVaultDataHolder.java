@@ -28,7 +28,7 @@ import java.util.Optional;
  */
 public class SecureVaultDataHolder {
     private static SecureVaultDataHolder instance = new SecureVaultDataHolder();
-    
+
     private Optional<SecretRepository> optSecretRepository;
     private Optional<MasterKeyReader> optMasterKeyReader;
 

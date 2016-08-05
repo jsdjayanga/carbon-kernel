@@ -67,6 +67,10 @@ public class SecureVaultUtils {
         return charset.decode(ByteBuffer.wrap(bytes)).array();
     }
 
+    public static byte[] toBytes(String value) {
+        return value.getBytes(Charset.forName("UTF-8"));
+    }
+
     public static byte[] toBytes(char[] chars) {
         Charset charset = Charset.forName("UTF-8");
         ByteBuffer encoded = charset.encode(CharBuffer.wrap(chars));

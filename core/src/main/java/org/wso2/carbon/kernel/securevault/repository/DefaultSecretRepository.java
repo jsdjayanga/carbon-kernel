@@ -21,7 +21,6 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.kernel.securevault.CipherProvider;
 import org.wso2.carbon.kernel.securevault.MasterKey;
 import org.wso2.carbon.kernel.securevault.MasterKeyReader;
 import org.wso2.carbon.kernel.securevault.SecretRepository;
@@ -52,46 +51,39 @@ import java.util.List;
 )
 public class DefaultSecretRepository extends AbstractSecretRepository {
     private static Logger logger = LoggerFactory.getLogger(AbstractSecretRepository.class);
-    private CipherProvider cipherProvider;
+    private JKSBasedCipherProvider jksBasedCipherProvider;
 
     @Activate
     public void activate() {
-        logger.debug("Activating FileBasedSecretRepository");
+        logger.debug("Activating DefaultSecretRepository");
     }
 
     @Deactivate
     public void deactivate() {
-        logger.debug("Deactivating FileBasedSecretRepository");
+        logger.debug("Deactivating DefaultSecretRepository");
     }
 
     @Override
     public void init(SecureVaultConfiguration secureVaultConfiguration, MasterKeyReader masterKeyReader)
             throws SecureVaultException {
-        logger.debug("Initializing FileBasedSecretRepository");
-        cipherProvider = createCipherProvider(secureVaultConfiguration, masterKeyReader);
-    }
+        logger.debug("Initializing DefaultSecretRepository");
 
-    @Override
-    public byte[] encrypt(byte[] plainText) throws SecureVaultException {
-        return cipherProvider.encrypt(plainText);
-    }
-
-    @Override
-    public byte[] decrypt(byte[] cipherText) throws SecureVaultException {
-        return cipherProvider.decrypt(cipherText);
-    }
-
-    protected CipherProvider createCipherProvider(SecureVaultConfiguration secureVaultConfiguration,
-                                               MasterKeyReader masterKeyReader) throws SecureVaultException {
-        List<MasterKey> masterKeys = new ArrayList<>();
+                List<MasterKey> masterKeys = new ArrayList<>();
         masterKeys.add(new MasterKey(SecureVaultConstants.KEY_STORE_PASSWORD));
         masterKeys.add(new MasterKey(SecureVaultConstants.PRIVATE_KEY_PASSWORD));
         masterKeyReader.readMasterKeys(masterKeys);
 
-        JKSBasedCipherProvider jksBasedCipherProvider = new JKSBasedCipherProvider();
+        jksBasedCipherProvider = new JKSBasedCipherProvider();
         jksBasedCipherProvider.init(secureVaultConfiguration, masterKeys);
-        return jksBasedCipherProvider;
     }
 
+    @Override
+    public byte[] encrypt(byte[] plainText) throws SecureVaultException {
+        return jksBasedCipherProvider.encrypt(plainText);
+    }
 
+    @Override
+    public byte[] decrypt(byte[] cipherText) throws SecureVaultException {
+        return jksBasedCipherProvider.decrypt(cipherText);
+    }
 }

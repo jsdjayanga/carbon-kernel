@@ -30,7 +30,7 @@ public class SecureVaultImpl implements SecureVault {
     public char[] resolve(String alias) throws SecureVaultException {
         return SecureVaultDataHolder.getInstance().getSecretRepository()
                 .orElseThrow(() -> new SecureVaultException("No secret repository found."))
-                .getSecret(alias);
+                .resolve(alias);
     }
 
     @Override

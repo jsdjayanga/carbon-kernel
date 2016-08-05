@@ -70,7 +70,7 @@ public interface SecretRepository {
      * @param alias alias of the secret
      * @return      if the given alias is available, a char[] consisting the plain text secret else and empty char[]
      */
-    char[] getSecret(String alias);
+    char[] resolve(String alias);
 
     /**
      * An implementation of this method should provide the relevant encryption logic.

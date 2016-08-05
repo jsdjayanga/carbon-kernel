@@ -41,62 +41,37 @@ public abstract class AbstractSecretRepository implements SecretRepository {
     public void loadSecrets(SecureVaultConfiguration secureVaultConfiguration, MasterKeyReader masterKeyReader)
             throws SecureVaultException {
         logger.debug("Loading secrets to SecretRepository");
-        loadDecryptedSecrets(secureVaultConfiguration);
+        Properties secretsProperties = SecureVaultUtils.getSecretProperties(secureVaultConfiguration);
+
+        for (Map.Entry<Object, Object> entry: secretsProperties.entrySet()) {
+            String key = entry.getKey().toString().trim();
+            String value = entry.getValue().toString().trim();
+
+            char[] decryptedPassword;
+            String[] tokens = value.split(SecureVaultConstants.SPACE);
+
+            if (tokens.length != 2) {
+                logger.error("Secret properties file contains an invalid entry at key : {}", key);
+                continue;
+            }
+
+            if (SecureVaultConstants.CIPHER_TEXT.equals(tokens[0])) {
+                byte[] base64Decoded = SecureVaultUtils.base64Decode(SecureVaultUtils.toBytes(tokens[1]));
+                decryptedPassword = SecureVaultUtils.toChars(decrypt(base64Decoded));
+            } else if (SecureVaultConstants.PLAIN_TEXT.equals(tokens[0])) {
+                decryptedPassword = tokens[1].toCharArray();
+            } else {
+                logger.error("Unknown prefix in secrets file");
+                continue;
+            }
+            secrets.put(key, decryptedPassword);
+        }
     }
 
     @Override
     public void persistSecrets(SecureVaultConfiguration secureVaultConfiguration, MasterKeyReader masterKeyReader)
             throws SecureVaultException {
         logger.debug("Persisting secrets to SecretRepository");
-        persistEncryptedSecrets(secureVaultConfiguration);
-    }
-
-    @Override
-    public char[] getSecret(String alias) {
-        char[] secret = secrets.get(alias);
-        if (secret != null && secret.length != 0) {
-            return secret;
-        }
-        return new char[0];
-    }
-
-    @Override
-    public byte[] encrypt(byte[] plainText) throws SecureVaultException {
-        return new byte[0];
-    }
-
-    @Override
-    public byte[] decrypt(byte[] cipherText) throws SecureVaultException {
-        return new byte[0];
-    }
-
-    protected void loadDecryptedSecrets(SecureVaultConfiguration secureVaultConfiguration)
-            throws SecureVaultException {
-        Properties secretsProperties = SecureVaultUtils.getSecretProperties(secureVaultConfiguration);
-
-        for (Object alias : secretsProperties.keySet()) {
-            String key = String.valueOf(alias);
-            String secret = secretsProperties.getProperty(key);
-            char[] decryptedPassword;
-            String[] tokens = secret.split(SecureVaultConstants.SPACE);
-            if (tokens.length != 2) {
-                throw new SecureVaultException("Secret properties file contains an invalid entry at key : " + key);
-            }
-
-            if (SecureVaultConstants.CIPHER_TEXT.equals(tokens[0])) {
-                byte[] base64Decoded = SecureVaultUtils.base64Decode(SecureVaultUtils.toBytes(tokens[1].toCharArray()));
-                decryptedPassword = SecureVaultUtils.toChars(decrypt(base64Decoded));
-            } else if (SecureVaultConstants.PLAIN_TEXT.equals(tokens[0])) {
-                decryptedPassword = tokens[1].toCharArray();
-            } else {
-                throw new SecureVaultException("Unknown prefix in secrets file");
-            }
-            secrets.put(key, decryptedPassword);
-        }
-    }
-
-    protected void persistEncryptedSecrets(SecureVaultConfiguration secureVaultConfiguration)
-            throws SecureVaultException {
         Properties secretsProperties = SecureVaultUtils.getSecretProperties(secureVaultConfiguration);
 
         for (Object alias : secretsProperties.keySet()) {
@@ -120,5 +95,24 @@ public abstract class AbstractSecretRepository implements SecretRepository {
         String secretPropertiesFileLocation = SecureVaultUtils
                 .getSecretPropertiesFileLocation(secureVaultConfiguration);
         SecureVaultUtils.updateSecretFile(Paths.get(secretPropertiesFileLocation), secretsProperties);
+    }
+
+    @Override
+    public char[] resolve(String alias) {
+        char[] secret = secrets.get(alias);
+        if (secret != null && secret.length != 0) {
+            return secret;
+        }
+        return new char[0];
+    }
+
+    @Override
+    public byte[] encrypt(byte[] plainText) throws SecureVaultException {
+        return new byte[0];
+    }
+
+    @Override
+    public byte[] decrypt(byte[] cipherText) throws SecureVaultException {
+        return new byte[0];
     }
 }
