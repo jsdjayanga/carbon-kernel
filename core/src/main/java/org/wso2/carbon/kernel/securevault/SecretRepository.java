@@ -19,8 +19,6 @@ package org.wso2.carbon.kernel.securevault;
 import org.wso2.carbon.kernel.securevault.config.SecureVaultConfiguration;
 import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
 
-import java.util.List;
-
 /**
  * This interface is used to register SecretRepositories.
  *
@@ -60,10 +58,10 @@ public interface SecretRepository {
      * An implementation of this method should persist the secrets to the underlying secret repository.
      *
      * @param secureVaultConfiguration {@link SecureVaultConfiguration}
-     * @param masterKeys    a list of {@link MasterKey} with initialization secrets
+     * @param masterKeyReader          an initialized {@link MasterKeyReader}
      * @throws SecureVaultException    on an error while trying to persis secrets
      */
-    void persistSecrets(SecureVaultConfiguration secureVaultConfiguration, List<MasterKey> masterKeys)
+    void persistSecrets(SecureVaultConfiguration secureVaultConfiguration, MasterKeyReader masterKeyReader)
             throws SecureVaultException;
 
     /**

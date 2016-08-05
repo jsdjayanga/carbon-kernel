@@ -83,7 +83,7 @@ public class CipherTool {
     }
 
     private void process() throws SecureVaultException {
-        secretRepository.persistSecrets(secureVaultConfiguration, masterKeys);
+        secretRepository.persistSecrets(secureVaultConfiguration, masterKeyReader);
     }
 
     private void processArgs(String[] args) throws SecureVaultException {
