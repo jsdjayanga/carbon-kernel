@@ -74,12 +74,12 @@ public abstract class AbstractSecretRepository implements SecretRepository {
         logger.debug("Persisting secrets to SecretRepository");
         Properties secretsProperties = SecureVaultUtils.getSecretProperties(secureVaultConfiguration);
 
-        for (Object alias : secretsProperties.keySet()) {
-            String key = String.valueOf(alias);
-            String secret = secretsProperties.getProperty(key);
+        for (Map.Entry<Object, Object> entry: secretsProperties.entrySet()) {
+            String key = entry.getKey().toString().trim();
+            String value = entry.getValue().toString().trim();
 
             byte[] encryptedPassword;
-            String[] tokens = secret.split(SecureVaultConstants.SPACE);
+            String[] tokens = value.split(SecureVaultConstants.SPACE);
             if (tokens.length != 2) {
                 logger.error("Secret properties file contains an invalid entry at key : {}", key);
                 continue;

@@ -68,7 +68,7 @@ public class DefaultSecretRepository extends AbstractSecretRepository {
             throws SecureVaultException {
         logger.debug("Initializing DefaultSecretRepository");
 
-                List<MasterKey> masterKeys = new ArrayList<>();
+        List<MasterKey> masterKeys = new ArrayList<>();
         masterKeys.add(new MasterKey(SecureVaultConstants.KEY_STORE_PASSWORD));
         masterKeys.add(new MasterKey(SecureVaultConstants.PRIVATE_KEY_PASSWORD));
         masterKeyReader.readMasterKeys(masterKeys);
