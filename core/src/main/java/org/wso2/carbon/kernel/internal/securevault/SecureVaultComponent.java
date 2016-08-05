@@ -33,7 +33,6 @@ import org.wso2.carbon.kernel.securevault.config.SecureVaultConfiguration;
 import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
 import org.wso2.carbon.kernel.startupresolver.RequiredCapabilityListener;
 
-import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -92,21 +91,16 @@ public class SecureVaultComponent implements RequiredCapabilityListener {
             policy = ReferencePolicy.DYNAMIC,
             unbind = "unRegisterSecretRepository"
     )
-    protected void registerSecretRepository(SecretRepository secretRepository, Map<String, Object> configs) {
-        Optional.ofNullable(configs.get(SecureVaultConstants.SECRET_REPOSITORY_PROPERTY_NAME))
-                .ifPresent(o -> {
-                    if (o.toString().equals(secretRepositoryType)) {
-                        SecureVaultDataHolder.getInstance().setSecretRepository(secretRepository);
-                    }
-                });
+    protected void registerSecretRepository(SecretRepository secretRepository) {
+        if (secretRepository.getClass().getName().equals(secretRepositoryType)) {
+            SecureVaultDataHolder.getInstance().setSecretRepository(secretRepository);
+        }
     }
 
     protected void unRegisterSecretRepository(SecretRepository secretRepository) {
-        SecureVaultDataHolder.getInstance().getSecretRepository().ifPresent(currentSecretRepository -> {
-            if (currentSecretRepository == secretRepository) {
-                SecureVaultDataHolder.getInstance().setSecretRepository(null);
-            }
-        });
+        if (secretRepository.getClass().getName().equals(secretRepositoryType)) {
+            SecureVaultDataHolder.getInstance().setSecretRepository(null);
+        }
     }
 
     @Reference(
@@ -116,21 +110,16 @@ public class SecureVaultComponent implements RequiredCapabilityListener {
             policy = ReferencePolicy.DYNAMIC,
             unbind = "unregisterMasterKeyReader"
     )
-    protected void registerMasterKeyReader(MasterKeyReader masterKeyReader, Map<String, Object> configs) {
-        Optional.ofNullable(configs.get(SecureVaultConstants.MASTER_KEY_READER_PROPERTY_NAME))
-                .ifPresent(o -> {
-                    if (o.toString().equals(masterKeyReaderType)) {
-                        SecureVaultDataHolder.getInstance().setMasterKeyReader(masterKeyReader);
-                    }
-                });
+    protected void registerMasterKeyReader(MasterKeyReader masterKeyReader) {
+        if (masterKeyReader.getClass().getName().equals(masterKeyReaderType)) {
+            SecureVaultDataHolder.getInstance().setMasterKeyReader(masterKeyReader);
+        }
     }
 
     protected void unregisterMasterKeyReader(MasterKeyReader masterKeyReader) {
-        SecureVaultDataHolder.getInstance().getMasterKeyReader().ifPresent(currentMasterKeyReader -> {
-            if (currentMasterKeyReader == masterKeyReader) {
-                SecureVaultDataHolder.getInstance().setMasterKeyReader(null);
-            }
-        });
+        if (masterKeyReader.getClass().getName().equals(masterKeyReaderType)) {
+            SecureVaultDataHolder.getInstance().setMasterKeyReader(null);
+        }
     }
 
     private void initializeSecureVault() {

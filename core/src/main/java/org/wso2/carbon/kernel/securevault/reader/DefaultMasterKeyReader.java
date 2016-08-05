@@ -52,8 +52,7 @@ import java.util.Properties;
         name = "org.wso2.carbon.kernel.securevault.reader.DefaultMasterKeyReader",
         immediate = true,
         property = {
-                "capabilityName=org.wso2.carbon.kernel.securevault.MasterKeyReader",
-                "masterKeyReaderType=org.wso2.carbon.kernel.securevault.reader.DefaultMasterKeyReader"
+                "capabilityName=org.wso2.carbon.kernel.securevault.MasterKeyReader"
         }
 )
 public class DefaultMasterKeyReader implements MasterKeyReader {
