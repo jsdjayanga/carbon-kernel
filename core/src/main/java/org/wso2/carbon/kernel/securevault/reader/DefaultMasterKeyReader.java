@@ -73,7 +73,6 @@ public class DefaultMasterKeyReader implements MasterKeyReader {
     @Override
     public void init(SecureVaultConfiguration secureVaultConfiguration) throws SecureVaultException {
         // No initializations needed for the DefaultMasterKeyReader
-        return;
     }
 
     @Override
