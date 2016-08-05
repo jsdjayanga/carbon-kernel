@@ -16,13 +16,13 @@
 
 package org.wso2.carbon.kernel.securevault.tool;
 
+import org.wso2.carbon.kernel.internal.securevault.SecureVaultConfigurationProvider;
 import org.wso2.carbon.kernel.internal.securevault.SecureVaultDataHolder;
 import org.wso2.carbon.kernel.securevault.MasterKey;
 import org.wso2.carbon.kernel.securevault.MasterKeyReader;
 import org.wso2.carbon.kernel.securevault.SecretRepository;
 import org.wso2.carbon.kernel.securevault.SecureVaultConstants;
 import org.wso2.carbon.kernel.securevault.SecureVaultUtils;
-import org.wso2.carbon.kernel.securevault.config.SecureVaultConfigurationProvider;
 import org.wso2.carbon.kernel.securevault.config.model.SecureVaultConfiguration;
 import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
 

@@ -28,7 +28,6 @@ import org.wso2.carbon.kernel.internal.DataHolder;
 import org.wso2.carbon.kernel.securevault.MasterKeyReader;
 import org.wso2.carbon.kernel.securevault.SecretRepository;
 import org.wso2.carbon.kernel.securevault.SecureVault;
-import org.wso2.carbon.kernel.securevault.config.SecureVaultConfigurationProvider;
 import org.wso2.carbon.kernel.securevault.config.model.SecureVaultConfiguration;
 import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
 import org.wso2.carbon.kernel.startupresolver.RequiredCapabilityListener;
@@ -52,16 +51,20 @@ import java.util.Optional;
 )
 public class SecureVaultComponent implements RequiredCapabilityListener {
     private static final Logger logger = LoggerFactory.getLogger(SecureVaultComponent.class);
+    private Optional<SecureVaultConfiguration> optSecureVaultConfiguration;
 
     private String secretRepositoryType;
     private String masterKeyReaderType;
 
     public SecureVaultComponent() {
         try {
-            SecureVaultConfiguration secureVaultConfiguration = SecureVaultConfigurationProvider.getConfiguration();
-            secretRepositoryType = secureVaultConfiguration.getSecretRepository().getType().orElse("");
-            masterKeyReaderType = secureVaultConfiguration.getMasterKeyReader().getType().orElse("");
+            optSecureVaultConfiguration = Optional.of(SecureVaultConfigurationProvider.getConfiguration());
+            optSecureVaultConfiguration.ifPresent(secureVaultConfiguration -> {
+                secretRepositoryType = secureVaultConfiguration.getSecretRepository().getType().orElse("");
+                masterKeyReaderType = secureVaultConfiguration.getMasterKeyReader().getType().orElse("");
+            });
         } catch (SecureVaultException e) {
+            optSecureVaultConfiguration = Optional.empty();
             logger.error("Error while acquiring secure vault configuration", e);
         }
     }
@@ -124,7 +127,10 @@ public class SecureVaultComponent implements RequiredCapabilityListener {
         try {
             logger.debug("Initializing the secure vault with, SecretRepositoryType={}, MasterKeyReaderType={}",
                     secretRepositoryType, masterKeyReaderType);
-            SecureVaultConfiguration secureVaultConfiguration = SecureVaultConfigurationProvider.getConfiguration();
+
+            SecureVaultConfiguration secureVaultConfiguration = optSecureVaultConfiguration
+                    .orElseThrow(() -> new SecureVaultException("Cannot initialize secure vault without " +
+                            "secure vault configurations"));
 
             MasterKeyReader masterKeyReader = SecureVaultDataHolder.getInstance().getMasterKeyReader()
                     .orElseThrow(() ->
