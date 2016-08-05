@@ -18,7 +18,6 @@ package org.wso2.carbon.kernel.securevault.repository;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.kernel.securevault.MasterKeyReader;
 import org.wso2.carbon.kernel.securevault.SecretRepository;
 import org.wso2.carbon.kernel.securevault.SecureVaultConstants;
 import org.wso2.carbon.kernel.securevault.SecureVaultUtils;
@@ -38,7 +37,7 @@ public abstract class AbstractSecretRepository implements SecretRepository {
     private final Map<String, char[]> secrets = new HashMap<>();
 
     @Override
-    public void loadSecrets(SecureVaultConfiguration secureVaultConfiguration, MasterKeyReader masterKeyReader)
+    public void loadSecrets(SecureVaultConfiguration secureVaultConfiguration)
             throws SecureVaultException {
         logger.debug("Loading secrets to SecretRepository");
         Properties secretsProperties = SecureVaultUtils.getSecretProperties(secureVaultConfiguration);
@@ -69,7 +68,7 @@ public abstract class AbstractSecretRepository implements SecretRepository {
     }
 
     @Override
-    public void persistSecrets(SecureVaultConfiguration secureVaultConfiguration, MasterKeyReader masterKeyReader)
+    public void persistSecrets(SecureVaultConfiguration secureVaultConfiguration)
             throws SecureVaultException {
         logger.debug("Persisting secrets to SecretRepository");
         Properties secretsProperties = SecureVaultUtils.getSecretProperties(secureVaultConfiguration);

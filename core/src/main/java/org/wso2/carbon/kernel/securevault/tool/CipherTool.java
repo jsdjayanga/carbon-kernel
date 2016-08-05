@@ -18,7 +18,6 @@ package org.wso2.carbon.kernel.securevault.tool;
 
 import org.wso2.carbon.kernel.internal.securevault.SecureVaultConfigurationProvider;
 import org.wso2.carbon.kernel.internal.securevault.SecureVaultDataHolder;
-import org.wso2.carbon.kernel.securevault.MasterKey;
 import org.wso2.carbon.kernel.securevault.MasterKeyReader;
 import org.wso2.carbon.kernel.securevault.SecretRepository;
 import org.wso2.carbon.kernel.securevault.SecureVaultConstants;
@@ -26,8 +25,6 @@ import org.wso2.carbon.kernel.securevault.SecureVaultUtils;
 import org.wso2.carbon.kernel.securevault.config.model.SecureVaultConfiguration;
 import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -39,7 +36,6 @@ public class CipherTool {
     private SecureVaultConfiguration secureVaultConfiguration;
     private MasterKeyReader masterKeyReader;
     private SecretRepository secretRepository;
-    List<MasterKey> masterKeys = new ArrayList<>();
 
     public static void main(String[] args) {
         logger.info("####### WSO2 CipherTool #######");
@@ -82,7 +78,7 @@ public class CipherTool {
     }
 
     private void process() throws SecureVaultException {
-        secretRepository.persistSecrets(secureVaultConfiguration, masterKeyReader);
+        secretRepository.persistSecrets(secureVaultConfiguration);
     }
 
     private void processArgs(String[] args) throws SecureVaultException {

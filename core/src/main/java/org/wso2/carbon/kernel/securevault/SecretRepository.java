@@ -48,21 +48,17 @@ public interface SecretRepository {
      * An implementation of this method should load the secrets from underlying secret repository.
      *
      * @param secureVaultConfiguration {@link SecureVaultConfiguration}
-     * @param masterKeyReader          an initialized {@link MasterKeyReader}
      * @throws SecureVaultException    on an error while trying to load secrets
      */
-    void loadSecrets(SecureVaultConfiguration secureVaultConfiguration, MasterKeyReader masterKeyReader)
-            throws SecureVaultException;
+    void loadSecrets(SecureVaultConfiguration secureVaultConfiguration) throws SecureVaultException;
 
     /**
      * An implementation of this method should persist the secrets to the underlying secret repository.
      *
      * @param secureVaultConfiguration {@link SecureVaultConfiguration}
-     * @param masterKeyReader          an initialized {@link MasterKeyReader}
      * @throws SecureVaultException    on an error while trying to persis secrets
      */
-    void persistSecrets(SecureVaultConfiguration secureVaultConfiguration, MasterKeyReader masterKeyReader)
-            throws SecureVaultException;
+    void persistSecrets(SecureVaultConfiguration secureVaultConfiguration) throws SecureVaultException;
 
     /**
      * An implementation of this method should provide the plain text secret for a given alias.

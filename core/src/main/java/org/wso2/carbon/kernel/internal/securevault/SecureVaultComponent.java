@@ -142,7 +142,7 @@ public class SecureVaultComponent implements RequiredCapabilityListener {
             masterKeyReader.init(secureVaultConfiguration);
 
             secretRepository.init(secureVaultConfiguration, masterKeyReader);
-            secretRepository.loadSecrets(secureVaultConfiguration, masterKeyReader);
+            secretRepository.loadSecrets(secureVaultConfiguration);
 
             Optional.ofNullable(DataHolder.getInstance().getBundleContext())
                     .ifPresent(bundleContext -> bundleContext
