@@ -18,7 +18,6 @@ package org.wso2.carbon.kernel.securevault.cipher;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.kernel.securevault.CipherProvider;
 import org.wso2.carbon.kernel.securevault.MasterKey;
 import org.wso2.carbon.kernel.securevault.SecureVaultConstants;
 import org.wso2.carbon.kernel.securevault.SecureVaultUtils;
@@ -51,7 +50,7 @@ import javax.crypto.NoSuchPaddingException;
  *
  * @since 5.2.0
  */
-public class JKSBasedCipherProvider implements CipherProvider {
+public class JKSBasedCipherProvider {
     private static Logger logger = LoggerFactory.getLogger(JKSBasedCipherProvider.class);
     private Cipher encryptionCipher;
     private Cipher decryptionCipher;
@@ -78,12 +77,10 @@ public class JKSBasedCipherProvider implements CipherProvider {
                 privateKeyPassword.getMasterKeyValue().toCharArray());
     }
 
-    @Override
     public byte[] encrypt(byte[] plainText) throws SecureVaultException {
         return doCipher(encryptionCipher, plainText);
     }
 
-    @Override
     public byte[] decrypt(byte[] cipherText) throws SecureVaultException {
         return doCipher(decryptionCipher, cipherText);
     }
