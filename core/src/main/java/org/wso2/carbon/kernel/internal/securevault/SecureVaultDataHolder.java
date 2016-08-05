@@ -28,8 +28,9 @@ import java.util.Optional;
  */
 public class SecureVaultDataHolder {
     private static SecureVaultDataHolder instance = new SecureVaultDataHolder();
-    private SecretRepository secretRepository;
-    private MasterKeyReader masterKeyReader;
+    
+    private Optional<SecretRepository> optSecretRepository;
+    private Optional<MasterKeyReader> optMasterKeyReader;
 
     public static SecureVaultDataHolder getInstance() {
         return instance;
@@ -44,7 +45,7 @@ public class SecureVaultDataHolder {
      * @return SecretRepository returns an {@link Optional} {@link SecretRepository} instance
      */
     public Optional<SecretRepository> getSecretRepository() {
-        return Optional.ofNullable(secretRepository);
+        return optSecretRepository;
     }
 
     /**
@@ -53,7 +54,7 @@ public class SecureVaultDataHolder {
      * @param secretRepository SecretRepository instance to be set
      */
     public void setSecretRepository(SecretRepository secretRepository) {
-        this.secretRepository = secretRepository;
+        optSecretRepository = Optional.ofNullable(secretRepository);
     }
 
     /**
@@ -62,7 +63,7 @@ public class SecureVaultDataHolder {
      * @return MasterKeyReader returns an {@link Optional} {@link MasterKeyReader} instance
      */
     public Optional<MasterKeyReader> getMasterKeyReader() {
-        return Optional.ofNullable(masterKeyReader);
+        return optMasterKeyReader;
     }
 
     /**
@@ -71,6 +72,6 @@ public class SecureVaultDataHolder {
      * @param masterKeyReader MasterKeyReader instance to be set
      */
     public void setMasterKeyReader(MasterKeyReader masterKeyReader) {
-        this.masterKeyReader = masterKeyReader;
+        optMasterKeyReader = Optional.ofNullable(masterKeyReader);
     }
 }
