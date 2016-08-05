@@ -105,7 +105,7 @@ public class CipherTool {
     private void encryptText(String plainText) throws SecureVaultException {
         byte[] encryptedPassword = SecureVaultDataHolder.getInstance().getSecretRepository()
                 .orElseThrow(() -> new SecureVaultException("No secret repository found."))
-                .encrypt(SecureVaultUtils.toBytes(plainText.trim().toCharArray()));
+                .encrypt(SecureVaultUtils.toBytes(plainText.trim()));
         logger.info(new String(SecureVaultUtils.toChars(encryptedPassword)));
     }
 }

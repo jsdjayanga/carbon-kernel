@@ -87,7 +87,7 @@ public abstract class AbstractSecretRepository implements SecretRepository {
 
             if (SecureVaultConstants.PLAIN_TEXT.equals(tokens[0])) {
                 encryptedPassword = SecureVaultUtils.base64Encode(
-                        encrypt(SecureVaultUtils.toBytes(tokens[1].trim().toCharArray())));
+                        encrypt(SecureVaultUtils.toBytes(tokens[1].trim())));
                 secretsProperties.setProperty(key, SecureVaultConstants.CIPHER_TEXT + " "
                         + new String(SecureVaultUtils.toChars(encryptedPassword)));
             }
