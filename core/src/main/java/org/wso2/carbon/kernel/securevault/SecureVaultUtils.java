@@ -22,16 +22,18 @@ import org.wso2.carbon.kernel.internal.utils.Utils;
 import org.wso2.carbon.kernel.securevault.config.SecureVaultConfiguration;
 import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
 
-import java.io.ByteArrayOutputStream;
+import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Base64;
@@ -45,6 +47,7 @@ import java.util.Properties;
  */
 public class SecureVaultUtils {
     private static final Logger logger = LoggerFactory.getLogger(SecureVaultUtils.class);
+    private static final String defaultCharset = StandardCharsets.UTF_8.name();
 
     public static MasterKey getSecret(List<MasterKey> masterKeys, String secretName) throws SecureVaultException {
         return masterKeys.stream()
@@ -63,30 +66,22 @@ public class SecureVaultUtils {
     }
 
     public static char[] toChars(byte[] bytes) {
-        Charset charset = Charset.forName("UTF-8");
+        Charset charset = Charset.forName(defaultCharset);
         return charset.decode(ByteBuffer.wrap(bytes)).array();
     }
 
     public static byte[] toBytes(String value) {
-        return value.getBytes(Charset.forName("UTF-8"));
-    }
-
-    public static byte[] toBytes(char[] chars) {
-        Charset charset = Charset.forName("UTF-8");
-        ByteBuffer encoded = charset.encode(CharBuffer.wrap(chars));
-
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        byteArrayOutputStream.write(encoded.array(), 0, encoded.limit());
-        return byteArrayOutputStream.toByteArray();
+        return value.getBytes(Charset.forName(defaultCharset));
     }
 
     public static Properties loadSecretFile(Path secretsFilePath) throws SecureVaultException {
         Properties properties = new Properties();
-        try (InputStream inputStream = new FileInputStream(secretsFilePath.toFile())) {
+        try (InputStream inputStream = new FileInputStream(secretsFilePath.toFile());
+             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, defaultCharset))) {
 
             // TODO : Use ConfigUtil to update with environment variables
 
-            properties.load(inputStream);
+            properties.load(bufferedReader);
         } catch (FileNotFoundException e) {
             throw new SecureVaultException("Cannot find secrets file in given location. (location: "
                     + secretsFilePath + ")", e);
@@ -98,8 +93,10 @@ public class SecureVaultUtils {
     }
 
     public static void updateSecretFile(Path secretsFilePath, Properties properties) throws SecureVaultException {
-        try (OutputStream outputStream = new FileOutputStream(secretsFilePath.toFile())) {
-            properties.store(outputStream, null);
+        try (OutputStream outputStream = new FileOutputStream(secretsFilePath.toFile());
+             OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream, defaultCharset)) {
+
+            properties.store(outputStreamWriter, null);
         } catch (FileNotFoundException e) {
             throw new SecureVaultException("Cannot find secrets file in given location. (location: "
                     + secretsFilePath + ")", e);
