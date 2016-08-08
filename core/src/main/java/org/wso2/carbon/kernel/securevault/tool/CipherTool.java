@@ -61,9 +61,9 @@ public class CipherTool {
     private void init() throws SecureVaultException {
         secureVaultConfiguration = SecureVaultConfigurationProvider.getConfiguration();
 
-        String secretRepositoryType = secureVaultConfiguration.getSecretRepository().getType()
+        String secretRepositoryType = secureVaultConfiguration.getSecretRepositoryConfig().getType()
                 .orElseThrow(() -> new SecureVaultException("Secret repository type is mandatory"));
-        String masterKeyReaderType = secureVaultConfiguration.getMasterKeyReader().getType()
+        String masterKeyReaderType = secureVaultConfiguration.getMasterKeyReaderConfig().getType()
                 .orElseThrow(() -> new SecureVaultException("Master key reader type is mandatory"));
 
         try {
@@ -73,8 +73,8 @@ public class CipherTool {
             throw new SecureVaultException("Failed to instantiate implementation classes.", e);
         }
 
-        masterKeyReader.init(secureVaultConfiguration);
-        secretRepository.init(secureVaultConfiguration, masterKeyReader);
+        masterKeyReader.init(secureVaultConfiguration.getMasterKeyReaderConfig());
+        secretRepository.init(secureVaultConfiguration.getSecretRepositoryConfig(), masterKeyReader);
     }
 
     private void process() throws SecureVaultException {

@@ -63,8 +63,8 @@ public class SecureVaultComponent implements RequiredCapabilityListener {
         try {
             optSecureVaultConfiguration = Optional.of(SecureVaultConfigurationProvider.getConfiguration());
             optSecureVaultConfiguration.ifPresent(secureVaultConfiguration -> {
-                secretRepositoryType = secureVaultConfiguration.getSecretRepository().getType().orElse("");
-                masterKeyReaderType = secureVaultConfiguration.getMasterKeyReader().getType().orElse("");
+                secretRepositoryType = secureVaultConfiguration.getSecretRepositoryConfig().getType().orElse("");
+                masterKeyReaderType = secureVaultConfiguration.getMasterKeyReaderConfig().getType().orElse("");
             });
         } catch (SecureVaultException e) {
             optSecureVaultConfiguration = Optional.empty();
@@ -146,8 +146,8 @@ public class SecureVaultComponent implements RequiredCapabilityListener {
                     .orElseThrow(() ->
                             new SecureVaultException("Cannot initialise secure vault without secret repository"));
 
-            masterKeyReader.init(secureVaultConfiguration);
-            secretRepository.init(secureVaultConfiguration, masterKeyReader);
+            masterKeyReader.init(secureVaultConfiguration.getMasterKeyReaderConfig());
+            secretRepository.init(secureVaultConfiguration.getSecretRepositoryConfig(), masterKeyReader);
 
             secretRepository.loadSecrets(secureVaultConfiguration);
 

@@ -17,7 +17,7 @@
 package org.wso2.carbon.kernel.securevault;
 
 
-import org.wso2.carbon.kernel.securevault.config.model.SecureVaultConfiguration;
+import org.wso2.carbon.kernel.securevault.config.model.MasterKeyReaderConfiguration;
 import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
 
 import java.util.List;
@@ -38,10 +38,10 @@ public interface MasterKeyReader {
      * An implementation of this method should initialize the MasterKeyReader, so that it could perform the
      * {@code readMasterKeys}
      *
-     * @param secureVaultConfiguration  {@link SecureVaultConfiguration}
+     * @param masterKeyReaderConfiguration  {@link MasterKeyReaderConfiguration}
      * @throws SecureVaultException     on an error while trying to initializing the MasterKeyReader
      */
-    void init(SecureVaultConfiguration secureVaultConfiguration) throws SecureVaultException;
+    void init(MasterKeyReaderConfiguration masterKeyReaderConfiguration) throws SecureVaultException;
 
     /**
      * An implementation of this method should populate the secretValue of all the Secrets provided in the

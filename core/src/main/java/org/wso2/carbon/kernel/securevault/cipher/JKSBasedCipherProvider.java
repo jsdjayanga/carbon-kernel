@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.kernel.securevault.MasterKey;
 import org.wso2.carbon.kernel.securevault.SecureVaultConstants;
 import org.wso2.carbon.kernel.securevault.SecureVaultUtils;
-import org.wso2.carbon.kernel.securevault.config.model.SecureVaultConfiguration;
+import org.wso2.carbon.kernel.securevault.config.model.SecretRepositoryConfiguration;
 import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
 
 import java.io.BufferedInputStream;
@@ -56,12 +56,12 @@ public class JKSBasedCipherProvider {
     private Cipher encryptionCipher;
     private Cipher decryptionCipher;
 
-    public void init(SecureVaultConfiguration secureVaultConfiguration, List<MasterKey> masterKeys)
+    public void init(SecretRepositoryConfiguration secretRepositoryConfiguration, List<MasterKey> masterKeys)
             throws SecureVaultException {
-        String keystoreLocation = secureVaultConfiguration.getSecretRepository().getParameter(location)
+        String keystoreLocation = secretRepositoryConfiguration.getParameter(location)
                 .orElseThrow(() -> new SecureVaultException("Key store location is mandatory"));
 
-        String privateKeyAlias = secureVaultConfiguration.getSecretRepository().getParameter(alias)
+        String privateKeyAlias = secretRepositoryConfiguration.getParameter(alias)
                 .orElseThrow(() -> new SecureVaultException("Private key alias is mandatory"));
 
         MasterKey keyStorePassword = SecureVaultUtils.getSecret(masterKeys,

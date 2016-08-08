@@ -16,6 +16,7 @@
 
 package org.wso2.carbon.kernel.securevault;
 
+import org.wso2.carbon.kernel.securevault.config.model.SecretRepositoryConfiguration;
 import org.wso2.carbon.kernel.securevault.config.model.SecureVaultConfiguration;
 import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
 
@@ -37,11 +38,11 @@ public interface SecretRepository {
      * An implementation of this method should initialize the {@link SecretRepository}, which make the
      * SecretRepository ready for {@code loadSecrets} and {@code persistSecrets}
      *
-     * @param secureVaultConfiguration {@link SecureVaultConfiguration}
+     * @param secretRepositoryConfiguration {@link SecretRepositoryConfiguration}
      * @param masterKeyReader          an initialized {@link MasterKeyReader}
      * @throws SecureVaultException    on an error while trying to initialize the SecretRepository
      */
-    void init(SecureVaultConfiguration secureVaultConfiguration, MasterKeyReader masterKeyReader)
+    void init(SecretRepositoryConfiguration secretRepositoryConfiguration, MasterKeyReader masterKeyReader)
             throws SecureVaultException;
 
     /**

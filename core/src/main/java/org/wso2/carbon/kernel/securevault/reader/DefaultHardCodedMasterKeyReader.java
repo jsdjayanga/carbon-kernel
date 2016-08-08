@@ -25,7 +25,7 @@ import org.wso2.carbon.kernel.securevault.MasterKey;
 import org.wso2.carbon.kernel.securevault.MasterKeyReader;
 import org.wso2.carbon.kernel.securevault.SecureVaultConstants;
 import org.wso2.carbon.kernel.securevault.SecureVaultUtils;
-import org.wso2.carbon.kernel.securevault.config.model.SecureVaultConfiguration;
+import org.wso2.carbon.kernel.securevault.config.model.MasterKeyReaderConfiguration;
 import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
 
 import java.util.List;
@@ -58,7 +58,7 @@ public class DefaultHardCodedMasterKeyReader implements MasterKeyReader {
     }
 
     @Override
-    public void init(SecureVaultConfiguration secureVaultConfiguration) throws SecureVaultException {
+    public void init(MasterKeyReaderConfiguration masterKeyReaderConfiguration) throws SecureVaultException {
         // No initializations needed for the DefaultMasterKeyReader
     }
 

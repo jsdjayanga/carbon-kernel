@@ -16,20 +16,25 @@
 
 package org.wso2.carbon.kernel.securevault.config.model;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+
 /**
- * SecureVaultConfiguration class holds static configuration parameters specified in the secure-vault.yaml file.
+ * Secret Repository Configuration bean.
  *
  * @since 5.2.0
  */
-public class SecureVaultConfiguration {
-    private SecretRepositoryConfiguration secretRepository;
-    private MasterKeyReaderConfiguration masterKeyReader;
+public class SecretRepositoryConfiguration {
 
-    public SecretRepositoryConfiguration getSecretRepositoryConfig() {
-        return secretRepository;
+    private String type = "";
+    private Map<String, String> parameters = new HashMap<>();
+
+    public Optional<String> getType() {
+        return Optional.ofNullable(type);
     }
 
-    public MasterKeyReaderConfiguration getMasterKeyReaderConfig() {
-        return masterKeyReader;
+    public Optional<String> getParameter(String key) {
+        return Optional.ofNullable(parameters.get(key));
     }
 }

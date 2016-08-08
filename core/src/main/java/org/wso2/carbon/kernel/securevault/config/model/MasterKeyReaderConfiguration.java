@@ -21,11 +21,11 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * Component Configuration bean.
+ * Master Key Reader Configuration bean.
  *
  * @since 5.2.0
  */
-public class ComponentConfiguration {
+public class MasterKeyReaderConfiguration {
 
     private String type = "";
     private Map<String, String> parameters = new HashMap<>();

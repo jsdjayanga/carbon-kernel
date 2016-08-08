@@ -26,7 +26,7 @@ import org.wso2.carbon.kernel.securevault.MasterKeyReader;
 import org.wso2.carbon.kernel.securevault.SecretRepository;
 import org.wso2.carbon.kernel.securevault.SecureVaultConstants;
 import org.wso2.carbon.kernel.securevault.cipher.JKSBasedCipherProvider;
-import org.wso2.carbon.kernel.securevault.config.model.SecureVaultConfiguration;
+import org.wso2.carbon.kernel.securevault.config.model.SecretRepositoryConfiguration;
 import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
 
 import java.util.ArrayList;
@@ -64,7 +64,7 @@ public class DefaultSecretRepository extends AbstractSecretRepository {
     }
 
     @Override
-    public void init(SecureVaultConfiguration secureVaultConfiguration, MasterKeyReader masterKeyReader)
+    public void init(SecretRepositoryConfiguration secretRepositoryConfiguration, MasterKeyReader masterKeyReader)
             throws SecureVaultException {
         List<MasterKey> masterKeys = new ArrayList<>();
         masterKeys.add(new MasterKey(SecureVaultConstants.KEY_STORE_PASSWORD));
@@ -72,7 +72,7 @@ public class DefaultSecretRepository extends AbstractSecretRepository {
         masterKeyReader.readMasterKeys(masterKeys);
 
         jksBasedCipherProvider = new JKSBasedCipherProvider();
-        jksBasedCipherProvider.init(secureVaultConfiguration, masterKeys);
+        jksBasedCipherProvider.init(secretRepositoryConfiguration, masterKeys);
 
         logger.debug("DefaultSecretRepository initialized with '{}'", JKSBasedCipherProvider.class.getName());
     }
