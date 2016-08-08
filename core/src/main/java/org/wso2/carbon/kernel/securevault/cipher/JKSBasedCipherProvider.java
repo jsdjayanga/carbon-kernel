@@ -69,11 +69,12 @@ public class JKSBasedCipherProvider {
         MasterKey privateKeyPassword = SecureVaultUtils.getSecret(masterKeys,
                 SecureVaultConstants.PRIVATE_KEY_PASSWORD);
 
-        KeyStore keyStore = loadKeyStore(keystoreLocation, keyStorePassword.getMasterKeyValue().toCharArray());
+        KeyStore keyStore = loadKeyStore(keystoreLocation, keyStorePassword.getMasterKeyValue()
+                .orElseThrow(() -> new SecureVaultException("Key store password is mandatory")).toCharArray());
 
         encryptionCipher = getEncryptionCipher(keyStore, privateKeyAlias);
-        decryptionCipher = getDecryptionCipher(keyStore, privateKeyAlias,
-                privateKeyPassword.getMasterKeyValue().toCharArray());
+        decryptionCipher = getDecryptionCipher(keyStore, privateKeyAlias, privateKeyPassword.getMasterKeyValue()
+                .orElseThrow(() -> new SecureVaultException("Private key password is mandatory")).toCharArray());
         logger.debug("JKSBasedCipherProvider initialized successfully.");
     }
 

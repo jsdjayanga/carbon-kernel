@@ -16,12 +16,17 @@
 
 package org.wso2.carbon.kernel.securevault;
 
+import java.util.Optional;
+
 /**
- * Created by jayanga on 7/13/16.
+ * This class represents a master key that is needed to initialize a secret repository. A secret repository might need
+ *  a few master keys to get it initialized.
+ *
+ * @since 5.2.0
  */
 public class MasterKey {
     private String masterKeyName;
-    private String masterKeyValue;
+    private Optional<String> optMasterKeyValue;
 
     public MasterKey(String masterKeyName) {
         this.masterKeyName = masterKeyName;
@@ -31,11 +36,11 @@ public class MasterKey {
         return masterKeyName;
     }
 
-    public String getMasterKeyValue() {
-        return masterKeyValue;
+    public Optional<String> getMasterKeyValue() {
+        return optMasterKeyValue;
     }
 
     public void setMasterKeyValue(String masterKeyValue) {
-        this.masterKeyValue = masterKeyValue;
+        this.optMasterKeyValue = Optional.ofNullable(masterKeyValue);
     }
 }
