@@ -45,8 +45,7 @@ import javax.crypto.CipherOutputStream;
 import javax.crypto.NoSuchPaddingException;
 
 /**
- * This service component is responsible for providing encryption and decryption capabilities based on the JKS.
- * And this component registers a CipherProvider as an OSGi service.
+ * This class is responsible for providing encryption and decryption capabilities based on the JKS.
  *
  * @since 5.2.0
  */
@@ -75,6 +74,7 @@ public class JKSBasedCipherProvider {
         encryptionCipher = getEncryptionCipher(keyStore, privateKeyAlias);
         decryptionCipher = getDecryptionCipher(keyStore, privateKeyAlias,
                 privateKeyPassword.getMasterKeyValue().toCharArray());
+        logger.debug("JKSBasedCipherProvider initialized successfully.");
     }
 
     public byte[] encrypt(byte[] plainText) throws SecureVaultException {
@@ -91,6 +91,9 @@ public class JKSBasedCipherProvider {
             try {
                 keyStore = KeyStore.getInstance(SecureVaultConstants.JKS);
                 keyStore.load(bufferedInputStream, keyStorePassword);
+
+                logger.debug("Keystore at path : '{}', loaded successfully.", keyStorePath);
+
                 return keyStore;
             } catch (CertificateException e) {
                 throw new SecureVaultException("Failed to load certificates from keystore : '" + keyStorePath + "'", e);
@@ -118,6 +121,9 @@ public class JKSBasedCipherProvider {
         try {
             Cipher cipher = Cipher.getInstance(certificate.getPublicKey().getAlgorithm());
             cipher.init(Cipher.ENCRYPT_MODE, certificate);
+
+            logger.debug("Successfully created an encryption cipher with alias : '{}'", alias);
+
             return cipher;
         } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException e) {
             throw new SecureVaultException("Failed to initialize Cipher for mode '" + Cipher.ENCRYPT_MODE + "'", e);
@@ -137,6 +143,9 @@ public class JKSBasedCipherProvider {
         try {
             Cipher cipher = Cipher.getInstance(privateKey.getAlgorithm());
             cipher.init(Cipher.DECRYPT_MODE, privateKey);
+
+            logger.debug("Successfully created a decryption cipher with alias : '{}'", alias);
+
             return cipher;
         } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException e) {
             throw new SecureVaultException("Failed to initialize Cipher for mode '" + Cipher.DECRYPT_MODE + "'", e);
