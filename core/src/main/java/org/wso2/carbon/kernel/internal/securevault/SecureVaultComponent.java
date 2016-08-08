@@ -35,10 +35,13 @@ import org.wso2.carbon.kernel.startupresolver.RequiredCapabilityListener;
 import java.util.Optional;
 
 /**
- * This service component acts as a RequiredCapabilityListener for all the ${@link SecretRepository}s
- * and ${@link MasterKeyReader}s. Once those are available, this component choose which instance to be used,
- * based on the secure vault configuration and registered the SecureVault OSGi service, which can then be used
- * by other components for encryption and decryption.
+ * This service component acts as a RequiredCapabilityListener for all the ${@link SecretRepository}s and
+ * ${@link MasterKeyReader}s. This component will receive all the ${@link SecretRepository} and
+ * ${@link MasterKeyReader} services registrations, but it will only keep references for the services that are
+ * configured in the secure-vault.yaml. Once all the services are available, this component will initialize the
+ * corresponding ${@link SecretRepository} and ${@link MasterKeyReader} and call the ${@link SecretRepository}
+ * to load the secrets. Once the ${@link SecretRepository} is ready, this component will  register the
+ * SecureVault OSGi service, which can then be used by other components for encryption and decryption.
  *
  * @since 5.2.0
  */
@@ -94,12 +97,14 @@ public class SecureVaultComponent implements RequiredCapabilityListener {
     )
     protected void registerSecretRepository(SecretRepository secretRepository) {
         if (secretRepository.getClass().getName().equals(secretRepositoryType)) {
+            logger.debug("Registering secret repository : {}", secretRepositoryType);
             SecureVaultDataHolder.getInstance().setSecretRepository(secretRepository);
         }
     }
 
     protected void unRegisterSecretRepository(SecretRepository secretRepository) {
         if (secretRepository.getClass().getName().equals(secretRepositoryType)) {
+            logger.debug("Un-registering secret repository : {}", secretRepositoryType);
             SecureVaultDataHolder.getInstance().setSecretRepository(null);
         }
     }
@@ -113,12 +118,14 @@ public class SecureVaultComponent implements RequiredCapabilityListener {
     )
     protected void registerMasterKeyReader(MasterKeyReader masterKeyReader) {
         if (masterKeyReader.getClass().getName().equals(masterKeyReaderType)) {
+            logger.debug("Registering secret repository : ", masterKeyReaderType);
             SecureVaultDataHolder.getInstance().setMasterKeyReader(masterKeyReader);
         }
     }
 
     protected void unregisterMasterKeyReader(MasterKeyReader masterKeyReader) {
         if (masterKeyReader.getClass().getName().equals(masterKeyReaderType)) {
+            logger.debug("Un-registering secret repository : ", masterKeyReaderType);
             SecureVaultDataHolder.getInstance().setMasterKeyReader(null);
         }
     }
@@ -140,8 +147,8 @@ public class SecureVaultComponent implements RequiredCapabilityListener {
                             new SecureVaultException("Cannot initialise secure vault without secret repository"));
 
             masterKeyReader.init(secureVaultConfiguration);
-
             secretRepository.init(secureVaultConfiguration, masterKeyReader);
+
             secretRepository.loadSecrets(secureVaultConfiguration);
 
             Optional.ofNullable(DataHolder.getInstance().getBundleContext())
@@ -150,5 +157,6 @@ public class SecureVaultComponent implements RequiredCapabilityListener {
         } catch (SecureVaultException e) {
             logger.error("Failed to initialize Secure Vault.", e);
         }
+        logger.debug("Secure Vault initialized successfully");
     }
 }
