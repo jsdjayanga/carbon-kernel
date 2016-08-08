@@ -33,10 +33,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This service component is responsible for exposing the secrets given in the secrets.properties file. By default
- * this will read the secrets from default secrets.properties file. This can be altered by specifying "location"
- * of the secrets file in the secure_vault.yml file.
- * And this component registers a SecretRepository as an OSGi service.
+ * This service component provides a concrete implementation for {@link SecretRepository}. This is the default
+ * implementation for secret repository in Secure Vault. The secrets are taken form the secrets.properties file and
+ * encryption/decryption is based on the Java KeyStore.
+ *
+ * This component registers a SecretRepository as an OSGi service.
  *
  * @since 5.2.0
  */
@@ -65,8 +66,6 @@ public class DefaultSecretRepository extends AbstractSecretRepository {
     @Override
     public void init(SecureVaultConfiguration secureVaultConfiguration, MasterKeyReader masterKeyReader)
             throws SecureVaultException {
-        logger.debug("Initializing DefaultSecretRepository");
-
         List<MasterKey> masterKeys = new ArrayList<>();
         masterKeys.add(new MasterKey(SecureVaultConstants.KEY_STORE_PASSWORD));
         masterKeys.add(new MasterKey(SecureVaultConstants.PRIVATE_KEY_PASSWORD));
@@ -74,6 +73,8 @@ public class DefaultSecretRepository extends AbstractSecretRepository {
 
         jksBasedCipherProvider = new JKSBasedCipherProvider();
         jksBasedCipherProvider.init(secureVaultConfiguration, masterKeys);
+
+        logger.debug("DefaultSecretRepository initialized with '{}'", JKSBasedCipherProvider.class.getName());
     }
 
     @Override
