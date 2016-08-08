@@ -96,6 +96,7 @@ public class DefaultMasterKeyReader implements MasterKeyReader {
 
     private void readMasterKeysFromEnvironment(List<MasterKey> masterKeys) throws SecureVaultException {
         masterKeys.forEach(masterKey -> {
+            logger.debug("Reading master key '{}' from environment variables.", masterKey.getMasterKeyName());
             Optional.ofNullable(System.getenv(masterKey.getMasterKeyName()))
                     .ifPresent(s -> masterKey.setMasterKeyValue(s));
         });
@@ -103,17 +104,18 @@ public class DefaultMasterKeyReader implements MasterKeyReader {
 
     private void readMasterKeysFromSystem(List<MasterKey> masterKeys) throws SecureVaultException {
         masterKeys.forEach(masterKey -> {
+            logger.debug("Reading master key '{}' from system properties.", masterKey.getMasterKeyName());
             Optional.ofNullable(System.getProperty(masterKey.getMasterKeyName()))
                     .ifPresent(s -> masterKey.setMasterKeyValue(s));
         });
     }
 
     private void readSecretsFile(Path passwordFilePath, List<MasterKey> masterKeys) throws SecureVaultException {
-        Properties properties = new Properties();
         try (InputStream inputStream = new FileInputStream(passwordFilePath.toFile());
              BufferedReader bufferedReader = new BufferedReader(
                      new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
 
+            Properties properties = new Properties();
             properties.load(bufferedReader);
 
             if (properties.isEmpty()) {
@@ -126,7 +128,8 @@ public class DefaultMasterKeyReader implements MasterKeyReader {
             }
 
             for (MasterKey masterKey : masterKeys) {
-                masterKey.setMasterKeyValue(properties.getProperty(masterKey.getMasterKeyName(), ""));
+                logger.debug("Reading master key '{}' from file.", masterKey.getMasterKeyName());
+                masterKey.setMasterKeyValue(properties.getProperty(masterKey.getMasterKeyName()));
             }
 
             inputStream.close();
@@ -143,16 +146,23 @@ public class DefaultMasterKeyReader implements MasterKeyReader {
         Optional.ofNullable(System.console()).ifPresent(console -> {
             masterKeys.stream()
                     .filter(masterKey -> !Optional.ofNullable(masterKey.getMasterKeyValue()).isPresent())
-                    .forEach(uninitializedMasterKey -> uninitializedMasterKey.setMasterKeyValue(
-                            new String(console.readPassword("[%s]", "Enter master key '"
-                                    + uninitializedMasterKey.getMasterKeyName() + "' :")))
-                    );
+                    .forEach(uninitializedMasterKey -> {
+                        logger.debug("Reading master key '{}' from console.",
+                                uninitializedMasterKey.getMasterKeyName());
+                        uninitializedMasterKey.setMasterKeyValue(
+                                new String(console.readPassword("[%s]", "Enter master key '"
+                                        + uninitializedMasterKey.getMasterKeyName() + "' :")));
+                    });
         });
     }
 
     private boolean fullyInitialized(List<MasterKey> masterKeys) {
         return (masterKeys.stream()
-                .filter(masterKey -> !Optional.ofNullable(masterKey.getMasterKeyValue()).isPresent())
+                .filter(masterKey -> {
+                    logger.debug("Mater key '{}' is not initialized from env, sys or file, hence needed to be read " +
+                            "from console.", masterKey.getMasterKeyName());
+                    return !Optional.ofNullable(masterKey.getMasterKeyValue()).isPresent();
+                })
                 .count() > 0) ? false : true;
     }
 }
