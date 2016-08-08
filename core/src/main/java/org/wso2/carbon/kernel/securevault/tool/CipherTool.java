@@ -78,7 +78,7 @@ public class CipherTool {
     }
 
     private void process() throws SecureVaultException {
-        secretRepository.persistSecrets(secureVaultConfiguration);
+        secretRepository.persistSecrets(secureVaultConfiguration.getSecretRepositoryConfig());
     }
 
     private void processArgs(String[] args) throws SecureVaultException {

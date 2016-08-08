@@ -21,9 +21,10 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.kernel.securevault.SecretRepository;
 import org.wso2.carbon.kernel.securevault.SecureVaultConstants;
 import org.wso2.carbon.kernel.securevault.SecureVaultUtils;
-import org.wso2.carbon.kernel.securevault.config.model.SecureVaultConfiguration;
+import org.wso2.carbon.kernel.securevault.config.model.SecretRepositoryConfiguration;
 import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
 
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
@@ -42,10 +43,12 @@ public abstract class AbstractSecretRepository implements SecretRepository {
     private final Map<String, char[]> secrets = new HashMap<>();
 
     @Override
-    public void loadSecrets(SecureVaultConfiguration secureVaultConfiguration)
+    public void loadSecrets(SecretRepositoryConfiguration secretRepositoryConfiguration)
             throws SecureVaultException {
         logger.debug("Loading secrets to SecretRepository");
-        Properties secretsProperties = SecureVaultUtils.getSecretProperties(secureVaultConfiguration);
+        Path secretPropertiesFilePath = Paths.get(SecureVaultUtils
+                .getSecretPropertiesFileLocation(secretRepositoryConfiguration));
+        Properties secretsProperties = SecureVaultUtils.loadSecretFile(secretPropertiesFilePath);
 
         for (Map.Entry<Object, Object> entry: secretsProperties.entrySet()) {
             String key = entry.getKey().toString().trim();
@@ -74,10 +77,12 @@ public abstract class AbstractSecretRepository implements SecretRepository {
     }
 
     @Override
-    public void persistSecrets(SecureVaultConfiguration secureVaultConfiguration)
+    public void persistSecrets(SecretRepositoryConfiguration secretRepositoryConfiguration)
             throws SecureVaultException {
         logger.debug("Persisting secrets to SecretRepository");
-        Properties secretsProperties = SecureVaultUtils.getSecretProperties(secureVaultConfiguration);
+        Path secretPropertiesFilePath = Paths.get(SecureVaultUtils
+                .getSecretPropertiesFileLocation(secretRepositoryConfiguration));
+        Properties secretsProperties = SecureVaultUtils.loadSecretFile(secretPropertiesFilePath);
 
         int count = 0;
         for (Map.Entry<Object, Object> entry: secretsProperties.entrySet()) {
@@ -99,9 +104,7 @@ public abstract class AbstractSecretRepository implements SecretRepository {
             }
         }
 
-        String secretPropertiesFileLocation = SecureVaultUtils
-                .getSecretPropertiesFileLocation(secureVaultConfiguration);
-        SecureVaultUtils.updateSecretFile(Paths.get(secretPropertiesFileLocation), secretsProperties);
+        SecureVaultUtils.updateSecretFile(secretPropertiesFilePath, secretsProperties);
 
         logger.debug("Secrets file updated with '{}' new encrypted secrets", count);
     }

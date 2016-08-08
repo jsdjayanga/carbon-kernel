@@ -17,7 +17,6 @@
 package org.wso2.carbon.kernel.securevault;
 
 import org.wso2.carbon.kernel.securevault.config.model.SecretRepositoryConfiguration;
-import org.wso2.carbon.kernel.securevault.config.model.SecureVaultConfiguration;
 import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
 
 /**
@@ -33,7 +32,7 @@ import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
 public interface SecretRepository {
 
     /**
-     * This method will be called with a {@link SecureVaultConfiguration}, a {@link MasterKeyReader}.
+     * This method will be called with a {@link SecretRepositoryConfiguration}, a {@link MasterKeyReader}.
      *
      * An implementation of this method should initialize the {@link SecretRepository}, which make the
      * SecretRepository ready for {@code loadSecrets} and {@code persistSecrets}
@@ -48,18 +47,18 @@ public interface SecretRepository {
     /**
      * An implementation of this method should load the secrets from underlying secret repository.
      *
-     * @param secureVaultConfiguration {@link SecureVaultConfiguration}
+     * @param secretRepositoryConfiguration {@link SecretRepositoryConfiguration}
      * @throws SecureVaultException    on an error while trying to load secrets
      */
-    void loadSecrets(SecureVaultConfiguration secureVaultConfiguration) throws SecureVaultException;
+    void loadSecrets(SecretRepositoryConfiguration secretRepositoryConfiguration) throws SecureVaultException;
 
     /**
      * An implementation of this method should persist the secrets to the underlying secret repository.
      *
-     * @param secureVaultConfiguration {@link SecureVaultConfiguration}
+     * @param secretRepositoryConfiguration {@link SecretRepositoryConfiguration}
      * @throws SecureVaultException    on an error while trying to persis secrets
      */
-    void persistSecrets(SecureVaultConfiguration secureVaultConfiguration) throws SecureVaultException;
+    void persistSecrets(SecretRepositoryConfiguration secretRepositoryConfiguration) throws SecureVaultException;
 
     /**
      * An implementation of this method should provide the plain text secret for a given alias.
