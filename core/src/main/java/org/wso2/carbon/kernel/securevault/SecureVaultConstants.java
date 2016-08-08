@@ -22,23 +22,12 @@ package org.wso2.carbon.kernel.securevault;
  * @since 5.2.0
  */
 public class SecureVaultConstants {
-    public static final String SECRET_REPOSITORY = "secretRepository";
-    public static final String SECRET_REPOSITORY_PROPERTY_NAME = "secretRepositoryType";
-    public static final String MASTER_KEY_READER = "masterKeyReader";
-    public static final String MASTER_KEY_READER_PROPERTY_NAME = "masterKeyReaderType";
-    public static final String CIPHER_PROVIDER = "cipherProvider";
 
-    public static final String KEY_STORE_PASSWORD = "keyStorePassword";
-    public static final String PRIVATE_KEY_PASSWORD = "privateKeyPassword";
-
-    public static final String LOCATION = "location";
-    public static final String TYPE = "type";
-    public static final String ALIAS = "alias";
     public static final String CIPHER_TEXT = "cipherText";
     public static final String PLAIN_TEXT = "plainText";
     public static final String ENCRYPT_TEXT = "encryptText";
+    public static final String LOCATION = "location";
     public static final String SPACE = " ";
-    public static final String JKS = "JKS";
 
     /**
      * Remove default constructor and make it not available to initialize.

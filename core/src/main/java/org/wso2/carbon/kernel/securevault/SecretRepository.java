@@ -20,9 +20,8 @@ import org.wso2.carbon.kernel.securevault.config.model.SecretRepositoryConfigura
 import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
 
 /**
- * This interface is used to register SecretRepositories.
- *
- * An implementation of this interface should be registered as an OSGi service using the SecretRepository interface.
+ * This interface is used to register SecretRepositories. An implementation of this interface should be registered
+ * as an OSGi service using the SecretRepository interface.
  *
  * The implementation of this interface can be different from one SecretRepository to another depending on its
  * requirements and behaviour.
@@ -33,7 +32,6 @@ public interface SecretRepository {
 
     /**
      * This method will be called with a {@link SecretRepositoryConfiguration}, a {@link MasterKeyReader}.
-     *
      * An implementation of this method should initialize the {@link SecretRepository}, which make the
      * SecretRepository ready for {@code loadSecrets} and {@code persistSecrets}
      *

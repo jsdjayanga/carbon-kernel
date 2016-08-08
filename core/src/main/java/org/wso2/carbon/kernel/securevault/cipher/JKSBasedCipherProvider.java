@@ -19,7 +19,6 @@ package org.wso2.carbon.kernel.securevault.cipher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.kernel.securevault.MasterKey;
-import org.wso2.carbon.kernel.securevault.SecureVaultConstants;
 import org.wso2.carbon.kernel.securevault.SecureVaultUtils;
 import org.wso2.carbon.kernel.securevault.config.model.SecretRepositoryConfiguration;
 import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
@@ -51,23 +50,24 @@ import javax.crypto.NoSuchPaddingException;
  */
 public class JKSBasedCipherProvider {
     private static Logger logger = LoggerFactory.getLogger(JKSBasedCipherProvider.class);
-    private static final String location = "keystoreLocation";
-    private static final String alias = "privateKeyAlias";
+    private static final String LOCATION = "keystoreLocation";
+    private static final String ALIAS = "privateKeyAlias";
+    public static final String KEY_STORE_PASSWORD = "keyStorePassword";
+    public static final String PRIVATE_KEY_PASSWORD = "privateKeyPassword";
+    private static final String JKS = "JKS";
     private Cipher encryptionCipher;
     private Cipher decryptionCipher;
 
     public void init(SecretRepositoryConfiguration secretRepositoryConfiguration, List<MasterKey> masterKeys)
             throws SecureVaultException {
-        String keystoreLocation = secretRepositoryConfiguration.getParameter(location)
+        String keystoreLocation = secretRepositoryConfiguration.getParameter(LOCATION)
                 .orElseThrow(() -> new SecureVaultException("Key store location is mandatory"));
 
-        String privateKeyAlias = secretRepositoryConfiguration.getParameter(alias)
+        String privateKeyAlias = secretRepositoryConfiguration.getParameter(ALIAS)
                 .orElseThrow(() -> new SecureVaultException("Private key alias is mandatory"));
 
-        MasterKey keyStorePassword = SecureVaultUtils.getSecret(masterKeys,
-                SecureVaultConstants.KEY_STORE_PASSWORD);
-        MasterKey privateKeyPassword = SecureVaultUtils.getSecret(masterKeys,
-                SecureVaultConstants.PRIVATE_KEY_PASSWORD);
+        MasterKey keyStorePassword = SecureVaultUtils.getSecret(masterKeys, KEY_STORE_PASSWORD);
+        MasterKey privateKeyPassword = SecureVaultUtils.getSecret(masterKeys, PRIVATE_KEY_PASSWORD);
 
         KeyStore keyStore = loadKeyStore(keystoreLocation, keyStorePassword.getMasterKeyValue()
                 .orElseThrow(() -> new SecureVaultException("Key store password is mandatory")).toCharArray());
@@ -90,7 +90,7 @@ public class JKSBasedCipherProvider {
         try (BufferedInputStream bufferedInputStream = new BufferedInputStream(new FileInputStream(keyStorePath))) {
             KeyStore keyStore;
             try {
-                keyStore = KeyStore.getInstance(SecureVaultConstants.JKS);
+                keyStore = KeyStore.getInstance(JKS);
                 keyStore.load(bufferedInputStream, keyStorePassword);
 
                 logger.debug("Keystore at path : '{}', loaded successfully.", keyStorePath);

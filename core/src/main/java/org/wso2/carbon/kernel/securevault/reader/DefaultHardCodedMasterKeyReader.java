@@ -23,8 +23,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.kernel.securevault.MasterKey;
 import org.wso2.carbon.kernel.securevault.MasterKeyReader;
-import org.wso2.carbon.kernel.securevault.SecureVaultConstants;
 import org.wso2.carbon.kernel.securevault.SecureVaultUtils;
+import org.wso2.carbon.kernel.securevault.cipher.JKSBasedCipherProvider;
 import org.wso2.carbon.kernel.securevault.config.model.MasterKeyReaderConfiguration;
 import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
 
@@ -66,11 +66,11 @@ public class DefaultHardCodedMasterKeyReader implements MasterKeyReader {
     public void readMasterKeys(List<MasterKey> masterKeys) throws SecureVaultException {
         logger.debug("Providing hard coded secrets for 'keyStorePassword' and 'privateKeyPassword'");
 
-        MasterKey keyStorePassword = SecureVaultUtils.getSecret(masterKeys, SecureVaultConstants.KEY_STORE_PASSWORD);
+        MasterKey keyStorePassword = SecureVaultUtils.getSecret(masterKeys, JKSBasedCipherProvider.KEY_STORE_PASSWORD);
         keyStorePassword.setMasterKeyValue("wso2carbon");
 
         MasterKey privateKeyPassword = SecureVaultUtils.getSecret(masterKeys,
-                SecureVaultConstants.PRIVATE_KEY_PASSWORD);
+                JKSBasedCipherProvider.PRIVATE_KEY_PASSWORD);
         privateKeyPassword.setMasterKeyValue("wso2carbon");
     }
 }

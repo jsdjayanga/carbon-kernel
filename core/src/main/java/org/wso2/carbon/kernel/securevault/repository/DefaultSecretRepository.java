@@ -24,7 +24,6 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.kernel.securevault.MasterKey;
 import org.wso2.carbon.kernel.securevault.MasterKeyReader;
 import org.wso2.carbon.kernel.securevault.SecretRepository;
-import org.wso2.carbon.kernel.securevault.SecureVaultConstants;
 import org.wso2.carbon.kernel.securevault.cipher.JKSBasedCipherProvider;
 import org.wso2.carbon.kernel.securevault.config.model.SecretRepositoryConfiguration;
 import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
@@ -67,8 +66,8 @@ public class DefaultSecretRepository extends AbstractSecretRepository {
     public void init(SecretRepositoryConfiguration secretRepositoryConfiguration, MasterKeyReader masterKeyReader)
             throws SecureVaultException {
         List<MasterKey> masterKeys = new ArrayList<>();
-        masterKeys.add(new MasterKey(SecureVaultConstants.KEY_STORE_PASSWORD));
-        masterKeys.add(new MasterKey(SecureVaultConstants.PRIVATE_KEY_PASSWORD));
+        masterKeys.add(new MasterKey(JKSBasedCipherProvider.KEY_STORE_PASSWORD));
+        masterKeys.add(new MasterKey(JKSBasedCipherProvider.PRIVATE_KEY_PASSWORD));
         masterKeyReader.readMasterKeys(masterKeys);
 
         jksBasedCipherProvider = new JKSBasedCipherProvider();
