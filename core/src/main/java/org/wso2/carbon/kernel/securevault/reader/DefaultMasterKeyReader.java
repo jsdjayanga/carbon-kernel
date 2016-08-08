@@ -28,7 +28,6 @@ import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
 import org.wso2.carbon.kernel.utils.Utils;
 
 import java.io.BufferedReader;
-import java.io.Console;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -38,16 +37,19 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Optional;
 import java.util.Properties;
 
 /**
- * This service component is responsible for providing secrets to initialize the secret repositories. This provider
- * has two behaviours
- * 1. Reads the secrets from file
+ * This service component is responsible for providing master keys to initialize the secret repositories. This provider
+ * has four behaviours
+ * 1. Reads the master keys from Environment variables.
+ * 2. Reads the master keys from System properties.
+ * 3. Reads the master keys from file
  * It looks for a property file with name "password" in server home directory, read the passwords and delete the
  * file. If the file has a property "permanent=true", the file will not be deleted.
- * 2. Reads the secrets from command line.
- * And this component registers a SecretProvider as an OSGi service.
+ * 4. Reads the master keys from command line.
+ * And this component registers a MasterKeyReader as an OSGi service.
  *
  * @since 5.2.0
  */
@@ -79,12 +81,31 @@ public class DefaultMasterKeyReader implements MasterKeyReader {
 
     @Override
     public void readMasterKeys(List<MasterKey> masterKeys) throws SecureVaultException {
+        readMasterKeysFromEnvironment(masterKeys);
+        readMasterKeysFromSystem(masterKeys);
+
         Path passwordFilePath = Paths.get(Utils.getCarbonHome().toString(), "password");
         if (Files.exists(passwordFilePath)) {
             readSecretsFile(passwordFilePath, masterKeys);
-        } else {
+        }
+
+        if (!fullyInitialized(masterKeys)) {
             readSecretsFromConsole(masterKeys);
         }
+    }
+
+    private void readMasterKeysFromEnvironment(List<MasterKey> masterKeys) throws SecureVaultException {
+        masterKeys.forEach(masterKey -> {
+            Optional.ofNullable(System.getenv(masterKey.getMasterKeyName()))
+                    .ifPresent(s -> masterKey.setMasterKeyValue(s));
+        });
+    }
+
+    private void readMasterKeysFromSystem(List<MasterKey> masterKeys) throws SecureVaultException {
+        masterKeys.forEach(masterKey -> {
+            Optional.ofNullable(System.getProperty(masterKey.getMasterKeyName()))
+                    .ifPresent(s -> masterKey.setMasterKeyValue(s));
+        });
     }
 
     private void readSecretsFile(Path passwordFilePath, List<MasterKey> masterKeys) throws SecureVaultException {
@@ -119,12 +140,19 @@ public class DefaultMasterKeyReader implements MasterKeyReader {
     }
 
     private void readSecretsFromConsole(List<MasterKey> masterKeys) throws SecureVaultException {
-        Console console = System.console();
-        if (console != null) {
-            for (MasterKey masterKey : masterKeys) {
-                masterKey.setMasterKeyValue(new String(console.readPassword("[%s]",
-                        "Enter master key '" + masterKey.getMasterKeyName() + "' :")));
-            }
-        }
+        Optional.ofNullable(System.console()).ifPresent(console -> {
+            masterKeys.stream()
+                    .filter(masterKey -> !Optional.ofNullable(masterKey.getMasterKeyValue()).isPresent())
+                    .forEach(uninitializedMasterKey -> uninitializedMasterKey.setMasterKeyValue(
+                            new String(console.readPassword("[%s]", "Enter master key '"
+                                    + uninitializedMasterKey.getMasterKeyName() + "' :")))
+                    );
+        });
+    }
+
+    private boolean fullyInitialized(List<MasterKey> masterKeys) {
+        return (masterKeys.stream()
+                .filter(masterKey -> !Optional.ofNullable(masterKey.getMasterKeyValue()).isPresent())
+                .count() > 0) ? false : true;
     }
 }
