@@ -30,7 +30,12 @@ import java.util.Map;
 import java.util.Properties;
 
 /**
- * Created by jayanga on 8/4/16.
+ * {@link AbstractSecretRepository} implements {@link SecretRepository} and it provides basic implementations for
+ * {@code loadSecrets}, {@code persistSecrets} and {@code resolve} methods. An extended class of this should provide
+ * concrete implementations for other abstract methods and register that class as an OSGi service of interface
+ * {@link SecretRepository}.
+ *
+ * @since 5.2.0
  */
 public abstract class AbstractSecretRepository implements SecretRepository {
     private static Logger logger = LoggerFactory.getLogger(AbstractSecretRepository.class);
@@ -65,6 +70,7 @@ public abstract class AbstractSecretRepository implements SecretRepository {
             }
             secrets.put(key, decryptedPassword);
         }
+        logger.debug("Secret repository loaded with '{}' secrets", secrets.size());
     }
 
     @Override
@@ -73,6 +79,7 @@ public abstract class AbstractSecretRepository implements SecretRepository {
         logger.debug("Persisting secrets to SecretRepository");
         Properties secretsProperties = SecureVaultUtils.getSecretProperties(secureVaultConfiguration);
 
+        int count = 0;
         for (Map.Entry<Object, Object> entry: secretsProperties.entrySet()) {
             String key = entry.getKey().toString().trim();
             String value = entry.getValue().toString().trim();
@@ -85,16 +92,18 @@ public abstract class AbstractSecretRepository implements SecretRepository {
             }
 
             if (SecureVaultConstants.PLAIN_TEXT.equals(tokens[0])) {
-                encryptedPassword = SecureVaultUtils.base64Encode(
-                        encrypt(SecureVaultUtils.toBytes(tokens[1].trim())));
+                encryptedPassword = SecureVaultUtils.base64Encode(encrypt(SecureVaultUtils.toBytes(tokens[1].trim())));
                 secretsProperties.setProperty(key, SecureVaultConstants.CIPHER_TEXT + " "
                         + new String(SecureVaultUtils.toChars(encryptedPassword)));
+                count++;
             }
         }
 
         String secretPropertiesFileLocation = SecureVaultUtils
                 .getSecretPropertiesFileLocation(secureVaultConfiguration);
         SecureVaultUtils.updateSecretFile(Paths.get(secretPropertiesFileLocation), secretsProperties);
+
+        logger.debug("Secrets file updated with '{}' new encrypted secrets", count);
     }
 
     @Override
@@ -104,15 +113,5 @@ public abstract class AbstractSecretRepository implements SecretRepository {
             return secret;
         }
         return new char[0];
-    }
-
-    @Override
-    public byte[] encrypt(byte[] plainText) throws SecureVaultException {
-        return new byte[0];
-    }
-
-    @Override
-    public byte[] decrypt(byte[] cipherText) throws SecureVaultException {
-        return new byte[0];
     }
 }
