@@ -17,7 +17,6 @@
 package org.wso2.carbon.kernel.securevault.tool;
 
 import org.wso2.carbon.kernel.internal.securevault.SecureVaultConfigurationProvider;
-import org.wso2.carbon.kernel.internal.securevault.SecureVaultDataHolder;
 import org.wso2.carbon.kernel.securevault.MasterKeyReader;
 import org.wso2.carbon.kernel.securevault.SecretRepository;
 import org.wso2.carbon.kernel.securevault.SecureVaultConstants;
@@ -25,6 +24,9 @@ import org.wso2.carbon.kernel.securevault.SecureVaultUtils;
 import org.wso2.carbon.kernel.securevault.config.model.SecureVaultConfiguration;
 import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
 
+import java.net.URLClassLoader;
+import java.nio.file.Path;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -36,25 +38,27 @@ public class CipherTool {
     private SecureVaultConfiguration secureVaultConfiguration;
     private MasterKeyReader masterKeyReader;
     private SecretRepository secretRepository;
+    private URLClassLoader urlClassLoader;
 
-    public static void main(String[] args) {
+    public void run(String[] args, URLClassLoader urlClassLoader) {
+        this.urlClassLoader = urlClassLoader;
         logger.info("####### WSO2 CipherTool #######");
         try {
-            CipherTool cipherTool = new CipherTool();
-            cipherTool.init();
-            cipherTool.processArgs(args);
+            processArgs(args);
         } catch (SecureVaultException e) {
             logger.log(Level.SEVERE, "CipherTool exits with error", e);
         }
     }
 
-    // TODO: remove this if Carbon Tool is not used
-    public void execute(String[] args) {
-        try {
-            init();
-            processArgs(args);
-        } catch (SecureVaultException e) {
-            logger.log(Level.SEVERE, "CipherTool exits with error", e);
+    private void processArgs(String[] args) throws SecureVaultException {
+        if (args.length == 0 || (args.length == 1 && args[0].startsWith(SecureVaultConstants.CUSTOM_LIB_PATH + "="))) {
+            process();
+        } else if (args[0].startsWith(SecureVaultConstants.ENCRYPT_TEXT + "=")) {
+            encryptText(args[0].substring(12));
+        } else if (args[0].startsWith(SecureVaultConstants.DECRYPT_TEXT + "=")) {
+            decryptText(args[0].substring(12));
+        } else {
+            printHelp();
         }
     }
 
@@ -67,8 +71,8 @@ public class CipherTool {
                 .orElseThrow(() -> new SecureVaultException("Master key reader type is mandatory"));
 
         try {
-            masterKeyReader = (MasterKeyReader) Class.forName(masterKeyReaderType).newInstance();
-            secretRepository = (SecretRepository) Class.forName(secretRepositoryType).newInstance();
+            masterKeyReader = (MasterKeyReader) urlClassLoader.loadClass(masterKeyReaderType).newInstance();
+            secretRepository = (SecretRepository) urlClassLoader.loadClass(secretRepositoryType).newInstance();
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
             throw new SecureVaultException("Failed to instantiate implementation classes.", e);
         }
@@ -78,19 +82,8 @@ public class CipherTool {
     }
 
     private void process() throws SecureVaultException {
+        init();
         secretRepository.persistSecrets(secureVaultConfiguration.getSecretRepositoryConfig());
-    }
-
-    private void processArgs(String[] args) throws SecureVaultException {
-        if (args.length == 0) {
-            process();
-        } else if ("-help".equals(args[0]) || "--help".equals(args[0])) {
-            printHelp();
-        } else if (args[0].startsWith("-D" + SecureVaultConstants.ENCRYPT_TEXT + "=")) {
-            encryptText(args[0].substring(14));
-        } else {
-            throw new SecureVaultException("Unknown option '" + args[0] + "'");
-        }
     }
 
     private void printHelp() {
@@ -98,9 +91,15 @@ public class CipherTool {
     }
 
     private void encryptText(String plainText) throws SecureVaultException {
-        byte[] encryptedPassword = SecureVaultDataHolder.getInstance().getSecretRepository()
-                .orElseThrow(() -> new SecureVaultException("No secret repository found."))
-                .encrypt(SecureVaultUtils.toBytes(plainText.trim()));
-        logger.info(new String(SecureVaultUtils.toChars(encryptedPassword)));
+        init();
+        byte[] encryptedPassword = secretRepository.encrypt(SecureVaultUtils.toBytes(plainText.trim()));
+        logger.info(new String(SecureVaultUtils.toChars(SecureVaultUtils.base64Encode(encryptedPassword))));
+    }
+
+    private void decryptText(String cipherText) throws SecureVaultException {
+        init();
+        byte[] decryptedPassword = secretRepository.decrypt(SecureVaultUtils
+                .base64Decode(SecureVaultUtils.toBytes(cipherText)));
+        logger.info(new String(SecureVaultUtils.toChars(decryptedPassword)));
     }
 }
