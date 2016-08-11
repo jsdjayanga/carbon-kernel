@@ -17,6 +17,7 @@
 package org.wso2.carbon.tools.securevault;
 
 import org.wso2.carbon.tools.CarbonTool;
+import org.wso2.carbon.tools.exception.CarbonToolException;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -46,18 +47,49 @@ import java.util.stream.Stream;
  */
 public class SecureVaultTool implements CarbonTool {
     private static final Logger logger = Logger.getLogger(SecureVaultTool.class.getName());
+    private static final String ENCRYPT_TEXT = "encryptText";
+    private static final String DECRYPT_TEXT = "decryptText";
+    private static final String CUSTOM_LIB_PATH = "customLibPath";
+    private static final String CIPHER_TOOL_CLASS = "org.wso2.carbon.kernel.securevault.tool.CipherTool";
+
 
     @Override
     public void execute(String... toolArgs) {
-        List<URL> urls = new ArrayList<>();
+        Optional<String> optCommandlineParam = validateAndGetCurrentCommand(toolArgs);
+        if (toolArgs.length > 0 && !optCommandlineParam.isPresent()) {
+            printHlepMessage();
+            return;
+        }
 
-        Stream.of(toolArgs)
-                .filter(s -> s.startsWith("customLibPath"))
-                .findFirst()
-                .map(s1 -> s1.substring(14))
-                .map(s2 -> Paths.get(s2))
+        URLClassLoader urlClassLoader = getCustomClassLoader(optCommandlineParam);
+        try {
+            Object objCipherTool = createCipherTool(urlClassLoader);
+            processCommand(optCommandlineParam, objCipherTool);
+        } catch (CarbonToolException e) {
+            logger.log(Level.SEVERE, e.getMessage(), e);
+            return;
+        }
+    }
+
+    private Optional<String> validateAndGetCurrentCommand(String... toolArgs) {
+        if (toolArgs.length != 0) {
+            return Stream.of(toolArgs)
+                    .filter(arg -> arg.startsWith(ENCRYPT_TEXT + "=")
+                            || arg.startsWith(DECRYPT_TEXT + "=")
+                            || arg.startsWith(CUSTOM_LIB_PATH + "="))
+                    .findFirst();
+        }
+        return Optional.empty();
+    }
+
+    private URLClassLoader getCustomClassLoader(Optional<String> optCommandlineParam) {
+        List<URL> urls = new ArrayList<>();
+        optCommandlineParam
+                .filter(param -> param.startsWith(CUSTOM_LIB_PATH))
+                .map(param -> param.substring(CUSTOM_LIB_PATH.length() + 1))
+                .map(path -> Paths.get(path))
                 .filter(path -> path.toFile().exists() && path.toFile().isDirectory())
-                .ifPresent(path1 -> urls.addAll(getJarURLs(path1.toString())));
+                .ifPresent(path -> urls.addAll(getJarURLs(path.toString())));
 
         Optional.ofNullable(System.getProperty("carbon.home"))
                 .ifPresent(carbonHome -> {
@@ -65,27 +97,51 @@ public class SecureVaultTool implements CarbonTool {
                     urls.addAll(getJarURLs(Paths.get(carbonHome, "osgi", "plugins").toString()));
                 });
 
-        URLClassLoader urlClassLoader = (URLClassLoader) AccessController
-                .doPrivileged((PrivilegedAction<Object>) () -> new URLClassLoader(urls.toArray(new URL[urls.size()])));
+        return (URLClassLoader) AccessController.doPrivileged(
+                (PrivilegedAction<Object>) () -> new URLClassLoader(urls.toArray(new URL[urls.size()])));
+    }
 
+    private Object createCipherTool(URLClassLoader urlClassLoader) throws CarbonToolException {
+        Object objCipherTool;
+        try {
+            objCipherTool = urlClassLoader.loadClass(CIPHER_TOOL_CLASS).newInstance();
+        } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+            throw new CarbonToolException("Unable to instantiate Cipher Tool", e);
+        }
 
         try {
-            Class clazz = urlClassLoader.loadClass("org.wso2.carbon.kernel.securevault.tool.CipherTool");
-            Object object = clazz.newInstance();
-            Method method = object.getClass().getMethod("run", String[].class, URLClassLoader.class);
-            method.invoke(object, new Object[]{toolArgs, urlClassLoader});
-            //cipherTool.init(urlClassLoader);
-            //logger.info(clazz.getName() + cipherTool.getClass());
-        } catch (ClassNotFoundException e) {
-            logger.log(Level.SEVERE, "Error when executing the secure vault tool", e);
-        } catch (InstantiationException e) {
-            logger.log(Level.SEVERE, "CipherTool exits with error", e);
-        } catch (IllegalAccessException e) {
-            logger.log(Level.SEVERE, "CipherTool exits with error", e);
-        } catch (NoSuchMethodException e) {
-            logger.log(Level.SEVERE, "CipherTool exits with error", e);
-        } catch (InvocationTargetException e) {
-            logger.log(Level.SEVERE, "CipherTool exits with error", e);
+            Method initMethod = objCipherTool.getClass().getMethod("init", URLClassLoader.class);
+            initMethod.invoke(objCipherTool, new Object[]{urlClassLoader});
+        } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+            throw new CarbonToolException("Failed to initialize Cipher Tool", e);
+        }
+        return objCipherTool;
+    }
+
+    private void processCommand(Optional<String> optCommandlineParam, Object objCipherTool) throws CarbonToolException {
+        String command = optCommandlineParam
+                .map(s -> s.substring(0, s.indexOf('=')))
+                .orElse("");
+        String parameter = optCommandlineParam
+                .map(s -> s.substring(s.indexOf('=') + 1))
+                .orElse("");
+        Method method;
+        try {
+            switch (command) {
+                case ENCRYPT_TEXT:
+                    method = objCipherTool.getClass().getMethod("encryptText", String.class);
+                    method.invoke(objCipherTool, new Object[]{parameter});
+                    break;
+                case DECRYPT_TEXT:
+                    method = objCipherTool.getClass().getMethod("decryptText", String.class);
+                    method.invoke(objCipherTool, new Object[]{parameter});
+                    break;
+                default:
+                    method = objCipherTool.getClass().getMethod("encryptSecrets", null);
+                    method.invoke(objCipherTool, new Object[]{});
+            }
+        } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+            throw new CarbonToolException("Failed to execute Cipher Tool ccommand", e);
         }
     }
 
@@ -130,5 +186,19 @@ public class SecureVaultTool implements CarbonTool {
         }
 
         return urls;
+    }
+
+    /**
+     * Returns a help message for the secure vault tool usage.
+     */
+    private void printHlepMessage() {
+        logger.info(
+                "Incorrect usage of the dropins deployer tool.\n\n" +
+                        "Instructions: sh dropins.sh [profile]\n" + "profile - name of the Carbon Profile to " +
+                        "be updated\n\n" +
+                        "Keyword option for profile:\n" +
+                        "ALL\tUpdate dropins OSGi bundle information of all Carbon Profiles " +
+                        "(ex: sh dropins.sh ALL/dropins.bat ALL)\n"
+        );
     }
 }

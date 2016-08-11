@@ -19,13 +19,11 @@ package org.wso2.carbon.kernel.securevault.tool;
 import org.wso2.carbon.kernel.internal.securevault.SecureVaultConfigurationProvider;
 import org.wso2.carbon.kernel.securevault.MasterKeyReader;
 import org.wso2.carbon.kernel.securevault.SecretRepository;
-import org.wso2.carbon.kernel.securevault.SecureVaultConstants;
 import org.wso2.carbon.kernel.securevault.SecureVaultUtils;
 import org.wso2.carbon.kernel.securevault.config.model.SecureVaultConfiguration;
 import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
 
 import java.net.URLClassLoader;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -36,31 +34,8 @@ public class CipherTool {
     private SecureVaultConfiguration secureVaultConfiguration;
     private MasterKeyReader masterKeyReader;
     private SecretRepository secretRepository;
-    private URLClassLoader urlClassLoader;
 
-    public void run(String[] args, URLClassLoader urlClassLoader) {
-        this.urlClassLoader = urlClassLoader;
-        logger.info("####### WSO2 CipherTool #######");
-        try {
-            processArgs(args);
-        } catch (SecureVaultException e) {
-            logger.log(Level.SEVERE, "CipherTool exits with error", e);
-        }
-    }
-
-    private void processArgs(String[] args) throws SecureVaultException {
-        if (args.length == 0 || (args.length == 1 && args[0].startsWith(SecureVaultConstants.CUSTOM_LIB_PATH + "="))) {
-            process();
-        } else if (args[0].startsWith(SecureVaultConstants.ENCRYPT_TEXT + "=")) {
-            encryptText(args[0].substring(12));
-        } else if (args[0].startsWith(SecureVaultConstants.DECRYPT_TEXT + "=")) {
-            decryptText(args[0].substring(12));
-        } else {
-            printHelp();
-        }
-    }
-
-    private void init() throws SecureVaultException {
+    public void init(URLClassLoader urlClassLoader) throws SecureVaultException {
         secureVaultConfiguration = SecureVaultConfigurationProvider.getConfiguration();
 
         String secretRepositoryType = secureVaultConfiguration.getSecretRepositoryConfig().getType()
@@ -79,23 +54,16 @@ public class CipherTool {
         secretRepository.init(secureVaultConfiguration.getSecretRepositoryConfig(), masterKeyReader);
     }
 
-    private void process() throws SecureVaultException {
-        init();
+    public void encryptSecrets() throws SecureVaultException {
         secretRepository.persistSecrets(secureVaultConfiguration.getSecretRepositoryConfig());
     }
 
-    private void printHelp() {
-        logger.info("==========help===========");
-    }
-
-    private void encryptText(String plainText) throws SecureVaultException {
-        init();
+    public void encryptText(String plainText) throws SecureVaultException {
         byte[] encryptedPassword = secretRepository.encrypt(SecureVaultUtils.toBytes(plainText.trim()));
         logger.info(new String(SecureVaultUtils.toChars(SecureVaultUtils.base64Encode(encryptedPassword))));
     }
 
-    private void decryptText(String cipherText) throws SecureVaultException {
-        init();
+    public void decryptText(String cipherText) throws SecureVaultException {
         byte[] decryptedPassword = secretRepository.decrypt(SecureVaultUtils
                 .base64Decode(SecureVaultUtils.toBytes(cipherText)));
         logger.info(new String(SecureVaultUtils.toChars(decryptedPassword)));
