@@ -25,8 +25,6 @@ import org.wso2.carbon.kernel.securevault.config.model.SecureVaultConfiguration;
 import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
 
 import java.net.URLClassLoader;
-import java.nio.file.Path;
-import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
