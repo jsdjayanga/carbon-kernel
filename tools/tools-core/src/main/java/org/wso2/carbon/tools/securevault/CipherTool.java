@@ -191,12 +191,18 @@ public class CipherTool implements CarbonTool {
      * Returns a help message for the secure vault tool usage.
      */
     private void printHelpMessage() {
-        logger.info("Incorrect usage of the cipher tool.\n\n" +
-                "Instructions: sh dropins.sh [profile]\n" + "profile - name of the Carbon Profile to " +
-                "be updated\n\n" +
-                "Keyword option for profile:\n" +
-                "ALL\tUpdate dropins OSGi bundle information of all Carbon Profiles " +
-                "(ex: sh dropins.sh ALL/dropins.bat ALL)\n"
+        logger.info("Incorrect usage of the cipher tool.\n\n"
+                + "Instructions: sh ciphertool.sh [option]\n"
+                + "option - a key=value pair based on the operation\n\n"
+                + "Options:\n"
+                + "1. With no option specified, cipher tool will encrypt the secrets given in the" +
+                " [CARBON_HOME]conf/security/secrets.properties file.\n"
+                + "2. encryptText : this option will first encrypt a given text and then prints the base64 encoded " +
+                "string of the encoded cipher text in the console.\n"
+                + "  Eg: ciphertool.sh encryptText=Abc@123\n"
+                + "3. decryptText : this option accepts base64 encoded cipher text and prints the decoded plain text " +
+                "in the console.\n"
+                + "  Eg: ciphertool.sh decryptText=XxXxXx\n"
         );
     }
 }
