@@ -41,12 +41,12 @@ import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 /**
- * The Java class which defines the tool for SecureVault.
+ * The Java class which defines the CipherTool as a CarbonTool.
  *
  * @since 5.2.0
  */
-public class SecureVaultTool implements CarbonTool {
-    private static final Logger logger = Logger.getLogger(SecureVaultTool.class.getName());
+public class CipherTool implements CarbonTool {
+    private static final Logger logger = Logger.getLogger(CipherTool.class.getName());
     private static final String ENCRYPT_TEXT = "encryptText";
     private static final String DECRYPT_TEXT = "decryptText";
     private static final String CUSTOM_LIB_PATH = "customLibPath";
@@ -57,7 +57,7 @@ public class SecureVaultTool implements CarbonTool {
     public void execute(String... toolArgs) {
         Optional<String> optCommandlineParam = validateAndGetCurrentCommand(toolArgs);
         if (toolArgs.length > 0 && !optCommandlineParam.isPresent()) {
-            printHlepMessage();
+            printHelpMessage();
             return;
         }
 
@@ -191,14 +191,13 @@ public class SecureVaultTool implements CarbonTool {
     /**
      * Returns a help message for the secure vault tool usage.
      */
-    private void printHlepMessage() {
-        logger.info(
-                "Incorrect usage of the dropins deployer tool.\n\n" +
-                        "Instructions: sh dropins.sh [profile]\n" + "profile - name of the Carbon Profile to " +
-                        "be updated\n\n" +
-                        "Keyword option for profile:\n" +
-                        "ALL\tUpdate dropins OSGi bundle information of all Carbon Profiles " +
-                        "(ex: sh dropins.sh ALL/dropins.bat ALL)\n"
+    private void printHelpMessage() {
+        logger.info("Incorrect usage of the cipher tool.\n\n" +
+                "Instructions: sh dropins.sh [profile]\n" + "profile - name of the Carbon Profile to " +
+                "be updated\n\n" +
+                "Keyword option for profile:\n" +
+                "ALL\tUpdate dropins OSGi bundle information of all Carbon Profiles " +
+                "(ex: sh dropins.sh ALL/dropins.bat ALL)\n"
         );
     }
 }

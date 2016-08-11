@@ -27,7 +27,9 @@ import java.net.URLClassLoader;
 import java.util.logging.Logger;
 
 /**
- * Created by jayanga on 7/18/16.
+ * The Java class which defines the CipherTool
+ *
+ * @since 5.2.0
  */
 public class CipherTool {
     private static final Logger logger = Logger.getLogger(CipherTool.class.getName());
