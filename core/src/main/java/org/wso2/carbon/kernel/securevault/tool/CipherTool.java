@@ -34,7 +34,6 @@ import java.util.logging.Logger;
 public class CipherTool {
     private static final Logger logger = Logger.getLogger(CipherTool.class.getName());
     private SecureVaultConfiguration secureVaultConfiguration;
-    private MasterKeyReader masterKeyReader;
     private SecretRepository secretRepository;
 
     public void init(URLClassLoader urlClassLoader) throws SecureVaultException {
@@ -45,6 +44,7 @@ public class CipherTool {
         String masterKeyReaderType = secureVaultConfiguration.getMasterKeyReaderConfig().getType()
                 .orElseThrow(() -> new SecureVaultException("Master key reader type is mandatory"));
 
+        MasterKeyReader masterKeyReader;
         try {
             masterKeyReader = (MasterKeyReader) urlClassLoader.loadClass(masterKeyReaderType).newInstance();
             secretRepository = (SecretRepository) urlClassLoader.loadClass(secretRepositoryType).newInstance();

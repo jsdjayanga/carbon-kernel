@@ -67,7 +67,6 @@ public class CipherTool implements CarbonTool {
             processCommand(optCommandlineParam, objCipherTool);
         } catch (CarbonToolException e) {
             logger.log(Level.SEVERE, e.getMessage(), e);
-            return;
         }
     }
 
@@ -111,7 +110,7 @@ public class CipherTool implements CarbonTool {
 
         try {
             Method initMethod = objCipherTool.getClass().getMethod("init", URLClassLoader.class);
-            initMethod.invoke(objCipherTool, new Object[]{urlClassLoader});
+            initMethod.invoke(objCipherTool, urlClassLoader);
         } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
             throw new CarbonToolException("Failed to initialize Cipher Tool", e);
         }
@@ -130,15 +129,15 @@ public class CipherTool implements CarbonTool {
             switch (command) {
                 case ENCRYPT_TEXT:
                     method = objCipherTool.getClass().getMethod("encryptText", String.class);
-                    method.invoke(objCipherTool, new Object[]{parameter});
+                    method.invoke(objCipherTool, parameter);
                     break;
                 case DECRYPT_TEXT:
                     method = objCipherTool.getClass().getMethod("decryptText", String.class);
-                    method.invoke(objCipherTool, new Object[]{parameter});
+                    method.invoke(objCipherTool, parameter);
                     break;
                 default:
-                    method = objCipherTool.getClass().getMethod("encryptSecrets", null);
-                    method.invoke(objCipherTool, new Object[]{});
+                    method = objCipherTool.getClass().getMethod("encryptSecrets");
+                    method.invoke(objCipherTool);
             }
         } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
             throw new CarbonToolException("Failed to execute Cipher Tool ccommand", e);
