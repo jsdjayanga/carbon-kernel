@@ -26,7 +26,7 @@ import java.util.Optional;
  */
 public class MasterKey {
     private String masterKeyName;
-    private Optional<String> optMasterKeyValue;
+    private Optional<String> optMasterKeyValue = Optional.empty();
 
     public MasterKey(String masterKeyName) {
         this.masterKeyName = masterKeyName;

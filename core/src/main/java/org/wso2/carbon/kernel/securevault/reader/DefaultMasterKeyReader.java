@@ -143,7 +143,7 @@ public class DefaultMasterKeyReader implements MasterKeyReader {
     }
 
     private void readSecretsFromConsole(List<MasterKey> masterKeys) throws SecureVaultException {
-        Optional.ofNullable(System.console()).ifPresent(console -> {
+        Optional.ofNullable(System.console()).ifPresent(console ->
             masterKeys.stream()
                     .filter(masterKey -> !Optional.ofNullable(masterKey.getMasterKeyValue()).isPresent())
                     .forEach(uninitializedMasterKey -> {
@@ -152,17 +152,20 @@ public class DefaultMasterKeyReader implements MasterKeyReader {
                         uninitializedMasterKey.setMasterKeyValue(
                                 new String(console.readPassword("[%s]", "Enter master key '"
                                         + uninitializedMasterKey.getMasterKeyName() + "' :")));
-                    });
-        });
+                    })
+        );
     }
 
     private boolean fullyInitialized(List<MasterKey> masterKeys) {
-        return (masterKeys.stream()
+        return masterKeys.stream()
                 .filter(masterKey -> {
+                    if (masterKey.getMasterKeyValue().isPresent()) {
+                        return false;
+                    }
                     logger.debug("Mater key '{}' is not initialized from env, sys or file, hence needed to be read " +
                             "from console.", masterKey.getMasterKeyName());
-                    return !Optional.ofNullable(masterKey.getMasterKeyValue()).isPresent();
+                    return true;
                 })
-                .count() > 0) ? false : true;
+                .count() <= 0;
     }
 }
