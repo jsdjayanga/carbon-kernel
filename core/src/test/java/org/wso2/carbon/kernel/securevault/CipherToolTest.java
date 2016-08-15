@@ -16,19 +16,11 @@
 
 package org.wso2.carbon.kernel.securevault;
 
-import org.easymock.EasyMock;
-import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.testng.Assert;
-import org.testng.IObjectFactory;
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.ObjectFactory;
 import org.testng.annotations.Test;
 import org.wso2.carbon.kernel.Constants;
-import org.wso2.carbon.kernel.internal.securevault.SecureVaultConfigurationProvider;
 import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
-import org.wso2.carbon.kernel.securevault.repository.DefaultSecretRepository;
 import org.wso2.carbon.kernel.securevault.tool.CipherTool;
-import org.wso2.carbon.kernel.securevault.utils.ClassUtils;
 
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -36,7 +28,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Created by jayanga on 8/15/16.
