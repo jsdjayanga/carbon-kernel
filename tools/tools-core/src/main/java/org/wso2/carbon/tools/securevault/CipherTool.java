@@ -140,7 +140,7 @@ public class CipherTool implements CarbonTool {
                     method.invoke(objCipherTool);
             }
         } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
-            throw new CarbonToolException("Failed to execute Cipher Tool ccommand", e);
+            throw new CarbonToolException("Failed to execute Cipher Tool command", e);
         }
     }
 
