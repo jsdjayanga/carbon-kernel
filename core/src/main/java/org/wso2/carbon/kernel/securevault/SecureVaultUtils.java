@@ -107,7 +107,7 @@ public class SecureVaultUtils {
 
     public static String getSecretPropertiesFileLocation(SecretRepositoryConfiguration secretRepositoryConfiguration) {
         return secretRepositoryConfiguration.getParameter(SecureVaultConstants.LOCATION)
-                .orElse(Utils.getSecretsPropertiesLocation());
+                .orElseGet(() -> Utils.getSecretsPropertiesLocation());
     }
 
     /**

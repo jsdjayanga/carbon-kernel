@@ -20,7 +20,6 @@ import org.easymock.EasyMock;
 import org.testng.Assert;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
-import org.wso2.carbon.kernel.Constants;
 import org.wso2.carbon.kernel.securevault.config.model.SecretRepositoryConfiguration;
 import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
 import org.wso2.carbon.kernel.securevault.reader.DefaultHardCodedMasterKeyReader;
@@ -140,8 +139,6 @@ public class DefaultSecretRepositoryTest {
 
     @Test(dependsOnMethods = {"testInitSecretRepository"})
     public void testReadSecrets() throws SecureVaultException {
-        System.setProperty(Constants.CARBON_HOME, Paths.get(secureVaultResourcesPath.toString()).toString());
-
         SecretRepositoryConfiguration secretRepositoryConfiguration =
                 EasyMock.mock(SecretRepositoryConfiguration.class);
         MasterKeyReader masterKeyReader = new DefaultHardCodedMasterKeyReader();
@@ -165,8 +162,6 @@ public class DefaultSecretRepositoryTest {
 
     @Test(dependsOnMethods = {"testReadSecrets"},  expectedExceptions = SecureVaultException.class)
     public void testReadSecretsWrongSecretsFileLocation() throws SecureVaultException {
-        System.setProperty(Constants.CARBON_HOME, Paths.get(secureVaultResourcesPath.toString()).toString());
-
         SecretRepositoryConfiguration secretRepositoryConfiguration =
                 EasyMock.mock(SecretRepositoryConfiguration.class);
         MasterKeyReader masterKeyReader = new DefaultHardCodedMasterKeyReader();
@@ -188,8 +183,6 @@ public class DefaultSecretRepositoryTest {
 
     @Test(dependsOnMethods = {"testReadSecrets"})
     public void testEncryptSecrets() throws SecureVaultException {
-        System.setProperty(Constants.CARBON_HOME, Paths.get(secureVaultResourcesPath.toString()).toString());
-
         SecretRepositoryConfiguration secretRepositoryConfiguration =
                 EasyMock.mock(SecretRepositoryConfiguration.class);
         MasterKeyReader masterKeyReader = new DefaultHardCodedMasterKeyReader();
@@ -211,8 +204,6 @@ public class DefaultSecretRepositoryTest {
 
     @Test(dependsOnMethods = {"testEncryptSecrets"})
     public void testReadSecretsCipherTest() throws SecureVaultException {
-        System.setProperty(Constants.CARBON_HOME, Paths.get(secureVaultResourcesPath.toString()).toString());
-
         SecretRepositoryConfiguration secretRepositoryConfiguration =
                 EasyMock.mock(SecretRepositoryConfiguration.class);
         MasterKeyReader masterKeyReader = new DefaultHardCodedMasterKeyReader();
@@ -236,8 +227,6 @@ public class DefaultSecretRepositoryTest {
 
     @Test(dependsOnMethods = {"testInitSecretRepository"})
     public void testReadErroneousSecrets() throws SecureVaultException {
-        System.setProperty(Constants.CARBON_HOME, Paths.get(secureVaultResourcesPath.toString()).toString());
-
         SecretRepositoryConfiguration secretRepositoryConfiguration =
                 EasyMock.mock(SecretRepositoryConfiguration.class);
         MasterKeyReader masterKeyReader = new DefaultHardCodedMasterKeyReader();
@@ -261,8 +250,6 @@ public class DefaultSecretRepositoryTest {
 
     @Test(dependsOnMethods = {"testReadErroneousSecrets"})
     public void testPersistErroneousSecrets() throws SecureVaultException {
-        System.setProperty(Constants.CARBON_HOME, Paths.get(secureVaultResourcesPath.toString()).toString());
-
         SecretRepositoryConfiguration secretRepositoryConfiguration =
                 EasyMock.mock(SecretRepositoryConfiguration.class);
         MasterKeyReader masterKeyReader = new DefaultHardCodedMasterKeyReader();
