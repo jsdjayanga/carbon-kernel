@@ -22,7 +22,7 @@ import java.lang.reflect.Field;
  * Created by jayanga on 8/12/16.
  */
 public class ClassUtils {
-    public static void setToPrivateField(Object objInstance, String filedName, String value) {
+    public static void setToPrivateField(Object objInstance, String filedName, Object value) {
         try {
             Field field = objInstance.getClass().getDeclaredField(filedName);
             field.setAccessible(true);
