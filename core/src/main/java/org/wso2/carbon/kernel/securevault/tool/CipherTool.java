@@ -60,14 +60,18 @@ public class CipherTool {
         secretRepository.persistSecrets(secureVaultConfiguration.getSecretRepositoryConfig());
     }
 
-    public void encryptText(String plainText) throws SecureVaultException {
+    public String encryptText(String plainText) throws SecureVaultException {
         byte[] encryptedPassword = secretRepository.encrypt(SecureVaultUtils.toBytes(plainText.trim()));
-        logger.info(new String(SecureVaultUtils.toChars(SecureVaultUtils.base64Encode(encryptedPassword))));
+        String base64Encoded = new String(SecureVaultUtils.toChars(SecureVaultUtils.base64Encode(encryptedPassword)));
+        logger.info(base64Encoded);
+        return base64Encoded;
     }
 
-    public void decryptText(String cipherText) throws SecureVaultException {
+    public String decryptText(String cipherText) throws SecureVaultException {
         byte[] decryptedPassword = secretRepository.decrypt(SecureVaultUtils
                 .base64Decode(SecureVaultUtils.toBytes(cipherText)));
-        logger.info(new String(SecureVaultUtils.toChars(decryptedPassword)));
+        String plainText = new String(SecureVaultUtils.toChars(decryptedPassword));
+        logger.info(plainText);
+        return plainText;
     }
 }
