@@ -22,6 +22,8 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
+import org.wso2.carbon.kernel.startupresolver.StartupServiceCache;
+import org.wso2.carbon.kernel.startupresolver.StartupServiceMonitor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,11 +35,16 @@ import java.util.List;
  */
 @Component(
         name = "org.wso2.carbon.sample.transport.mgt.TransportManager",
-        immediate = true
+        immediate = true,
+        property = {
+                "componentName=carbon-sample-transport-mgt"
+        }
 )
-public class TransportManager {
+public class TransportManager implements StartupServiceMonitor {
 
     private static List<Transport> transportList = new ArrayList<>();
+    private StartupServiceCache startupServiceCache = new StartupServiceCache();
+
 
     @Activate
     public void activate(BundleContext bundleContext) {
@@ -57,6 +64,7 @@ public class TransportManager {
     )
     public void registerTransport(Transport transport) {
         transportList.add(transport);
+        startupServiceCache.addService(Transport.class.getName(), transport);
     }
 
     public void deregisterTransport(Transport transport) {
@@ -67,4 +75,8 @@ public class TransportManager {
         return transportList.size();
     }
 
+    @Override
+    public StartupServiceCache getAvailableServices() {
+        return startupServiceCache;
+    }
 }

@@ -164,6 +164,7 @@ class StartupOrderResolverUtils {
                             Capability.CapabilityType.OSGi_SERVICE,
                             Capability.CapabilityState.EXPECTED,
                             manifestElement.getBundle());
+                    osgiServiceCapability.setDirectDependency(true);
 
                     // Check whether requiredByComponent property is specified.
                     getNonEmptyStringAfterTrim(manifestElement.getAttribute(REQUIRED_BY_COMPONENT_NAME))
@@ -176,6 +177,12 @@ class StartupOrderResolverUtils {
                             .ifPresent(requiredByComponentNameStr ->
                                     addRequiredByComponentNames(osgiServiceCapability, requiredByComponentNameStr)
                             );
+
+                    if (getNonEmptyStringAfterTrim(manifestElement.getAttribute(REQUIRED_BY_COMPONENT_NAME)).isPresent()
+                            || getNonEmptyStringAfterTrim(manifestElement.getAttribute(DEPENDENT_COMPONENT_NAME))
+                            .isPresent()) {
+                        osgiServiceCapability.setDirectDependency(false);
+                    }
 
                     osgiServiceCapabilityList.add(osgiServiceCapability);
                 });

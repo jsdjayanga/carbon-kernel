@@ -47,6 +47,8 @@
         <module>org.wso2.carbon.sample.repository.mgt</module>
         <module>org.wso2.carbon.sample.transport.service</module>
         <module>org.wso2.carbon.sample.runtime.service</module>
+        <module>zorg.wso2.carbon.sample.transport.http</module>
+        <module>ZZHTTP</module>
     </modules>
 
 </project>

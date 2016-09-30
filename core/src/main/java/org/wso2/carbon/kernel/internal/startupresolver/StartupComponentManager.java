@@ -24,6 +24,7 @@ import org.wso2.carbon.kernel.internal.startupresolver.beans.Capability;
 import org.wso2.carbon.kernel.internal.startupresolver.beans.CapabilityProviderCapability;
 import org.wso2.carbon.kernel.internal.startupresolver.beans.StartupComponent;
 import org.wso2.carbon.kernel.startupresolver.RequiredCapabilityListener;
+import org.wso2.carbon.kernel.startupresolver.StartupServiceMonitor;
 
 import java.util.HashMap;
 import java.util.List;
@@ -44,7 +45,7 @@ class StartupComponentManager {
 
     /**
      * Adds the given {@code StartupComponent}.
-     * <p>
+     * <p/>
      * Add the StartupComponent to the startupComponentMap. Key is the componentName.
      *
      * @param startupComponent to be added.
@@ -97,7 +98,7 @@ class StartupComponentManager {
 
     /**
      * Adds the available {@code RequiredCapabilityListener} OSGi service to the specified startup component.
-     * <p>
+     * <p/>
      * This service is required to notify the component when all of its required capabilities are available.
      *
      * @param listener      {@code RequiredCapabilityListener} service object.
@@ -128,9 +129,24 @@ class StartupComponentManager {
         startupComponent.setListener(listener);
     }
 
+    void addStartupServiceMonitor(StartupServiceMonitor startupServiceMonitor, String componentName, Bundle bundle) {
+        StartupComponent startupComponent = startupComponentMap.get(componentName);
+        if (startupComponent == null) {
+            logger.warn("Adding a RequiredCapabilityListener from bundle({}:{}), but specified startup component is " +
+                    "not available, component-name: {}", bundle.getSymbolicName(), bundle.getVersion(), componentName);
+            return;
+        }
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("Adding available RequiredCapabilityListener with the componentName {} from bundle({}:{})",
+                    componentName, bundle.getSymbolicName(), bundle.getVersion());
+        }
+        startupComponent.addStartupServiceMonitor(startupServiceMonitor);
+    }
+
     /**
      * Adds expected {@code CapabilityProvider} capability.
-     * <p>
+     * <p/>
      * This method is invoked during the manifest header processing stage.
      *
      * @param capabilityProvider {@code CapabilityProvider} capability instance
@@ -152,7 +168,7 @@ class StartupComponentManager {
 
     /**
      * Adds expect required capability. Capability could be an OSGi service, manifest header etc.
-     * <p>
+     * <p/>
      * This method is invoked during the manifest header processing time or when {@code CapabilityProvider}
      * OSGi service is registered.
      *
@@ -195,7 +211,7 @@ class StartupComponentManager {
 
     /**
      * Returns a list of {@code StartupComponent}s based on the given {@code Predicate}.
-     * <p>
+     * <p/>
      *
      * @param componentFilter which specifies the criteria to retrieve components.
      * @return a list of {@code StartupComponent}s with pending capabilities
@@ -223,22 +239,27 @@ class StartupComponentManager {
         getComponents(StartupComponent::isSatisfiable)
                 .forEach(startupComponent -> {
 
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Notifying RequiredCapabilityListener of component {} from bundle({}:{}) " +
-                                        "since all the required capabilities are available",
-                                startupComponent.getName(),
-                                startupComponent.getBundle().getSymbolicName(),
-                                startupComponent.getBundle().getVersion());
-                    }
+                    if (startupComponent.isReady()) {
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("Notifying RequiredCapabilityListener of component {} from bundle({}:{}) " +
+                                            "since all the required capabilities are available",
+                                    startupComponent.getName(),
+                                    startupComponent.getBundle().getSymbolicName(),
+                                    startupComponent.getBundle().getVersion());
+                        }
 
-                    startupComponent.setSatisfied(true);
-                    RequiredCapabilityListener capabilityListener = startupComponent.getListener();
 
-                    try {
-                        capabilityListener.onAllRequiredCapabilitiesAvailable();
-                    } catch (RuntimeException e) {
-                        logger.error("Runtime Exception occurred while calling onAllRequiredCapabilitiesAvailable of "
-                                + "component " + startupComponent.getName(), e);
+                        startupComponent.setSatisfied(true);
+                        RequiredCapabilityListener capabilityListener = startupComponent.getListener();
+
+                        try {
+                            capabilityListener.onAllRequiredCapabilitiesAvailable();
+                        } catch (RuntimeException e) {
+                            logger.error("Runtime Exception occurred while calling " +
+                                    "onAllRequiredCapabilitiesAvailable of component " + startupComponent.getName(), e);
+                        }
+                    } else {
+                        logger.info("===============================================");
                     }
                 });
     }

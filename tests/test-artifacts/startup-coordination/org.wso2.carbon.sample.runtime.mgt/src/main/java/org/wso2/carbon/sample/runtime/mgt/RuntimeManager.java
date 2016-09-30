@@ -22,6 +22,8 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
+import org.wso2.carbon.kernel.startupresolver.StartupServiceCache;
+import org.wso2.carbon.kernel.startupresolver.StartupServiceMonitor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,11 +35,15 @@ import java.util.List;
  */
 @Component(
         name = "org.wso2.carbon.sample.runtime.mgt.RuntimeManager",
-        immediate = true
+        immediate = true,
+        property = {
+                "componentName=carbon-sample-runtime-mgt"
+        }
 )
-public class RuntimeManager {
+public class RuntimeManager implements StartupServiceMonitor {
 
     private static List<Runtime> runtimeList = new ArrayList<>();
+    private StartupServiceCache startupServiceCache = new StartupServiceCache();
 
     @Activate
     public void activate(BundleContext bundleContext) {
@@ -57,6 +63,7 @@ public class RuntimeManager {
     )
     public void registerRuntime(Runtime runtime) {
         runtimeList.add(runtime);
+        startupServiceCache.addService(Runtime.class.getName(), runtime);
     }
 
     public void deregisterRuntime(Runtime runtime) {
@@ -67,4 +74,8 @@ public class RuntimeManager {
         return runtimeList.size();
     }
 
+    @Override
+    public StartupServiceCache getAvailableServices() {
+        return startupServiceCache;
+    }
 }

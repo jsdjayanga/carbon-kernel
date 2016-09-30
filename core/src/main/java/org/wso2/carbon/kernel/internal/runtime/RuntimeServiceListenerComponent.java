@@ -27,6 +27,8 @@ import org.wso2.carbon.kernel.internal.DataHolder;
 import org.wso2.carbon.kernel.runtime.Runtime;
 import org.wso2.carbon.kernel.runtime.RuntimeService;
 import org.wso2.carbon.kernel.startupresolver.RequiredCapabilityListener;
+import org.wso2.carbon.kernel.startupresolver.StartupServiceCache;
+import org.wso2.carbon.kernel.startupresolver.StartupServiceMonitor;
 import org.wso2.carbon.kernel.utils.MBeanRegistrator;
 
 /**
@@ -43,10 +45,11 @@ import org.wso2.carbon.kernel.utils.MBeanRegistrator;
                 "componentName=carbon-runtime-mgt"
         }
 )
-public class RuntimeServiceListenerComponent implements RequiredCapabilityListener {
+public class RuntimeServiceListenerComponent implements RequiredCapabilityListener, StartupServiceMonitor {
     private static final Logger logger = LoggerFactory.getLogger(RuntimeServiceListenerComponent.class);
     private RuntimeManager runtimeManager = new RuntimeManager();
     private BundleContext bundleContext;
+    private StartupServiceCache startupServiceCache = new StartupServiceCache();
 
     @Activate
     protected void start(BundleContext bundleContext) {
@@ -70,6 +73,7 @@ public class RuntimeServiceListenerComponent implements RequiredCapabilityListen
     protected void registerRuntime(Runtime runtime) {
         try {
             runtimeManager.registerRuntime(runtime);
+            startupServiceCache.addService(Runtime.class.getName(), runtime);
         } catch (Exception e) {
             logger.error("Error while adding runtime to the Runtime manager", e);
         }
@@ -101,5 +105,10 @@ public class RuntimeServiceListenerComponent implements RequiredCapabilityListen
         } catch (Exception e) {
             logger.error("Error while starting runtime from Runtime manager", e);
         }
+    }
+
+    @Override
+    public StartupServiceCache getAvailableServices() {
+        return null;
     }
 }

@@ -33,6 +33,7 @@ import org.wso2.carbon.kernel.internal.startupresolver.beans.OSGiServiceCapabili
 import org.wso2.carbon.kernel.internal.startupresolver.beans.StartupComponent;
 import org.wso2.carbon.kernel.startupresolver.CapabilityProvider;
 import org.wso2.carbon.kernel.startupresolver.RequiredCapabilityListener;
+import org.wso2.carbon.kernel.startupresolver.StartupServiceMonitor;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -95,6 +96,7 @@ class OSGiServiceCapabilityTracker {
         // We need to track RequiredCapabilityListener services as well as CapabilityProvider service.
         requiredServiceList.add(RequiredCapabilityListener.class.getName());
         requiredServiceList.add(CapabilityProvider.class.getName());
+        requiredServiceList.add(StartupServiceMonitor.class.getName());
         return requiredServiceList;
     }
 
@@ -168,6 +170,13 @@ class OSGiServiceCapabilityTracker {
                                         Capability.CapabilityType.OSGi_SERVICE,
                                         Capability.CapabilityState.EXPECTED,
                                         bundle)));
+            } else if (StartupServiceMonitor.class.getName().equals(serviceInterfaceClassName)) {
+                String componentKey = getNonEmptyStringAfterTrim((String) reference.getProperty(COMPONENT_NAME))
+                        .orElseThrow(() -> new StartOrderResolverException(COMPONENT_NAME + " value is missing in " +
+                                "the services registered with the key " + serviceInterfaceClassName + ", " +
+                                "implementation class name is " + serviceImplClassName));
+                startupComponentManager.addStartupServiceMonitor(
+                        (StartupServiceMonitor) serviceObject, componentKey, reference.getBundle());
             } else {
                 // this has to be a capability service
                 logger.debug("Adding OSGi Service Capability. Service id: {}. Service implementation class: {}. ",

@@ -19,10 +19,14 @@ package org.wso2.carbon.kernel.internal.startupresolver.beans;
 
 import org.osgi.framework.Bundle;
 import org.wso2.carbon.kernel.startupresolver.RequiredCapabilityListener;
+import org.wso2.carbon.kernel.startupresolver.StartupServiceCache;
+import org.wso2.carbon.kernel.startupresolver.StartupServiceMonitor;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * {@code StartupComponent} Represents an entity which needs to hold its initialization until all the required
@@ -63,6 +67,10 @@ public class StartupComponent {
      * List of pending expected or available CapabilityProvider OSGi services.
      */
     private List<CapabilityProviderCapability> pendingCapabilityProviderList = new ArrayList<>();
+
+    private Map<String, List<Object>> requiredCapabilityMap = new HashMap<>();
+    //private List<Capability> requiredCapabilityList = new ArrayList<>();
+    private List<StartupServiceMonitor> startupServiceMonitorList = new ArrayList<>();
 
     /**
      * OSGi bundle to which this component resides.
@@ -137,6 +145,23 @@ public class StartupComponent {
             } else {
                 pendingCapabilityList.add(capability);
             }
+
+//            List<Object> serviceList = requiredCapabilityMap.get(capability.getName());
+//            if (serviceList == null) {
+//                serviceList = new ArrayList<>();
+//                requiredCapabilityMap.put(capability.getName(), serviceList);
+//            }
+//            serviceList.add();
+            if (capability.isDirectDependency() == true
+                    && capability.getState() == Capability.CapabilityState.EXPECTED) {
+                //requiredCapabilityList.add(capability);
+                List<Object> list = requiredCapabilityMap.get(capability.getName());
+                if (list == null) {
+                    list = new ArrayList<>();
+                    requiredCapabilityMap.put(capability.getName(), list);
+                }
+                list.add(capability);
+            }
         }
     }
 
@@ -162,6 +187,10 @@ public class StartupComponent {
 
     public void setListener(RequiredCapabilityListener listener) {
         this.listener = listener;
+    }
+
+    public void addStartupServiceMonitor(StartupServiceMonitor startupServiceMonitor) {
+        startupServiceMonitorList.add(startupServiceMonitor);
     }
 
     public void addExpectedOrAvailableCapabilityProvider(CapabilityProviderCapability capabilityProvider) {
@@ -203,6 +232,25 @@ public class StartupComponent {
                 pendingCapabilityList.size() == 0 &&
                 listener != null &&
                 pendingCapabilityProviderList.size() == 0;
+    }
+
+    public boolean isReady() {
+        for (StartupServiceMonitor startupServiceMonitor : startupServiceMonitorList) {
+            StartupServiceCache startupServiceCache = startupServiceMonitor.getAvailableServices();
+            Map<String, List<Object>> serviceMap = startupServiceCache.getServices();
+            for (Map.Entry<String, List<Object>> listEntry : serviceMap.entrySet()) {
+                if (listEntry.getValue().size() != requiredCapabilityMap.get(listEntry.getKey()).size()) {
+                    return false;
+                }
+            }
+
+           // serviceMap.get(startupServiceMonitor.)
+            //return !serviceMap.isEmpty();
+        }
+
+        //if (requiredCapabilityMap.size() != startupServiceMonitorList)
+
+        return true;
     }
 
     /**

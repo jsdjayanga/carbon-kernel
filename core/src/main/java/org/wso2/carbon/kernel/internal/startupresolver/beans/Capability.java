@@ -30,6 +30,7 @@ public class Capability {
     protected CapabilityType type;
     protected CapabilityState state;
     protected Bundle bundle;
+    protected boolean directDependency;
 
     /**
      * Describes the type of the Capability.
@@ -74,6 +75,14 @@ public class Capability {
 
     public Bundle getBundle() {
         return bundle;
+    }
+
+    public boolean isDirectDependency() {
+        return directDependency;
+    }
+
+    public void setDirectDependency(boolean directDependency) {
+        this.directDependency = directDependency;
     }
 
     /**
