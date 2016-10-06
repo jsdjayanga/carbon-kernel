@@ -24,6 +24,7 @@ import org.osgi.framework.launch.FrameworkFactory;
 import org.wso2.carbon.launcher.config.CarbonInitialBundle;
 import org.wso2.carbon.launcher.config.CarbonLaunchConfig;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ServiceLoader;
@@ -197,7 +198,17 @@ public class CarbonServer {
         }
 
         URL fwkBundleURL = config.getCarbonOSGiFramework();
-        return new URLClassLoader(new URL[]{fwkBundleURL});
+
+        URL fwkHookURL = null;
+        try {
+            fwkHookURL = new URL("file:/home/jayanga/WSO2/WSO2SourceCode/git/carbon-kernel/distribution/target/" +
+                    "wso2carbon-kernel-5.2.0-SNAPSHOT/osgi/hooks/" +
+                    "org.eclipse.equinox.weaving.hook_1.1.100.weaving-hook-20140821.jar");
+        } catch (MalformedURLException e) {
+            logger.info("Error while URL");
+        }
+        return new URLClassLoader(new URL[]{fwkBundleURL, fwkHookURL});
+        //return new URLClassLoader(new URL[]{fwkBundleURL});
     }
 
     /**
