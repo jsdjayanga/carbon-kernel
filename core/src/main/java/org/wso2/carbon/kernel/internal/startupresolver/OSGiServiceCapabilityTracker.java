@@ -162,12 +162,15 @@ class OSGiServiceCapabilityTracker {
 
                 CapabilityProvider provider = (CapabilityProvider) serviceObject;
                 IntStream.range(0, provider.getCount())
-                        .forEach(count -> startupComponentManager.addExpectedOrAvailableCapability(
-                                new OSGiServiceCapability(
-                                        capabilityName.trim(),
-                                        Capability.CapabilityType.OSGi_SERVICE,
-                                        Capability.CapabilityState.EXPECTED,
-                                        bundle)));
+                        .forEach(count -> {
+                            Capability capability = new OSGiServiceCapability(
+                                    capabilityName.trim(),
+                                    Capability.CapabilityType.OSGi_SERVICE,
+                                    Capability.CapabilityState.EXPECTED,
+                                    bundle,
+                                    true);
+                            startupComponentManager.addExpectedOrAvailableCapability(capability);
+                        });
             } else {
                 // this has to be a capability service
                 logger.debug("Adding OSGi Service Capability. Service id: {}. Service implementation class: {}. ",

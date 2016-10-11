@@ -18,11 +18,15 @@
 package org.wso2.carbon.kernel.internal.startupresolver.beans;
 
 import org.osgi.framework.Bundle;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.kernel.startupresolver.RequiredCapabilityListener;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * {@code StartupComponent} Represents an entity which needs to hold its initialization until all the required
@@ -38,6 +42,7 @@ import java.util.List;
  * @since 5.1.0
  */
 public class StartupComponent {
+    private static final Logger logger = LoggerFactory.getLogger(StartupComponent.class);
 
     /**
      * Name of the startup listener component extracted from the componentName manifest attribute.
@@ -63,6 +68,11 @@ public class StartupComponent {
      * List of pending expected or available CapabilityProvider OSGi services.
      */
     private List<CapabilityProviderCapability> pendingCapabilityProviderList = new ArrayList<>();
+
+    /**
+     * Map of required capability OSGi services.
+     */
+    private Map<String, List<Object>> requiredCapabilityMap = new HashMap<>();
 
     /**
      * OSGi bundle to which this component resides.
@@ -132,6 +142,15 @@ public class StartupComponent {
      */
     public void addExpectedOrAvailableCapability(Capability capability) {
         synchronized (pendingCapabilityList) {
+            if (capability.isDirectDependency() && capability.getState() == Capability.CapabilityState.EXPECTED) {
+                List<Object> requiredCapabilityList = requiredCapabilityMap.get(capability.getName());
+                if (requiredCapabilityList == null) {
+                    requiredCapabilityList = new ArrayList<>();
+                    requiredCapabilityMap.put(capability.getName(), requiredCapabilityList);
+                }
+                requiredCapabilityList.add(capability);
+            }
+
             if (pendingCapabilityList.contains(capability)) {
                 pendingCapabilityList.remove(capability);
             } else {
@@ -217,6 +236,18 @@ public class StartupComponent {
      */
     public boolean isPending() {
         return !satisfied;
+    }
+
+    public boolean isReady(Map<String, List<Object>> cachedServices) {
+        for (Map.Entry<String, List<Object>> serviceListEntry : requiredCapabilityMap.entrySet()) {
+            List<Object> cachedServiceList = cachedServices.get(serviceListEntry.getKey());
+            if (cachedServiceList == null || serviceListEntry.getValue().size() != cachedServiceList.size()) {
+                logger.debug("Startup component {} is not ready to start. service count mismatch in {}",
+                        this.getName(), serviceListEntry.getKey());
+                return false;
+            }
+        }
+        return true;
     }
 
     /**

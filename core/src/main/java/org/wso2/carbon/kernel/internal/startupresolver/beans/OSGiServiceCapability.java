@@ -38,6 +38,11 @@ public class OSGiServiceCapability extends Capability {
         super(capabilityName, type, state, bundle);
     }
 
+    public OSGiServiceCapability(String capabilityName, CapabilityType type, CapabilityState state, Bundle bundle,
+                                 boolean directDependency) {
+        super(capabilityName, type, state, bundle, directDependency);
+    }
+
     public List<String> getRequiredByComponentNames() {
         return requiredByComponentNames;
     }

@@ -222,23 +222,28 @@ class StartupComponentManager {
     void notifySatisfiableComponents() {
         getComponents(StartupComponent::isSatisfiable)
                 .forEach(startupComponent -> {
+                    Map<String, List<Object>> cachedServices = StartupServiceCache.getInstance()
+                            .getCachedServices(startupComponent.getName());
+                    if (startupComponent.isReady(cachedServices)) {
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("Notifying RequiredCapabilityListener of component {} from bundle({}:{}) " +
+                                            "since all the required capabilities are available",
+                                    startupComponent.getName(),
+                                    startupComponent.getBundle().getSymbolicName(),
+                                    startupComponent.getBundle().getVersion());
+                        }
 
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Notifying RequiredCapabilityListener of component {} from bundle({}:{}) " +
-                                        "since all the required capabilities are available",
-                                startupComponent.getName(),
-                                startupComponent.getBundle().getSymbolicName(),
-                                startupComponent.getBundle().getVersion());
-                    }
+                        startupComponent.setSatisfied(true);
+                        RequiredCapabilityListener capabilityListener = startupComponent.getListener();
 
-                    startupComponent.setSatisfied(true);
-                    RequiredCapabilityListener capabilityListener = startupComponent.getListener();
-
-                    try {
-                        capabilityListener.onAllRequiredCapabilitiesAvailable();
-                    } catch (RuntimeException e) {
-                        logger.error("Runtime Exception occurred while calling onAllRequiredCapabilitiesAvailable of "
-                                + "component " + startupComponent.getName(), e);
+                        try {
+                            capabilityListener.onAllRequiredCapabilitiesAvailable();
+                        } catch (RuntimeException e) {
+                            logger.error("Runtime Exception occurred while calling onAllRequiredCapabilitiesAvailable" +
+                                    " of component " + startupComponent.getName(), e);
+                        }
+                    } else {
+                        logger.info("Startup component has not received some of the required services");
                     }
                 });
     }
