@@ -188,7 +188,7 @@ class StartupComponentManager {
                                 capability.getBundle().getVersion(),
                                 startupComponent.getName());
                     }
-                    startupComponent.addExpectedCapability(capability);
+                    startupComponent.addExpectedCapability(capability.clone(capability));
                 });
 
     }
@@ -198,10 +198,15 @@ class StartupComponentManager {
      *
      * @param serviceInterfaceClass interface of the OSGi service.
      */
-    void updateIndirectCapability(String serviceInterfaceClass) {
-        for (Map.Entry<String, StartupComponent> startupComponent : startupComponentMap.entrySet()) {
-            startupComponent.getValue().updateIndirectCapability(serviceInterfaceClass);
-        }
+    void updateIndirectCapability(Capability capability) {
+        startupComponentMap.values()
+                .stream()
+                .filter(startupComponent -> startupComponent.isServiceRequired(capability.getName()))
+                .forEach(startupComponent -> startupComponent.updateIndirectCapability(capability));
+
+//        for (Map.Entry<String, StartupComponent> startupComponent : startupComponentMap.entrySet()) {
+//            startupComponent.getValue().updateIndirectCapability(capability);
+//        }
     }
 
     /**

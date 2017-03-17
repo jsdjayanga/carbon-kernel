@@ -31,6 +31,7 @@ public class Capability {
     protected CapabilityState state;
     protected Bundle bundle;
     protected boolean directDependency;
+    protected boolean secondCheck;
 
     /**
      * Describes the type of the Capability.
@@ -59,6 +60,11 @@ public class Capability {
         this.directDependency = directDependency;
     }
 
+    public Capability clone(Capability clone) {
+        Capability capability = new Capability(name, type, state, bundle, directDependency);
+        return capability;
+    }
+
     public String getName() {
         return name;
     }
@@ -85,6 +91,14 @@ public class Capability {
 
     public void setDirectDependency(boolean directDependency) {
         this.directDependency = directDependency;
+    }
+
+    public boolean isSecondCheck() {
+        return secondCheck;
+    }
+
+    public void setSecondCheck(boolean secondCheck) {
+        this.secondCheck = secondCheck;
     }
 
     /**

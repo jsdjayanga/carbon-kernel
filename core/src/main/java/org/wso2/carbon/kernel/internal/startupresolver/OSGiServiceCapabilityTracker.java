@@ -172,7 +172,13 @@ class OSGiServiceCapabilityTracker {
             } else {
                 logger.debug("Updating indirect dependencies in components for interface={} via the implementation={}",
                         serviceInterfaceClassName, serviceImplClassName);
-                startupComponentManager.updateIndirectCapability(serviceInterfaceClassName);
+
+                startupComponentManager.updateIndirectCapability(new OSGiServiceCapability(
+                        serviceInterfaceClassName,
+                        Capability.CapabilityType.OSGi_SERVICE,
+                        Capability.CapabilityState.AVAILABLE,
+                        bundle,
+                        false));
             }
 
             return serviceObject;

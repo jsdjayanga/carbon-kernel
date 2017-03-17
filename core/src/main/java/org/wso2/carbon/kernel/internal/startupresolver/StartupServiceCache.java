@@ -38,7 +38,8 @@ public class StartupServiceCache {
      * @param serviceInstance OSGi service instance
      */
     public synchronized void update(String componentName, Class interfaceName, Object serviceInstance) {
-        logger.debug("Updating StartupServiceCache, componentName={}, interfaceName={}, serviceInstance={}");
+        logger.debug("Updating StartupServiceCache, componentName={}, interfaceName={}, serviceInstance={}",
+                componentName, interfaceName.getName(), serviceInstance);
 
         Map<String, List<Object>> componentServicesMap = componentMap.get(componentName);
         if (componentServicesMap == null) {
