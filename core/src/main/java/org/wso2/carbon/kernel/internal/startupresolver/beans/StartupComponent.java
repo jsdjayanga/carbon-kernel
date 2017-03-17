@@ -214,7 +214,6 @@ public class StartupComponent {
         List<String> availableCapabilities = StartupServiceCache.getInstance().getServiceList(name);
         synchronized (expectedCapabilityList) {
             return expectedCapabilityList.stream()
-                    //TODO: remove direct dependency
                     .filter(capability -> capability.isDirectDependency()
                             || (!capability.isDirectDependency()
                             && capability.getState() == Capability.CapabilityState.EXPECTED))
