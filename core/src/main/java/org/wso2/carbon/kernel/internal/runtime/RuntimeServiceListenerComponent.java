@@ -15,20 +15,16 @@
  */
 package org.wso2.carbon.kernel.internal.runtime;
 
-import org.osgi.framework.BundleContext;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.base.CarbonComponent;
 import org.wso2.carbon.kernel.internal.DataHolder;
 import org.wso2.carbon.kernel.jmx.MBeanRegistrator;
 import org.wso2.carbon.kernel.runtime.Runtime;
 import org.wso2.carbon.kernel.runtime.RuntimeService;
-import org.wso2.carbon.kernel.startupresolver.RequiredCapabilityListener;
-import org.wso2.carbon.kernel.startupresolver.StartupServiceUtils;
+
+import java.util.ServiceLoader;
+import java.util.stream.Stream;
 
 /**
  * This service  component is responsible for retrieving the Runtime OSGi service and register each runtime
@@ -37,72 +33,40 @@ import org.wso2.carbon.kernel.startupresolver.StartupServiceUtils;
  *
  * @since 5.0.0
  */
-@Component(
-        name = "org.wso2.carbon.kernel.internal.runtime.RuntimeServiceListenerComponent",
-        immediate = true,
-        property = {
-                "componentName=" + RuntimeServiceListenerComponent.COMPONENT_NAME
-        }
-)
-public class RuntimeServiceListenerComponent implements RequiredCapabilityListener {
+public class RuntimeServiceListenerComponent implements CarbonComponent {
     public static final String COMPONENT_NAME = "carbon-runtime-mgt";
     private static final Logger logger = LoggerFactory.getLogger(RuntimeServiceListenerComponent.class);
     private RuntimeManager runtimeManager = new RuntimeManager();
-    private BundleContext bundleContext;
 
-    @Activate
-    protected void start(BundleContext bundleContext) {
-        this.bundleContext = bundleContext;
-        DataHolder.getInstance().setRuntimeManager(runtimeManager);
-    }
-
-    /**
-     * Register the runtime instance.
-     *
-     * @param runtime - runtime instance
-     */
-
-    @Reference(
-            name = "carbon.runtime.service",
-            service = Runtime.class,
-            cardinality = ReferenceCardinality.MULTIPLE,
-            policy = ReferencePolicy.DYNAMIC,
-            unbind = "unRegisterRuntime"
-    )
-    protected void registerRuntime(Runtime runtime) {
-        try {
-            runtimeManager.registerRuntime(runtime);
-            StartupServiceUtils.updateServiceCache(COMPONENT_NAME, Runtime.class);
-        } catch (Exception e) {
-            logger.error("Error while adding runtime to the Runtime manager", e);
-        }
-    }
-
-    /**
-     * Un-register the runtime instance.
-     *
-     * @param runtime - runtime instance
-     */
-    protected void unRegisterRuntime(Runtime runtime) {
-        try {
-            runtimeManager.unRegisterRuntime(runtime);
-        } catch (Exception e) {
-            logger.error("Error while removing runtime from Runtime manager", e);
-        }
+    @Override
+    public String getName() {
+        return RuntimeServiceListenerComponent.class.getName();
     }
 
     @Override
-    public void onAllRequiredCapabilitiesAvailable() {
-        if (logger.isDebugEnabled()) {
-            logger.debug("Registering RuntimeService as an OSGi service");
-        }
+    public boolean start() throws Exception {
+        DataHolder.getInstance().setRuntimeManager(runtimeManager);
+        ServiceLoader<Runtime> serviceLoader = ServiceLoader.load(Runtime.class);
+        Stream<ServiceLoader.Provider<Runtime>> serviceProviderStream = serviceLoader.stream();
+        serviceProviderStream.parallel().forEach(carbonComponentProvider -> {
+            try {
+                logger.info("Starting Runtime : '" + carbonComponentProvider.get() + "'");
+                runtimeManager.registerRuntime(carbonComponentProvider.get());
+            } catch (Exception e) {
+                logger.error("Error while starting Runtime : '"
+                        + carbonComponentProvider.get() + "'", e);
+                throw new RuntimeException("Error while starting Runtime : '"
+                        + carbonComponentProvider.get() + "'", e);
+            }
+        });
         RuntimeService runtimeService = new CarbonRuntimeService(runtimeManager);
-        try {
-            runtimeService.startRuntimes();
-            bundleContext.registerService(RuntimeService.class, runtimeService, null);
-            MBeanRegistrator.registerMBean(runtimeService);
-        } catch (Exception e) {
-            logger.error("Error while starting runtime from Runtime manager", e);
-        }
+        runtimeService.startRuntimes();
+        MBeanRegistrator.registerMBean(runtimeService);
+        return true;
+    }
+
+    @Override
+    public boolean stop() throws Exception {
+        return false;
     }
 }

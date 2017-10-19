@@ -52,8 +52,8 @@ public class CarbonConfiguration {
     @Element(description = "ports used by this server")
     private PortsConfig ports = new PortsConfig();
 
-    @Element(description = "StartupOrderResolver related configurations")
-    private StartupResolverConfig startupResolver = new StartupResolverConfig();
+//    @Element(description = "StartupOrderResolver related configurations")
+//    private StartupResolverConfig startupResolver = new StartupResolverConfig();
 
     @Element(description = "JMX Configuration")
     private JMXConfiguration jmx = new JMXConfiguration();
@@ -78,9 +78,9 @@ public class CarbonConfiguration {
         return ports;
     }
 
-    public StartupResolverConfig getStartupResolverConfig() {
-        return startupResolver;
-    }
+//    public StartupResolverConfig getStartupResolverConfig() {
+//        return startupResolver;
+//    }
 
     public JMXConfiguration getJmxConfiguration() {
         return jmx;

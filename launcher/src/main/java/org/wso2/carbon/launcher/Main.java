@@ -15,6 +15,8 @@
  */
 package org.wso2.carbon.launcher;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.launcher.config.CarbonLaunchConfig;
 import org.wso2.carbon.launcher.utils.Utils;
 
@@ -29,8 +31,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import static org.wso2.carbon.launcher.Constants.CARBON_HOME;
 import static org.wso2.carbon.launcher.Constants.DEFAULT_PROFILE;
@@ -52,7 +52,7 @@ import static org.wso2.carbon.launcher.Constants.RUNTIME_PATH;
  */
 public class Main {
 
-    private static final Logger logger = Logger.getLogger(Main.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(Main.class);
 
     /**
      * @param args arguments
@@ -70,10 +70,10 @@ public class Main {
         // 2) Initialize and/or verify System properties
         initAndVerifySysProps();
 
-        // 3) Load the Carbon start configuration
-        CarbonLaunchConfig config = loadCarbonLaunchConfig();
+//        // 3) Load the Carbon start configuration
+//        CarbonLaunchConfig config = loadCarbonLaunchConfig();
 
-        CarbonServer carbonServer = new CarbonServer(config);
+        CarbonServer carbonServer = new CarbonServer();
 
         // 4) Register a shutdown hook to stop the server
         registerShutdownHook(carbonServer);
@@ -100,7 +100,7 @@ public class Main {
             // We need to invoke the stop method of the CarbonServer to allow the server to cleanup itself.
             carbonServer.stop();
 
-            logger.log(Level.SEVERE, e.getMessage(), e);
+            logger.info(e.getMessage(), e);
             System.exit(ExitCodes.UNSUCCESSFUL_TERMINATION);
         }
     }
@@ -114,16 +114,14 @@ public class Main {
         File launchPropFile = Utils.getLaunchConfigDirectory().resolve(LAUNCH_PROPERTIES_FILE).toFile();
 
         if (launchPropFile.exists()) {
-            logger.log(Level.FINE, "Loading the Carbon launch configuration from the file " +
+            logger.info("Loading the Carbon launch configuration from the file " +
                     launchPropFile.getAbsolutePath());
 
             return new CarbonLaunchConfig(launchPropFile);
         } else {
 
-            if (logger.isLoggable(Level.FINE)) {
-                logger.log(Level.FINE, "Loading the Carbon launch configuration from the launch.properties file " +
+            logger.info("Loading the Carbon launch configuration from the launch.properties file " +
                         "in the classpath");
-            }
 
             return new CarbonLaunchConfig();
         }
@@ -149,7 +147,7 @@ public class Main {
         String carbonHome = System.getProperty(CARBON_HOME);
         if (carbonHome == null || carbonHome.length() == 0) {
             String msg = "carbon.home system property must be set before starting the server";
-            logger.log(Level.SEVERE, msg);
+            logger.info(msg);
             throw new RuntimeException(msg);
         }
 
@@ -158,22 +156,22 @@ public class Main {
             System.setProperty(PROFILE, DEFAULT_PROFILE);
         }
 
-        // Set log level for Pax logger to WARN and log service ranking to maximum value.
-        System.setProperty(PAX_DEFAULT_SERVICE_LOG_LEVEL, LOG_LEVEL_WARN);
-        System.setProperty(PAX_LOG_SERVICE_RANKING_LEVEL, String.valueOf(Integer.MAX_VALUE));
-
-        Path paxLoggingPropertiesFile =
-                Paths.get(System.getProperty(CARBON_HOME), "conf", System.getProperty(RUNTIME), "etc",
-                        PAX_LOGGING_PROPERTIES_FILE);
-        if (paxLoggingPropertiesFile.toFile().exists()) {
-            System.setProperty(PAX_LOGGING_PROPERTY_FILE_KEY, paxLoggingPropertiesFile.toAbsolutePath().toString());
-            logger.log(Level.FINE, "Setting pax logging properties file path to : " +
-                    paxLoggingPropertiesFile.toAbsolutePath().toString());
-        } else {
-            String msg = PAX_LOGGING_PROPERTIES_FILE + " should be available to start the server";
-            logger.log(Level.SEVERE, msg);
-            throw new RuntimeException(msg);
-        }
+//        // Set log level for Pax logger to WARN and log service ranking to maximum value.
+//        System.setProperty(PAX_DEFAULT_SERVICE_LOG_LEVEL, LOG_LEVEL_WARN);
+//        System.setProperty(PAX_LOG_SERVICE_RANKING_LEVEL, String.valueOf(Integer.MAX_VALUE));
+//
+//        Path paxLoggingPropertiesFile =
+//                Paths.get(System.getProperty(CARBON_HOME), "conf", System.getProperty(RUNTIME), "etc",
+//                        PAX_LOGGING_PROPERTIES_FILE);
+//        if (paxLoggingPropertiesFile.toFile().exists()) {
+//            System.setProperty(PAX_LOGGING_PROPERTY_FILE_KEY, paxLoggingPropertiesFile.toAbsolutePath().toString());
+//            logger.info("Setting pax logging properties file path to : " +
+//                    paxLoggingPropertiesFile.toAbsolutePath().toString());
+//        } else {
+//            String msg = PAX_LOGGING_PROPERTIES_FILE + " should be available to start the server";
+//            logger.info(msg);
+//            throw new RuntimeException(msg);
+//        }
     }
 
     /**
@@ -228,7 +226,7 @@ public class Main {
             }
             pid = builder.toString();
         } catch (IOException e) {
-            logger.log(Level.SEVERE, e.getMessage(), e);
+            logger.info(e.getMessage(), e);
         }
 
         if (pid.length() != 0) {
@@ -237,7 +235,7 @@ public class Main {
                     StandardCharsets.UTF_8))) {
                 writer.write(pid);
             } catch (IOException e) {
-                logger.log(Level.WARNING, "Cannot write runtime.pid file");
+                logger.info("Cannot write runtime.pid file");
             }
         }
     }

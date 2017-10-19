@@ -18,7 +18,7 @@
     <parent>
         <groupId>org.wso2</groupId>
         <artifactId>wso2</artifactId>
-        <version>5</version>
+        <version>6-SNAPSHOT</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -37,22 +37,25 @@
     <profiles>
         <profile>
             <id>default</id>
+            <modules>
+                <module>parent</module>
+                <module>base</module>
+                <module>launcher</module>
+                <module>core</module>
+
+
+                <!--Need to place archetypes module after core because tests in
+                org.wso2.carbon.archetypes.component depend on org.wso2.carbon.core-->
+                <!--<module>archetypes</module>-->
+                <!--<module>tools</module>-->
+                <!--<module>pax-exam-container-carbon</module>-->
+                <!--<module>features</module>-->
+                <!--<module>distribution</module>-->
+                <!--<module>tests</module>-->
+            </modules>
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
-            <modules>
-                <module>parent</module>
-                <module>launcher</module>
-                <module>core</module>
-                <!--Need to place archetypes module after core because tests in
-                org.wso2.carbon.archetypes.component depend on org.wso2.carbon.core-->
-                <module>archetypes</module>
-                <module>tools</module>
-                <module>pax-exam-container-carbon</module>
-                <module>features</module>
-                <module>distribution</module>
-                <module>tests</module>
-            </modules>
         </profile>
     </profiles>
 
@@ -64,47 +67,47 @@
     </scm>
 
     <build>
-        <extensions>
-            <extension>
-                <groupId>org.apache.maven.wagon</groupId>
-                <artifactId>wagon-ssh</artifactId>
-                <version>${maven.wagon.ssh.version}</version>
-            </extension>
-        </extensions>
+        <!--<extensions>-->
+            <!--<extension>-->
+                <!--<groupId>org.apache.maven.wagon</groupId>-->
+                <!--<artifactId>wagon-ssh</artifactId>-->
+                <!--<version>${maven.wagon.ssh.version}</version>-->
+            <!--</extension>-->
+        <!--</extensions>-->
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <source>1.9</source>
+                    <target>1.9</target>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-release-plugin</artifactId>
-                <configuration>
-                    <preparationGoals>clean install</preparationGoals>
-                    <autoVersionSubmodules>true</autoVersionSubmodules>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-deploy-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>docs</id>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>javadoc</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
+            <!--<plugin>-->
+                <!--<groupId>org.apache.maven.plugins</groupId>-->
+                <!--<artifactId>maven-release-plugin</artifactId>-->
+                <!--<configuration>-->
+                    <!--<preparationGoals>clean install</preparationGoals>-->
+                    <!--<autoVersionSubmodules>true</autoVersionSubmodules>-->
+                <!--</configuration>-->
+            <!--</plugin>-->
+            <!--<plugin>-->
+                <!--<groupId>org.apache.maven.plugins</groupId>-->
+                <!--<artifactId>maven-deploy-plugin</artifactId>-->
+            <!--</plugin>-->
+            <!--<plugin>-->
+                <!--<groupId>org.apache.maven.plugins</groupId>-->
+                <!--<artifactId>maven-javadoc-plugin</artifactId>-->
+                <!--<executions>-->
+                    <!--<execution>-->
+                        <!--<id>docs</id>-->
+                        <!--<phase>compile</phase>-->
+                        <!--<goals>-->
+                            <!--<goal>javadoc</goal>-->
+                        <!--</goals>-->
+                    <!--</execution>-->
+                <!--</executions>-->
+            <!--</plugin>-->
         </plugins>
     </build>
 

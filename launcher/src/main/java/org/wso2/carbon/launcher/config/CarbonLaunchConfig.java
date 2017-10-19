@@ -15,6 +15,8 @@
  */
 package org.wso2.carbon.launcher.config;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.launcher.CarbonServerListener;
 import org.wso2.carbon.launcher.utils.FileResolver;
 import org.wso2.carbon.launcher.utils.Utils;
@@ -32,22 +34,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.wso2.carbon.launcher.Constants.CARBON_HOME;
 import static org.wso2.carbon.launcher.Constants.CARBON_INITIAL_OSGI_BUNDLES;
-import static org.wso2.carbon.launcher.Constants.CARBON_OSGI_FRAMEWORK;
-import static org.wso2.carbon.launcher.Constants.CARBON_OSGI_REPOSITORY;
-import static org.wso2.carbon.launcher.Constants.CARBON_PROFILE_REPOSITORY;
 import static org.wso2.carbon.launcher.Constants.CARBON_SERVER_LISTENERS;
-import static org.wso2.carbon.launcher.Constants.ECLIPSE_P2_DATA_AREA;
-import static org.wso2.carbon.launcher.Constants.OSGI_CONFIG_AREA;
-import static org.wso2.carbon.launcher.Constants.OSGI_INSTALL_AREA;
-import static org.wso2.carbon.launcher.Constants.OSGI_INSTANCE_AREA;
 
 /**
  * Loading properties from launch configuration (launch.properties) file
@@ -57,22 +48,23 @@ import static org.wso2.carbon.launcher.Constants.OSGI_INSTANCE_AREA;
  */
 public class CarbonLaunchConfig {
 
-    private static final Logger logger = Logger.getLogger(CarbonLaunchConfig.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(CarbonLaunchConfig.class);
 
-    private URL carbonOSGiRepository;
-    private URL carbonProfileRepository;
-    private URL carbonOSGiFramework;
-    private URL osgiInstallArea;
-    private URL osgiConfigurationArea;
-    private URL osgiInstanceArea;
-    private URL eclipseP2DataArea;
+
+//    private URL carbonOSGiRepository;
+//    private URL carbonProfileRepository;
+//    private URL carbonOSGiFramework;
+//    private URL osgiInstallArea;
+//    private URL osgiConfigurationArea;
+//    private URL osgiInstanceArea;
+//    private URL eclipseP2DataArea;
 
     private String carbonHome;
 
-    private String carbonOSGiRepositoryPath;
-    private String carbonProfileRepositoryPath;
-
-    private List<CarbonInitialBundle> initialBundles = new ArrayList<>();
+//    private String carbonOSGiRepositoryPath;
+//    private String carbonProfileRepositoryPath;
+//
+//    private List<CarbonInitialBundle> initialBundles = new ArrayList<>();
 
     private List<CarbonServerListener> carbonServerListeners = new ArrayList<>();
 
@@ -121,10 +113,10 @@ public class CarbonLaunchConfig {
             }
             mergeCustomProperties(customProperties);
         }
-        if (logger.isLoggable(Level.FINE)) {
-            logger.log(Level.FINE, "Loaded properties from the launch.properties file.");
-            properties.forEach((key, value) -> logger.log(Level.FINE, "Key: " + key + " Value: " + value));
-        }
+
+        logger.info("Loaded properties from the launch.properties file.");
+        properties.forEach((key, value) -> logger.info("Key: " + key + " Value: " + value));
+
         initializeProperties();
     }
 
@@ -156,11 +148,11 @@ public class CarbonLaunchConfig {
             return loadLaunchConfigurationFromStream(fileInputStream);
         } catch (FileNotFoundException e) {
             String errorMsg = "File " + launchPropFile + " does not exists";
-            logger.log(Level.SEVERE, errorMsg, e);
+            logger.info(errorMsg, e);
             throw new RuntimeException(errorMsg, e);
         } catch (IOException e) {
             String errorMsg = "Exception while loading file " + launchPropFile;
-            logger.log(Level.SEVERE, errorMsg, e);
+            logger.info(errorMsg, e);
             throw new RuntimeException(errorMsg, e);
         }
     }
@@ -175,71 +167,71 @@ public class CarbonLaunchConfig {
             return loadLaunchConfigurationFromStream(stream);
         } catch (IOException e) {
             String errorMsg = "Error loading the launch.properties";
-            logger.log(Level.SEVERE, errorMsg, e);
+            logger.info(errorMsg, e);
             throw new RuntimeException(errorMsg, e);
         }
     }
 
-    /**
-     * Get the value of carbonOSGiRepository.
-     *
-     * @return {@link #carbonOSGiRepository}
-     */
-    public URL getCarbonOSGiRepository() {
-        return carbonOSGiRepository;
-    }
-
-    /**
-     * Get the value of carbonOSGiFramework.
-     *
-     * @return {@link #carbonOSGiFramework}
-     */
-    public URL getCarbonOSGiFramework() {
-        return carbonOSGiFramework;
-    }
-
-    /**
-     * Get the value of osgiInstallArea.
-     *
-     * @return {@link #osgiInstallArea}
-     */
-    public URL getOSGiInstallArea() {
-        return osgiInstallArea;
-    }
-
-    /**
-     * Get the value of osgiConfigurationArea.
-     *
-     * @return {@link #osgiConfigurationArea}
-     */
-    public URL getOSGiConfigurationArea() {
-        return osgiConfigurationArea;
-    }
-
-    /**
-     * Get the value of osgiInstanceArea.
-     *
-     * @return {@link #osgiInstanceArea}
-     */
-    public URL getOSGiInstanceArea() {
-        return osgiInstanceArea;
-    }
-
-    /**
-     * Get the value of eclipseP2DataArea.
-     *
-     * @return {@link #eclipseP2DataArea}
-     */
-    public URL getEclipseP2DataArea() {
-        return eclipseP2DataArea;
-    }
-
-    /**
-     * @return initial bundle list
-     */
-    public List<CarbonInitialBundle> getInitialBundles() {
-        return Collections.unmodifiableList(initialBundles);
-    }
+//    /**
+//     * Get the value of carbonOSGiRepository.
+//     *
+//     * @return {@link #carbonOSGiRepository}
+//     */
+//    public URL getCarbonOSGiRepository() {
+//        return carbonOSGiRepository;
+//    }
+//
+//    /**
+//     * Get the value of carbonOSGiFramework.
+//     *
+//     * @return {@link #carbonOSGiFramework}
+//     */
+//    public URL getCarbonOSGiFramework() {
+//        return carbonOSGiFramework;
+//    }
+//
+//    /**
+//     * Get the value of osgiInstallArea.
+//     *
+//     * @return {@link #osgiInstallArea}
+//     */
+//    public URL getOSGiInstallArea() {
+//        return osgiInstallArea;
+//    }
+//
+//    /**
+//     * Get the value of osgiConfigurationArea.
+//     *
+//     * @return {@link #osgiConfigurationArea}
+//     */
+//    public URL getOSGiConfigurationArea() {
+//        return osgiConfigurationArea;
+//    }
+//
+//    /**
+//     * Get the value of osgiInstanceArea.
+//     *
+//     * @return {@link #osgiInstanceArea}
+//     */
+//    public URL getOSGiInstanceArea() {
+//        return osgiInstanceArea;
+//    }
+//
+//    /**
+//     * Get the value of eclipseP2DataArea.
+//     *
+//     * @return {@link #eclipseP2DataArea}
+//     */
+//    public URL getEclipseP2DataArea() {
+//        return eclipseP2DataArea;
+//    }
+//
+//    /**
+//     * @return initial bundle list
+//     */
+//    public List<CarbonInitialBundle> getInitialBundles() {
+//        return Collections.unmodifiableList(initialBundles);
+//    }
 
     /**
      * Get the value of carbon home.
@@ -291,24 +283,24 @@ public class CarbonLaunchConfig {
     private void initializeProperties() {
         carbonHome = System.getProperty(CARBON_HOME);
 
-        carbonOSGiRepository = resolvePath(properties.get(CARBON_OSGI_REPOSITORY), carbonHome, CARBON_OSGI_REPOSITORY);
-        carbonProfileRepository = resolvePath(properties.get(CARBON_PROFILE_REPOSITORY), carbonHome,
-                CARBON_PROFILE_REPOSITORY);
-        carbonOSGiRepositoryPath = carbonOSGiRepository.toExternalForm().substring(5);
-        carbonProfileRepositoryPath = carbonProfileRepository.toExternalForm().substring(5);
-
-        carbonOSGiFramework = resolvePath(properties.get(CARBON_OSGI_FRAMEWORK), carbonOSGiRepositoryPath,
-                CARBON_OSGI_FRAMEWORK);
-        osgiInstallArea = resolvePath(properties.get(OSGI_INSTALL_AREA), carbonProfileRepositoryPath,
-                OSGI_INSTALL_AREA);
-        osgiConfigurationArea = resolvePath(properties.get(OSGI_CONFIG_AREA), carbonProfileRepositoryPath,
-                OSGI_CONFIG_AREA);
-        osgiInstanceArea = resolvePath(properties.get(OSGI_INSTANCE_AREA), carbonProfileRepositoryPath,
-                OSGI_INSTANCE_AREA);
-        eclipseP2DataArea = resolvePath(properties.get(ECLIPSE_P2_DATA_AREA), carbonOSGiRepositoryPath,
-                ECLIPSE_P2_DATA_AREA);
-
-        populateInitialBundlesList(properties.get(CARBON_INITIAL_OSGI_BUNDLES));
+//        carbonOSGiRepository = resolvePath(properties.get(CARBON_OSGI_REPOSITORY), carbonHome, CARBON_OSGI_REPOSITORY);
+//        carbonProfileRepository = resolvePath(properties.get(CARBON_PROFILE_REPOSITORY), carbonHome,
+//                CARBON_PROFILE_REPOSITORY);
+//        carbonOSGiRepositoryPath = carbonOSGiRepository.toExternalForm().substring(5);
+//        carbonProfileRepositoryPath = carbonProfileRepository.toExternalForm().substring(5);
+//
+//        carbonOSGiFramework = resolvePath(properties.get(CARBON_OSGI_FRAMEWORK), carbonOSGiRepositoryPath,
+//                CARBON_OSGI_FRAMEWORK);
+//        osgiInstallArea = resolvePath(properties.get(OSGI_INSTALL_AREA), carbonProfileRepositoryPath,
+//                OSGI_INSTALL_AREA);
+//        osgiConfigurationArea = resolvePath(properties.get(OSGI_CONFIG_AREA), carbonProfileRepositoryPath,
+//                OSGI_CONFIG_AREA);
+//        osgiInstanceArea = resolvePath(properties.get(OSGI_INSTANCE_AREA), carbonProfileRepositoryPath,
+//                OSGI_INSTANCE_AREA);
+//        eclipseP2DataArea = resolvePath(properties.get(ECLIPSE_P2_DATA_AREA), carbonOSGiRepositoryPath,
+//                ECLIPSE_P2_DATA_AREA);
+//
+//        populateInitialBundlesList(properties.get(CARBON_INITIAL_OSGI_BUNDLES));
         loadCarbonServerListeners(properties.get(CARBON_SERVER_LISTENERS));
     }
 
@@ -323,7 +315,7 @@ public class CarbonLaunchConfig {
     private URL resolvePath(String path, String parentPath, String key) {
         if (Utils.isNullOrEmpty(path)) {
             String errorMsg = "The property " + key + " must not be null or empty.";
-            logger.log(Level.SEVERE, errorMsg);
+            logger.info(errorMsg);
             throw new RuntimeException("The property " + key + " must not be null or empty.");
 
         }
@@ -333,59 +325,58 @@ public class CarbonLaunchConfig {
         }
         properties.put(key, url.toExternalForm());
 
-        if (logger.isLoggable(Level.FINE)) {
-            logger.log(Level.FINE, "Path: " + path);
-            logger.log(Level.FINE, "Parent path: " + parentPath);
-            logger.log(Level.FINE, "Resolved path: " + url.toExternalForm());
-        }
+        logger.info("Path: " + path);
+        logger.info("Parent path: " + parentPath);
+        logger.info("Resolved path: " + url.toExternalForm());
+
         return url;
     }
 
-    /**
-     * Populating bundles read from the initialBundleList.
-     *
-     * @param initialBundleList comma separated bundle list
-     */
-    private void populateInitialBundlesList(String initialBundleList) {
-        if (Utils.isNullOrEmpty(initialBundleList)) {
-            return;
-        }
-
-        String[] strArray = Utils.tokenize(initialBundleList, ",");
-
-        // Pattern to extract information from a initial bundle entry.
-        // e.g. file:plugins/org.eclipse.equinox.console_1.0.100.v20130429-0953.jar@2:true.
-        Pattern bundleEntryPattern = Pattern.compile("(file):(.*)@(.*):(.*)");
-        for (String bundleEntry : strArray) {
-
-            if (Utils.isNullOrEmpty(bundleEntry)) {
-                continue;
-            }
-
-            Matcher matcher = bundleEntryPattern.matcher(bundleEntry.trim());
-            if (!matcher.matches()) {
-                throw new RuntimeException("Invalid initial bundle entry: " + bundleEntry);
-            }
-
-            if (!"file".equals(matcher.group(1))) {
-                throw new RuntimeException("URLs other than file URLs are not supported.");
-            }
-
-            String path = matcher.group(2);
-            int bundleStartLevel = Integer.parseInt(matcher.group(3));
-            boolean start = Boolean.parseBoolean(matcher.group(4));
-
-            URL bundleURL = FileResolver.resolve("file:" + path, carbonOSGiRepositoryPath);
-            initialBundles.add(new CarbonInitialBundle(bundleURL, bundleStartLevel, start));
-
-            if (logger.isLoggable(Level.FINE)) {
-                logger.log(Level.FINE, "Initial bundle entry: " + bundleEntry);
-                logger.log(Level.FINE, "Bundle URL: " + bundleURL.toExternalForm());
-                logger.log(Level.FINE, "Bundle start level: " + bundleStartLevel);
-                logger.log(Level.FINE, "Start flag: " + start);
-            }
-        }
-    }
+//    /**
+//     * Populating bundles read from the initialBundleList.
+//     *
+//     * @param initialBundleList comma separated bundle list
+//     */
+//    private void populateInitialBundlesList(String initialBundleList) {
+//        if (Utils.isNullOrEmpty(initialBundleList)) {
+//            return;
+//        }
+//
+//        String[] strArray = Utils.tokenize(initialBundleList, ",");
+//
+//        // Pattern to extract information from a initial bundle entry.
+//        // e.g. file:plugins/org.eclipse.equinox.console_1.0.100.v20130429-0953.jar@2:true.
+//        Pattern bundleEntryPattern = Pattern.compile("(file):(.*)@(.*):(.*)");
+//        for (String bundleEntry : strArray) {
+//
+//            if (Utils.isNullOrEmpty(bundleEntry)) {
+//                continue;
+//            }
+//
+//            Matcher matcher = bundleEntryPattern.matcher(bundleEntry.trim());
+//            if (!matcher.matches()) {
+//                throw new RuntimeException("Invalid initial bundle entry: " + bundleEntry);
+//            }
+//
+//            if (!"file".equals(matcher.group(1))) {
+//                throw new RuntimeException("URLs other than file URLs are not supported.");
+//            }
+//
+//            String path = matcher.group(2);
+//            int bundleStartLevel = Integer.parseInt(matcher.group(3));
+//            boolean start = Boolean.parseBoolean(matcher.group(4));
+//
+//            URL bundleURL = FileResolver.resolve("file:" + path, carbonOSGiRepositoryPath);
+//            initialBundles.add(new CarbonInitialBundle(bundleURL, bundleStartLevel, start));
+//
+//            if (logger.isLoggable(Level.FINE)) {
+//                logger.log(Level.FINE, "Initial bundle entry: " + bundleEntry);
+//                logger.log(Level.FINE, "Bundle URL: " + bundleURL.toExternalForm());
+//                logger.log(Level.FINE, "Bundle start level: " + bundleStartLevel);
+//                logger.log(Level.FINE, "Start flag: " + start);
+//            }
+//        }
+//    }
 
     /**
      * Adding carbon server listeners.
@@ -407,9 +398,7 @@ public class CarbonLaunchConfig {
                 Class clazz = Class.forName(className.trim());
                 carbonServerListeners.add((CarbonServerListener) clazz.newInstance());
 
-                if (logger.isLoggable(Level.FINE)) {
-                    logger.log(Level.FINE, "Loaded CarbonServerListener: " + className);
-                }
+                logger.info("Loaded CarbonServerListener: " + className);
             } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
                 throw new RuntimeException(e.getMessage(), e);
             }

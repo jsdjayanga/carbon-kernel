@@ -15,7 +15,6 @@
  */
 package org.wso2.carbon.kernel.internal;
 
-import org.osgi.framework.BundleContext;
 import org.wso2.carbon.config.provider.ConfigProvider;
 import org.wso2.carbon.kernel.internal.runtime.RuntimeManager;
 
@@ -26,7 +25,6 @@ import org.wso2.carbon.kernel.internal.runtime.RuntimeManager;
  */
 public class DataHolder {
     private static DataHolder instance = new DataHolder();
-    private BundleContext bundleContext;
 
     private RuntimeManager runtimeManager = null;
 
@@ -34,14 +32,6 @@ public class DataHolder {
 
     public static DataHolder getInstance() {
         return instance;
-    }
-
-    public BundleContext getBundleContext() {
-        return bundleContext;
-    }
-
-    public void setBundleContext(BundleContext bundleContext) {
-        this.bundleContext = bundleContext;
     }
 
     /**

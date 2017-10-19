@@ -17,7 +17,6 @@ package org.wso2.carbon.kernel.internal;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.kernel.CarbonServerInfo;
 import org.wso2.carbon.kernel.Constants;
 
 import java.text.DecimalFormat;
@@ -47,12 +46,12 @@ public class CarbonStartupHandler {
         logger.info(serverName + " started in " + decimalFormatter.format(startupTime) + " sec");
     }
 
-    /**
-     * Register the the CarbonServerInfo as an OSGi service. Other components can identify the server startup completion
-     * by listening to the CarbonServerInfo Service registration.
-     */
-    public static void registerCarbonServerInfoService() {
-        DataHolder.getInstance().getBundleContext().registerService(CarbonServerInfo.class,
-                new CarbonServerInfo(), null);
-    }
+//    /**
+//     * Register the the CarbonServerInfo as an OSGi service. Other components can identify the server startup completion
+//     * by listening to the CarbonServerInfo Service registration.
+//     */
+//    public static void registerCarbonServerInfoService() {
+//        DataHolder.getInstance().getBundleContext().registerService(CarbonServerInfo.class,
+//                new CarbonServerInfo(), null);
+//    }
 }

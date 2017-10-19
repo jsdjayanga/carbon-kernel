@@ -15,6 +15,8 @@
  */
 package org.wso2.carbon.launcher.utils;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.launcher.Constants;
 
 import java.nio.file.Path;
@@ -22,8 +24,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -34,7 +34,7 @@ import java.util.regex.Pattern;
  */
 public class Utils {
 
-    private static final Logger logger = Logger.getLogger(Utils.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(Utils.class);
 
     private static final String VAR_REGEXP = "\\$\\{[^}]*}";
     private static final Pattern varPattern = Pattern.compile(VAR_REGEXP);
@@ -65,9 +65,7 @@ public class Utils {
             newValue = newValue.replaceFirst(VAR_REGEXP, sysPropValue);
         }
 
-        if (logger.isLoggable(Level.FINE)) {
-            logger.log(Level.FINE, "Substitute Variables before: " + value + ", after: " + newValue);
-        }
+        logger.info("Substitute Variables before: " + value + ", after: " + newValue);
 
         return newValue;
     }

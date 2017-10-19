@@ -15,20 +15,14 @@
  */
 package org.wso2.carbon.launcher;
 
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.BundleException;
-import org.osgi.framework.FrameworkEvent;
-import org.osgi.framework.launch.Framework;
-import org.osgi.framework.launch.FrameworkFactory;
-import org.wso2.carbon.launcher.config.CarbonInitialBundle;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.wso2.carbon.base.CarbonComponent;
 import org.wso2.carbon.launcher.config.CarbonLaunchConfig;
 
-import java.net.URL;
-import java.net.URLClassLoader;
+import java.text.DecimalFormat;
 import java.util.ServiceLoader;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.stream.Stream;
 
 import static org.wso2.carbon.launcher.Constants.CARBON_START_TIME;
 
@@ -39,19 +33,10 @@ import static org.wso2.carbon.launcher.Constants.CARBON_START_TIME;
  */
 public class CarbonServer {
 
-    private static final Logger logger = Logger.getLogger(CarbonServer.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(CarbonServer.class);
 
-    private CarbonLaunchConfig config;
-    private Framework framework;
     private ServerStatus serverStatus;
-    /**
-     * Constructor.
-     *
-     * @param config Carbon launcher configuration
-     */
-    public CarbonServer(CarbonLaunchConfig config) {
-        this.config = config;
-    }
+    boolean stopServerWait = false;
 
     /**
      * Starts a Carbon server instance. This method returns only after the server instance stops completely.
@@ -59,32 +44,41 @@ public class CarbonServer {
      * @throws Exception if error occurred
      */
     public void start() throws Exception {
-        if (logger.isLoggable(Level.FINE)) {
-            logger.log(Level.FINE, "Starting Carbon server instance.");
-        }
+        logger.info("Starting Carbon server instance.");
 
         // Sets the server start time.
         System.setProperty(CARBON_START_TIME, Long.toString(System.currentTimeMillis()));
 
         try {
-            // Creates an OSGi framework instance.
-            ClassLoader fwkClassLoader = createOSGiFwkClassLoader();
-            FrameworkFactory fwkFactory = loadOSGiFwkFactory(fwkClassLoader);
-            framework = fwkFactory.newFramework(config.getProperties());
-
             setServerCurrentStatus(ServerStatus.STARTING);
             // Notify Carbon server start.
             dispatchEvent(CarbonServerEvent.STARTING);
 
-            // Initialize and start OSGi framework.
-            initAndStartOSGiFramework(framework);
-
-            // Loads initial bundles listed in the launch.properties file.
-            loadInitialBundles(framework.getBundleContext());
+            ServiceLoader<CarbonComponent> serviceLoader = ServiceLoader.load(CarbonComponent.class);
+            Stream<ServiceLoader.Provider<CarbonComponent>> serviceProviderStream = serviceLoader.stream();
+            serviceProviderStream.parallel().forEach(carbonComponentProvider -> {
+                try {
+                    logger.info("Starting CarbonComponent : '" + carbonComponentProvider.get().getName() + "'");
+                    carbonComponentProvider.get().start();
+                } catch (Exception e) {
+                    logger.error("Error while starting CarbonComponent : '"
+                            + carbonComponentProvider.get().getName() + "'", e);
+                    throw new RuntimeException("Error while starting CarbonComponent : '"
+                            + carbonComponentProvider.get().getName() + "'", e);
+                }
+            });
 
             setServerCurrentStatus(ServerStatus.STARTED);
-            // This thread waits until the OSGi framework comes to a complete shutdown.
-            waitForServerStop(framework);
+
+            logServerStartupTime("ServerName");
+
+            // This thread waits until the server is stopped.
+            while (true) {
+                Thread.sleep(5000);
+                if (stopServerWait) {
+                    break;
+                }
+            }
 
             setServerCurrentStatus(ServerStatus.STOPPING);
             // Notify Carbon server shutdown.
@@ -99,159 +93,13 @@ public class CarbonServer {
      * Stop this Carbon server instance.
      */
     public void stop() {
-        if (!isFrameworkActive()) {
+        if (stopServerWait) {
             return;
         }
 
-        if (logger.isLoggable(Level.FINE)) {
-            logger.log(Level.FINE, "Stopping the OSGi framework.");
-        }
+        logger.info("Stopping the OSGi framework.");
 
-        // Framework.stop() method returns before the framework shutdown. But this.stop() method should only return
-        //  after framework stops completely. Therefore we invokes the framework.stop() method in a new
-        //  thread and this thread waits till the framework stops completely using the framework.waitForStop() method.
-        new Thread() {
-            public void run() {
-                try {
-                    framework.stop();
-                } catch (BundleException e) {
-                    logger.log(Level.SEVERE, e.getMessage(), e);
-                    throw new RuntimeException(e);
-                }
-            }
-        }.start();
-
-
-        try {
-            FrameworkEvent event = framework.waitForStop(1000 * 60 * 3);
-            if (event.getType() == FrameworkEvent.WAIT_TIMEDOUT) {
-                if (logger.isLoggable(Level.FINE)) {
-                    logger.log(Level.FINE, "OSGi framework did not stop during the given time.");
-                }
-            }
-        } catch (InterruptedException e) {
-            logger.log(Level.SEVERE, e.getMessage(), e);
-            throw new RuntimeException(e);
-        }
-    }
-
-    /**
-     * Initializes and start framework. Framework will try to resolve all the bundles if their requirements
-     * can be satisfied.
-     *
-     * @param framework osgiFramework
-     * @throws BundleException
-     */
-    private void initAndStartOSGiFramework(Framework framework) throws BundleException {
-        if (logger.isLoggable(Level.FINE)) {
-            logger.log(Level.FINE, "Initializing the OSGi framework.");
-        }
-
-        framework.init();
-
-        // Starts the framework.
-        if (logger.isLoggable(Level.FINE)) {
-            logger.log(Level.FINE, "Starting the OSGi framework.");
-        }
-
-        framework.start();
-
-        if (logger.isLoggable(Level.FINE)) {
-            logger.log(Level.FINE, "Started the OSGi framework.");
-        }
-    }
-
-    /**
-     * Wait until this Framework has completely stopped.
-     *
-     * @param framework OSGi framework
-     * @throws java.lang.Exception
-     */
-    private void waitForServerStop(Framework framework) throws Exception {
-        if (!isFrameworkActive()) {
-            return;
-        }
-
-        while (true) {
-            FrameworkEvent event = framework.waitForStop(0);
-
-            // We should not stop the framework if the user has updated the system bundle via the OSGi console or
-            //  programmatically. In this case, framework will shutdown and start itself.
-            if (event.getType() != FrameworkEvent.STOPPED_UPDATE) {
-                if (logger.isLoggable(Level.FINE)) {
-                    logger.log(Level.FINE, "OSGi framework is stopped for update.");
-                }
-                break;
-            }
-        }
-    }
-
-    /**
-     * Create OSGi framework class loader.
-     *
-     * @return new OSGi class loader
-     */
-    private ClassLoader createOSGiFwkClassLoader() {
-        if (logger.isLoggable(Level.FINE)) {
-            logger.log(Level.FINE, "Creating OSGi framework class loader.");
-        }
-
-        URL fwkBundleURL = config.getCarbonOSGiFramework();
-        return new URLClassLoader(new URL[]{fwkBundleURL});
-    }
-
-    /**
-     * Creates a new service loader for the given service type and class loader.
-     * Load OSGi framework factory for the given class loader.
-     *
-     * @param classLoader The class loader to be used to load provider-configurations
-     * @return framework factory for creating framework instances
-     */
-    private FrameworkFactory loadOSGiFwkFactory(ClassLoader classLoader) {
-        if (logger.isLoggable(Level.FINE)) {
-            logger.log(Level.FINE, "Loading OSGi FrameworkFactory implementation class from the classpath.");
-        }
-
-        ServiceLoader<FrameworkFactory> loader = ServiceLoader.load(FrameworkFactory.class, classLoader);
-        if (!loader.iterator().hasNext()) {
-            throw new RuntimeException("An implementation of the " + FrameworkFactory.class.getName() +
-                    " must be available in the classpath");
-        }
-        return loader.iterator().next();
-    }
-
-    /**
-     * Installs a bundle from the specified locations.
-     *
-     * @param bundleContext bundle's execution context within the Framework
-     * @throws BundleException
-     */
-    private void loadInitialBundles(BundleContext bundleContext) throws BundleException {
-        //Setting this property due to an issue with equinox simple configurator where it tries to uninstall bundles
-        //which are loaded from initial bundle list.
-        System.setProperty(Constants.EQUINOX_SIMPLE_CONFIGURATOR_EXCLUSIVE_INSTALLATION, "false");
-
-        for (CarbonInitialBundle initialBundleInfo : config.getInitialBundles()) {
-            if (logger.isLoggable(Level.FINE)) {
-                logger.log(Level.FINE, "Loading initial bundle: " + initialBundleInfo.getLocation().toExternalForm() +
-                        " with startlevel " + initialBundleInfo.getLevel());
-            }
-
-            Bundle bundle = bundleContext.installBundle(initialBundleInfo.getLocation().toString());
-            if (initialBundleInfo.shouldStart()) {
-                bundle.start();
-            }
-        }
-    }
-
-    /**
-     * Check if framework is active.
-     *
-     * @return true if framework is in active or starting state, false otherwise
-     */
-    private boolean isFrameworkActive() {
-        return framework != null
-                && (framework.getState() == Framework.ACTIVE || framework.getState() == Framework.STARTING);
+        stopServerWait = true;
     }
 
     /**
@@ -276,13 +124,25 @@ public class CarbonServer {
      * @param event number to notify
      */
     private void dispatchEvent(int event) {
-        CarbonServerEvent carbonServerEvent = new CarbonServerEvent(event, config);
-        config.getCarbonServerListeners().forEach(listener -> {
-            if (logger.isLoggable(Level.FINE)) {
-                String eventName = (event == CarbonServerEvent.STARTING) ? "STARTING" : "STOPPING";
-                logger.log(Level.FINE, "Dispatching " + eventName + " event to " + listener.getClass().getName());
-            }
-            listener.notify(carbonServerEvent);
-        });
+        // TODO :  User SPI to load Listeners
+//        CarbonServerEvent carbonServerEvent = new CarbonServerEvent(event, config);
+//        config.getCarbonServerListeners().forEach(listener -> {
+//            String eventName = (event == CarbonServerEvent.STARTING) ? "STARTING" : "STOPPING";
+//            logger.info("Dispatching " + eventName + " event to " + listener.getClass().getName());
+//            listener.notify(carbonServerEvent);
+//        });
+    }
+
+    /**
+     * Log the server start up time.
+     *
+     * @param serverName Server name to be in the log
+     */
+    public static void logServerStartupTime(String serverName) {
+        double startTime = Long.parseLong(System.getProperty(Constants.START_TIME));
+        double startupTime = (System.currentTimeMillis() - startTime) / 1000;
+
+        DecimalFormat decimalFormatter = new DecimalFormat("#,##0.000");
+        logger.info(serverName + " started in " + decimalFormatter.format(startupTime) + " sec");
     }
 }

@@ -1,16 +1,18 @@
 package org.wso2.carbon.kernel.internal;
 
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Deactivate;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.base.CarbonComponent;
+import org.wso2.carbon.config.ConfigProviderFactory;
 import org.wso2.carbon.config.provider.ConfigProvider;
 import org.wso2.carbon.kernel.CarbonRuntime;
 import org.wso2.carbon.kernel.internal.context.CarbonRuntimeFactory;
+import org.wso2.carbon.kernel.internal.jmx.CarbonJMXComponent;
+import org.wso2.carbon.utils.Constants;
+import org.wso2.carbon.utils.Utils;
+
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 
 /**
@@ -19,50 +21,41 @@ import org.wso2.carbon.kernel.internal.context.CarbonRuntimeFactory;
  *
  * @since 5.2.0
  */
-@Component(
-        name = "org.wso2.carbon.kernel.internal.CarbonCoreComponent",
-        immediate = true
-)
-public class CarbonCoreComponent {
+public class CarbonCoreComponent implements CarbonComponent {
     private static final Logger logger = LoggerFactory.getLogger(CarbonCoreComponent.class);
+    CarbonRuntime carbonRuntime;
+    CarbonJMXComponent carbonJMXComponent;
 
-    @Activate
-    public void activate() {
+    @Override
+    public String getName() {
+        return CarbonCoreComponent.class.getName();
+    }
+
+    @Override
+    public boolean start() throws Exception {
         try {
             logger.debug("Activating CarbonCoreComponent");
 
-            // 1) Get config provider from data holder
-            ConfigProvider configProvider = DataHolder.getInstance().getConfigProvider();
+            Path deploymentConfigPath = Paths.get(Utils.getRuntimeConfigPath().toString(),
+                    Constants.DEPLOYMENT_CONFIG_YAML);
+            ConfigProvider configProvider = ConfigProviderFactory.getConfigProvider(deploymentConfigPath);
 
             // 2) Creates the CarbonRuntime instance using the Carbon configuration provider.
-            CarbonRuntime carbonRuntime = CarbonRuntimeFactory.createCarbonRuntime(configProvider);
+            carbonRuntime = CarbonRuntimeFactory.createCarbonRuntime(configProvider);
 
-            // 3) Register CarbonRuntime instance as an OSGi bundle.
-            DataHolder.getInstance().getBundleContext()
-                    .registerService(CarbonRuntime.class.getName(), carbonRuntime, null);
+            carbonJMXComponent = new CarbonJMXComponent(carbonRuntime);
+            carbonJMXComponent.start();
+
 
         } catch (Throwable throwable) {
             logger.error("Error while activating CarbonCoreComponent");
         }
+        return true;
     }
 
-    @Deactivate
-    public void deactivate() {
+    @Override
+    public boolean stop() throws Exception {
         logger.debug("Deactivating CarbonCoreComponent");
-    }
-
-    @Reference(
-            name = "org.wso2.carbon.config",
-            service = ConfigProvider.class,
-            cardinality = ReferenceCardinality.AT_LEAST_ONE,
-            policy = ReferencePolicy.DYNAMIC,
-            unbind = "unregisterConfigProvider"
-    )
-    protected void registerConfigProvider(ConfigProvider configProvider) {
-        DataHolder.getInstance().setConfigProvider(configProvider);
-    }
-
-    protected void unregisterConfigProvider(ConfigProvider configProvider) {
-        DataHolder.getInstance().setConfigProvider(null);
+        return true;
     }
 }

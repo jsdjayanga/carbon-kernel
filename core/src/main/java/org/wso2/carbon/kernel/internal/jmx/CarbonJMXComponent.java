@@ -15,13 +15,6 @@
  */
 package org.wso2.carbon.kernel.internal.jmx;
 
-import org.osgi.framework.BundleContext;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Deactivate;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.kernel.CarbonRuntime;
@@ -30,16 +23,16 @@ import org.wso2.carbon.kernel.internal.config.JMXConfiguration;
 import org.wso2.carbon.kernel.jmx.connection.SingleAddressRMIServerSocketFactory;
 import org.wso2.carbon.kernel.jmx.security.CarbonJMXAuthenticator;
 
+import javax.management.remote.JMXConnectorServer;
+import javax.management.remote.JMXConnectorServerFactory;
+import javax.management.remote.JMXServiceURL;
+import javax.management.remote.rmi.RMIConnectorServer;
 import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
-import javax.management.remote.JMXConnectorServer;
-import javax.management.remote.JMXConnectorServerFactory;
-import javax.management.remote.JMXServiceURL;
-import javax.management.remote.rmi.RMIConnectorServer;
 
 /**
  * This service component is responsible for initializing and starting the JMXConnectorServer which enables remote
@@ -47,10 +40,6 @@ import javax.management.remote.rmi.RMIConnectorServer;
  *
  * @since 5.1.0
  */
-@Component(
-        name = "org.wso2.carbon.kernel.jmx.internal.CarbonJMXComponent",
-        immediate = true
-)
 public class CarbonJMXComponent {
     private static final Logger logger = LoggerFactory.getLogger(CarbonJMXComponent.class);
     private static final String JAVA_RMI_SERVER_HOSTNAME = "java.rmi.server.hostname";
@@ -58,14 +47,11 @@ public class CarbonJMXComponent {
     private Registry rmiRegistry;
     private CarbonRuntime carbonRuntime;
 
-    /**
-     * This is the activation method of CarbonJMXComponent. This will be called when all the references are
-     * satisfied.
-     *
-     * @param bundleContext the bundle context instance of this bundle.
-     */
-    @Activate
-    protected void start(BundleContext bundleContext) {
+    public CarbonJMXComponent(CarbonRuntime carbonRuntime) {
+        this.carbonRuntime = carbonRuntime;
+    }
+
+    public void start() throws Exception {
         try {
             CarbonConfiguration carbonConfiguration = carbonRuntime.getConfiguration();
             JMXConfiguration jmxConfiguration = carbonConfiguration.getJmxConfiguration();
@@ -113,33 +99,10 @@ public class CarbonJMXComponent {
         }
     }
 
-    /**
-     * This is the deactivation method of CarbonJMXComponent. This will be called when this component
-     * is being stopped or references are un-satisfied during runtime.
-     *
-     * @throws Exception this will be thrown if an issue occurs while executing the de-activate method
-     */
-    @Deactivate
-    protected void stop() throws Exception {
-
+    public void stop() throws Exception {
         if (jmxConnectorServer != null) {
             jmxConnectorServer.stop();
             UnicastRemoteObject.unexportObject(rmiRegistry, true); // Stop the RMI registry
         }
-    }
-
-    @Reference(
-            name = "carbon.jmx.carbon.runtime",
-            service = CarbonRuntime.class,
-            cardinality = ReferenceCardinality.AT_LEAST_ONE,
-            policy = ReferencePolicy.DYNAMIC,
-            unbind = "unregisterCarbonRuntime"
-    )
-    protected void registerCarbonRuntime(CarbonRuntime carbonRuntime) {
-        this.carbonRuntime = carbonRuntime;
-    }
-
-    protected void unregisterCarbonRuntime(CarbonRuntime carbonRuntime) {
-        this.carbonRuntime = null;
     }
 }
